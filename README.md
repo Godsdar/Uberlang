@@ -70,6 +70,12 @@ Both images are **2×, lossless PNG** captures from an earlier interface revisio
 they may show the previous brand spelling.
 Click an image to inspect it at full resolution.
 
+## Local tree presentation refinement
+
+The local source removes the decorative wide lineage halo and labels the inspector
+Selected form. Node geometry, source evidence and animation behavior remain intact.
+This visual revision has not been pushed or deployed.
+
 ## What works today
 
 | Feature | Night notebook |

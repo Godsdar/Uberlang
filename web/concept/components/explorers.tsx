@@ -132,8 +132,6 @@ function FamilyExplorer({ family: initialFamily, word, onFamilyChange }: FamilyP
                     const sign = sourced ? -1 : 1
                     const d = `M${from.x},${from.y - sign * 32} C${from.x},${bend} ${to.x},${bend} ${to.x},${to.y + sign * 32}`
                     return <motion.g key={id} initial={reduced ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={transition}>
-                      <motion.path initial={false} animate={{ d, opacity: active && !condensed ? .12 : 0 }} transition={transition}
-                        stroke="var(--lp-accent)" strokeWidth={9} fill="none" />
                       <motion.path initial={reduced || condensed ? false : { pathLength: 0 }}
                         animate={{ d, opacity: active ? 1 : .55, strokeWidth: active ? 2.5 : Math.max(1.1, 2.4 - to.depth * .35), ...(!condensed && { pathLength: 1 }) }}
                         transition={transition} stroke={active ? 'var(--lp-accent)' : 'var(--lp-muted)'}
@@ -155,7 +153,7 @@ function FamilyExplorer({ family: initialFamily, word, onFamilyChange }: FamilyP
         <p className="lp-explorer-hint">Choose a form to follow its story. {sourced ? 'Select a form, then Explore deeper to follow its cited history.' : 'Unfold branches above; scroll across wider trees.'}</p>
       </div>
       <aside className="lp-inspector lp-family-inspector">
-        <div className="lp-section-label">Field note</div>
+        <div className="lp-section-label">Selected form</div>
         <div aria-live="polite" aria-atomic="true"><p className={`lp-word ${selected.reconstructed ? 'is-reconstructed' : ''}`}>{selected.label}</p><p className="lp-label">{selected.lang}{selected.reconstructed ? ' · reconstructed' : ''}</p></div>
         {sourced && <section className="lp-history-controls" aria-label="Explore word history">
           {continuation.length > 0 ? <button onClick={() => { setPathOnly(false); setEndpoints(previous => continuationVisible ? foldHistory(family, previous, selected.id) : [...new Set([...previous.filter(id => id !== selected.id), ...continuation.map(n => n.id)])]) }}>{continuationVisible ? 'Fold continuation' : 'Unfold continuation'}</button> :
