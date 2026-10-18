@@ -32,10 +32,11 @@ Built with TypeScript, React, D3, and Motion.
 ## Choose a direction
 
 Open the translucent **Tools** wheel to choose Word histories, Understand,
-Sentence structure or Study notes. Each action occupies a full circular sector;
+Sentence structure or Study notes. Each action uses a plain outline icon in a full circular sector;
 the selected word stays at the center. The same circle adapts to mobile widths.
-Reduced motion removes the unfolding animation. Tool selection opens a view
-without submitting text.
+Hover slightly enlarges and rotates one sector. Names and limits appear on
+hover or keyboard focus; **Tool guide** offers labeled choices on touch screens.
+Reduced motion removes movement. Tool selection opens a view without submitting text.
 
 [![Uberlang radial entry with four language tools](docs/assets/uberlang-radial-desktop-2026-10-18.jpg)](docs/assets/uberlang-radial-desktop-2026-10-18.jpg)
 
@@ -96,22 +97,22 @@ its explanation and context as a study note.
 </details>
 
 These four images are direct JPEG browser captures from the local application
-on 18 October 2026: sector entry at `948970c`, Reading/Study at `cd24559`
-(unchanged by the sector correction), 1280 px desktop and 390 px mobile, at 1×.
+on 18 October 2026: icon-only sector entry at `5bc4d34`, Reading/Study at `cd24559`
+(unchanged by the launcher refinements), 1280 px desktop and 390 px mobile, at 1×.
 Reduced motion was enabled to capture settled states. They are not generated
 mockups or live-analysis demonstrations; the prepared examples remain labeled.
 
 ## Notebook design refinement
 
 The notebook keeps its open page, restrained serif headings and plain tree canvas.
-The radial entry uses the existing theme colors, subtle glass and short unfolding
-transitions. Appearance, examples and session notes disclose secondary controls.
+The radial entry uses existing theme colors, plain line icons and short unfolding
+transitions, without decorative sparkles or promotional headings. Appearance, examples and session notes disclose secondary controls.
 Visible keyboard focus, Escape/return behavior and touch-sized tool buttons support
 navigation. Initial lookup/grammar remain English; histories can cross supported
 languages.
 
 Application release, 2026-10-18:
-[`948970c`](https://github.com/Godsdar/Uberlang/commit/948970c)
+[`5bc4d34`](https://github.com/Godsdar/Uberlang/commit/5bc4d34)
 at [uberlang.vercel.app](https://uberlang.vercel.app/).
 [Radial tools decision and validation scope](docs/decisions/ADR-022-radial-tools-and-context.md).
 The earlier [visual refinement](docs/decisions/ADR-021-notebook-visual-refinement.md)
