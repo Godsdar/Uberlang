@@ -28,7 +28,7 @@ The benchmark uses only public synthetic examples and performs no network reques
 
 ## Alternatives assessed
 
-**UDPipe hosted API:** a live request on 2026-10-16 returned dependency and morphology output from `english-ewt-ud-2.17-251125`, with code-point TokenRange values. It is technically usable, but its [official service terms](https://lindat.mff.cuni.cz/services/udpipe/api-reference.php) require CC BY-NC-SA model compliance, explicit permission for commercial exploitation, and allow submitted data to improve UFAL systems. These restrictions and the third-party text transfer make it unsuitable as the default for Lingua. It is not called by the implementation.
+**UDPipe hosted API:** a live request on 2026-10-16 returned dependency and morphology output from `english-ewt-ud-2.17-251125`, with code-point TokenRange values. It is technically usable, but its [official service terms](https://lindat.mff.cuni.cz/services/udpipe/api-reference.php) require CC BY-NC-SA model compliance, explicit permission for commercial exploitation, and allow submitted data to improve UFAL systems. These restrictions and the third-party text transfer make it unsuitable as the default for Uberlang. It is not called by the implementation.
 
 **Browser POS libraries:** not selected. POS tagging alone does not meet the product requirement for dependency heads and morphological features. **LLM/cloud APIs:** no paid provider or anonymous paid proxy is enabled. **Stanza:** not benchmarked in this pilot; its packaging and latency remain unverified.
 

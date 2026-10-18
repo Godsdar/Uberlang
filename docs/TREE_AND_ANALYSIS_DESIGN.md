@@ -1,6 +1,6 @@
-# UberLang: interaction and analysis design
+# Uberlang: interaction and analysis design
 
-Marketing clarification, 2026-10-18: **UberLang** explores words, their origins, and connections across languages. Initial lookup and live grammar remain English in both layouts; supported history nodes can cross languages. See [current scope](MARKETING_POSITIONING.md#coverage-by-mode). Historical example descriptions below do not promise equal language coverage.
+Marketing clarification, 2026-10-18: **Uberlang** explores words, their origins, and connections across languages. Initial lookup and live grammar remain English in both layouts; supported history nodes can cross languages. See [current scope](MARKETING_POSITIONING.md#coverage-by-mode). Historical example descriptions below do not promise equal language coverage.
 
 Accepted direction, 2026-10-13. Visual references: Zen Notes and Monkeytype; Tokyo Night, Light, Graphite. This document describes shipped concept behavior and the next implementation gates separately.
 

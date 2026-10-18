@@ -10,7 +10,7 @@ Read [docs/MODEL_PLAYBOOK.md](docs/MODEL_PLAYBOOK.md) before changes. It applies
 
 ## Product name
 
-The visible brand is **UberLang** (U and L uppercase; latest owner instruction, 2026-10-18). Use it in UI, page titles,
+The visible brand is **Uberlang** (only U uppercase, lowercase l; latest owner instruction, 2026-10-18). Use it in UI, page titles,
 README and new exports. The logo/favicon letter is **L**, by owner choice.
 The repository is **Godsdar/Uberlang** by explicit owner request.
 Production demo: **https://uberlang.vercel.app/**, attached to the existing Vercel

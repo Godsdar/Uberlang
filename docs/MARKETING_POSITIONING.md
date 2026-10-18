@@ -1,14 +1,14 @@
-# UberLang positioning and language coverage
+# Uberlang positioning and language coverage
 
 Current marketing guidance, 18 October 2026. Use this document for new product descriptions and drafts. Earlier launch drafts, screenshots and published posts record their own dates; they are not a current feature checklist.
 
 ## Name and promise
 
-The visible name is **UberLang**, with uppercase U and L, following the owner's latest instruction. Keep the L logo. The repository remains `Godsdar/Uberlang`, the demo is https://uberlang.vercel.app/, and existing package, API, DOM and storage identifiers stay compatible. This spelling update supersedes the earlier lowercase-l branding instruction; historical ADRs and published material retain their original wording.
+The visible name is **Uberlang**, with only U uppercase and lowercase l, following the owner's latest instruction. Keep the L logo. The repository remains `Godsdar/Uberlang`, the demo is https://uberlang.vercel.app/, and existing package, API, DOM and storage identifiers stay compatible. This spelling update supersedes the intermediate uppercase-L branding instruction; historical ADRs and published material retain their original wording.
 
 **Explore words, their origins, and connections across languages.**
 
-UberLang is for independent language learners and people curious about language. The reason to return is an interesting discovery and a clearer connection to what they are reading. The tree is central to the experience and the product's visual identity. Grammar and dictionary meanings help maintain context; they are not the whole product.
+Uberlang is for independent language learners and people curious about language. The reason to return is an interesting discovery and a clearer connection to what they are reading. The tree is central to the experience and the product's visual identity. Grammar and dictionary meanings help maintain context; they are not the whole product.
 
 The owner's reference to Nietzsche's Übermensch is inspiration. “Exploring beyond your own language boundaries” is a proposed brand interpretation, not a philosophical definition or a promise of learning results. Do not claim superiority over other people, faster learning or proven educational effectiveness. Name/trademark availability remains unverified.
 
@@ -33,7 +33,7 @@ The audit supplied for this task reported production English computer lookup and
 
 ## Reusable presentation copy
 
-**Short description:** UberLang is a space for curious language learners to explore words, their origins, and connections across languages.
+**Short description:** Uberlang is a space for curious language learners to explore words, their origins, and connections across languages.
 
 **Try it now:** Start with an English word or passage. Look up alternative dictionary meanings, then follow the cited forms into other languages where supported. Or open a prepared word family. English sentence grammar is available on request; sources and histories can be incomplete.
 

@@ -1,8 +1,8 @@
 {
   "name": "lingua-ts",
   "version": "0.1.0",
-  "description": "Lingua \u2014 translation and the Indo-European language tree",
-  "author": "Lingua",
+  "description": "Uberlang \u2014 translation and the Indo-European language tree",
+  "author": "Uberlang",
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",

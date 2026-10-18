@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="web/concept/favicon.svg" width="72" height="72" alt="UberLang logo">
+<img src="web/concept/favicon.svg" width="72" height="72" alt="Uberlang logo">
 
-# UberLang
+# Uberlang
 
 **Explore words, their origins, and connections across languages.**
 
@@ -20,7 +20,7 @@ Built with TypeScript, React, D3, and Motion.
 </div>
 
 > [!NOTE]
-> UberLang is an early personal project. Reading and Study share the same capabilities.
+> Uberlang is an early personal project. Reading and Study share the same capabilities.
 > Initial word lookup and sentence analysis are English; **Explore deeper** can follow
 > supported forms in other languages through the English-language edition of Wiktionary.
 > A prepared language branch is not proof of live coverage. The workspace offers **live English grammar analysis**
@@ -42,7 +42,7 @@ sources. Separate etymologies require a choice; components and inflected forms
 are labelled separately from ancestry. Expanded histories and their revision links
 travel with exported notes. No paid API is required.
 
-[![UberLang word family: sourced ancestors and modern relatives](docs/assets/concept-family@2x.png)](docs/assets/concept-family@2x.png)
+[![Uberlang word family: sourced ancestors and modern relatives](docs/assets/concept-family@2x.png)](docs/assets/concept-family@2x.png)
 
 ## Language coverage
 
@@ -64,7 +64,7 @@ Select a word to inspect its lemma, grammatical features, head, and dependency.
 Explore an expression or a particular occurrence inside longer text, then save
 its explanation and context as a study note.
 
-[![UberLang Study workspace: selected word and contextual dependencies](docs/assets/concept-grammar@2x.png)](docs/assets/concept-grammar@2x.png)
+[![Uberlang Study workspace: selected word and contextual dependencies](docs/assets/concept-grammar@2x.png)](docs/assets/concept-grammar@2x.png)
 
 Both images are **2×, lossless PNG** captures from an earlier interface revision;
 they may show the previous brand spelling.
@@ -104,7 +104,7 @@ convert roots into session notes. Old `/concept/` links open the home page, and
 
 The concept demonstrates simple syntax, the present perfect progressive, and a
 relative clause. Choose **Analyze sentence** to parse your own English sentence. Only that sentence
-is sent to UberLang; no third-party inference service is used. The separate lexical
+is sent to Uberlang; no third-party inference service is used. The separate lexical
 lookup sends only the selected headword to Wiktionary. Dictionary senses are
 alternatives, and a grammar-based reading cannot resolve intent, irony or ambiguity.
 Unsupported histories remain explicitly unavailable.

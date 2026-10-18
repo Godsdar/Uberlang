@@ -1,5 +1,5 @@
 appId: app.lingua.desktop
-productName: Lingua
+productName: Uberlang
 directories:
   output: release
   buildResources: build

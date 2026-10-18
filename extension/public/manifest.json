@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "UberLang — Etymology",
+  "name": "Uberlang — Etymology",
   "version": "0.1.0",
   "description": "Explore documented word origins and connections across languages where source evidence is available.",
   "action": {
     "default_popup": "index.html",
-    "default_title": "UberLang — Etymology"
+    "default_title": "Uberlang — Etymology"
   },
   "icons": {
     "16": "icon-16.png",
