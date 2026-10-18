@@ -42,7 +42,9 @@ sources. Separate etymologies require a choice; components and inflected forms
 are labelled separately from ancestry. Expanded histories and their revision links
 travel with exported notes. No paid API is required.
 
-[![Uberlang word family: sourced ancestors and modern relatives](docs/assets/concept-family@2x.png)](docs/assets/concept-family@2x.png)
+[![Uberlang Reading: prepared water family and selected German form](docs/assets/uberlang-reading-family-desktop-2026-10-18@2x.png)](docs/assets/uberlang-reading-family-desktop-2026-10-18@2x.png)
+
+*Reading · prepared water family, selected German form and cited evidence.*
 
 ## Language coverage
 
@@ -64,11 +66,23 @@ Select a word to inspect its lemma, grammatical features, head, and dependency.
 Explore an expression or a particular occurrence inside longer text, then save
 its explanation and context as a study note.
 
-[![Uberlang Study workspace: selected word and contextual dependencies](docs/assets/concept-grammar@2x.png)](docs/assets/concept-grammar@2x.png)
+[![Uberlang Study: prepared English grammar, selected word and dependency arc](docs/assets/uberlang-study-grammar-desktop-2026-10-18@2x.png)](docs/assets/uberlang-study-grammar-desktop-2026-10-18@2x.png)
 
-Both images are **2×, lossless PNG** captures from an earlier interface revision;
-they may show the previous brand spelling.
-Click an image to inspect it at full resolution.
+*Study · prepared English grammar example with the selected word, its dependency and grammatical features.*
+
+<details>
+<summary>Mobile Reading — Light theme, 390 px</summary>
+
+<p align="center">
+<a href="docs/assets/uberlang-reading-mobile-2026-10-18@2x.png"><img src="docs/assets/uberlang-reading-mobile-2026-10-18@2x.png" width="320" alt="Uberlang Reading on a 390 px screen in the Light theme"></a>
+</p>
+
+</details>
+
+All three images are **2×, lossless PNG** captures taken directly from the
+[live notebook](https://uberlang.vercel.app/) on 18 October 2026. The built-in
+prepared examples remain labeled in the interface. Open an image to inspect it
+at full resolution.
 
 ## Notebook design refinement
 
