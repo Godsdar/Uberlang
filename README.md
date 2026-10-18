@@ -237,3 +237,15 @@ transitions are now implemented in the concept.
 - [Design research: Night notebook and alternatives](docs/DESIGN_RESEARCH_2026-10-16.md)
 - [Model implementation playbook](docs/MODEL_PLAYBOOK.md)
 - [Contribution guide](CONTRIBUTING.md) and [agent rules](AGENTS.md)
+
+## Architecture and long-term roadmap
+
+The current API uses Node.js/TypeScript and Fastify with a private Python/spaCy
+worker. See the [backend architecture](docs/BACKEND_ARCHITECTURE.md) and
+[local/runtime setup](docs/BACKEND_RUNBOOK.md).
+
+The [Rust backend roadmap](docs/RUST_BACKEND_ROADMAP.md) is a long-term plan,
+not an implemented migration. It starts with measured bottlenecks, one bounded
+prototype and API/UTF-16/source compatibility gates. Python/spaCy stays behind
+its existing boundary initially; any replacement needs quality evidence and a
+safe rollback. It does not add services, dependencies or new language modes.
