@@ -29,6 +29,22 @@ Built with TypeScript, React, D3, and Motion.
 > lookup retrieves dictionary senses and supported etymological sources from
 > Wiktionary. Coverage is partial, and senses are not automatically disambiguated.
 
+## Choose a direction
+
+Open the translucent **Tools** wheel to choose Word histories, Understand,
+Sentence structure or Study notes. Each action occupies a full circular sector;
+the selected word stays at the center. The same circle adapts to mobile widths.
+Reduced motion removes the unfolding animation. Tool selection opens a view
+without submitting text.
+
+[![Uberlang radial entry with four language tools](docs/assets/uberlang-radial-desktop-2026-10-18.jpg)](docs/assets/uberlang-radial-desktop-2026-10-18.jpg)
+
+Use **Use your own text** to open the editor, or **Open notebook** to go straight
+to the workspace. **Appearance** holds themes and Reading/Study layouts. Both
+layouts now share the draft, selected occurrence and session notes. Switching
+tools preserves the selected tree form, branches and zoom for unchanged context.
+Examples and notes open on demand; source evidence remains beside the results.
+
 ## A word’s family
 
 Look up a new word to explore its documented sources, or choose the curated
@@ -42,7 +58,7 @@ sources. Separate etymologies require a choice; components and inflected forms
 are labelled separately from ancestry. Expanded histories and their revision links
 travel with exported notes. No paid API is required.
 
-[![Uberlang Reading: prepared water family and selected German form](docs/assets/uberlang-reading-family-desktop-2026-10-18@2x.png)](docs/assets/uberlang-reading-family-desktop-2026-10-18@2x.png)
+[![Uberlang Reading: prepared water family and selected German form](docs/assets/uberlang-reading-radial-desktop-2026-10-18.jpg)](docs/assets/uberlang-reading-radial-desktop-2026-10-18.jpg)
 
 *Reading · prepared water family, selected German form and cited evidence.*
 
@@ -66,41 +82,40 @@ Select a word to inspect its lemma, grammatical features, head, and dependency.
 Explore an expression or a particular occurrence inside longer text, then save
 its explanation and context as a study note.
 
-[![Uberlang Study: prepared English grammar, selected word and dependency arc](docs/assets/uberlang-study-grammar-desktop-2026-10-18@2x.png)](docs/assets/uberlang-study-grammar-desktop-2026-10-18@2x.png)
+[![Uberlang Study: prepared English grammar, selected word and dependency arc](docs/assets/uberlang-study-radial-desktop-2026-10-18.jpg)](docs/assets/uberlang-study-radial-desktop-2026-10-18.jpg)
 
 *Study · prepared English grammar example with the selected word, its dependency and grammatical features.*
 
 <details>
-<summary>Mobile Reading — Light theme, 390 px</summary>
+<summary>Mobile tools — Light theme, 390 px</summary>
 
 <p align="center">
-<a href="docs/assets/uberlang-reading-mobile-2026-10-18@2x.png"><img src="docs/assets/uberlang-reading-mobile-2026-10-18@2x.png" width="320" alt="Uberlang Reading on a 390 px screen in the Light theme"></a>
+<a href="docs/assets/uberlang-radial-mobile-2026-10-18.jpg"><img src="docs/assets/uberlang-radial-mobile-2026-10-18.jpg" width="320" alt="Uberlang language tools on a 390 px screen in the Light theme"></a>
 </p>
 
 </details>
 
-All three images are **2×, lossless PNG** captures taken directly from the
-[live notebook](https://uberlang.vercel.app/) on 18 October 2026. The built-in
-prepared examples remain labeled in the interface. Open an image to inspect it
-at full resolution.
+These four images are direct JPEG browser captures from the local application
+on 18 October 2026: sector entry at `948970c`, Reading/Study at `cd24559`
+(unchanged by the sector correction), 1280 px desktop and 390 px mobile, at 1×.
+Reduced motion was enabled to capture settled states. They are not generated
+mockups or live-analysis demonstrations; the prepared examples remain labeled.
 
 ## Notebook design refinement
 
-The current source uses an open page, restrained serif headings and a plain tree
-canvas. The passage comes before examples; language branches, selected paths,
-source evidence and all three themes remain available. A keyboard skip link,
-visible form focus and touch-sized controls support navigation.
+The notebook keeps its open page, restrained serif headings and plain tree canvas.
+The radial entry uses the existing theme colors, subtle glass and short unfolding
+transitions. Appearance, examples and session notes disclose secondary controls.
+Visible keyboard focus, Escape/return behavior and touch-sized tool buttons support
+navigation. Initial lookup/grammar remain English; histories can cross supported
+languages.
 
-Verified application release, 2026-10-18:
-[`c935fc3`](https://github.com/Godsdar/Uberlang/commit/c935fc3c49e215d362d71daaa1c233c8c4f3065d)
-at [uberlang.vercel.app](https://uberlang.vercel.app/). The
-[production deployment](https://vercel.com/godsdar/lingua/7ZEdaQGZnxWzkjhXsfj6eDkUMcow)
-is Ready and includes the Uberlang spelling and quieter section grouping.
-[Design decision and validation scope](docs/decisions/ADR-021-notebook-visual-refinement.md).
-
-Section headings and spacing group the notebook without repeated horizontal
-dividers. Tree connections, active-control cues, input boundaries and keyboard
-focus remain visible across all three themes and both layouts.
+Application release, 2026-10-18:
+[`948970c`](https://github.com/Godsdar/Uberlang/commit/948970c)
+at [uberlang.vercel.app](https://uberlang.vercel.app/).
+[Radial tools decision and validation scope](docs/decisions/ADR-022-radial-tools-and-context.md).
+The earlier [visual refinement](docs/decisions/ADR-021-notebook-visual-refinement.md)
+remains the basis for the notebook’s typography, themes and tree presentation.
 
 ## What works today
 
@@ -111,7 +126,7 @@ focus remain visible across all three themes and both layouts.
 | Etymology | Progressive sourced histories for new words; curated `water` and `mother` families |
 | Translation | Prepared English → Russian examples |
 | Notes | Session notes; downloadable Markdown, JSON, and HTML |
-| Interface | Reading/Study layouts; Tokyo Night, Light, Graphite |
+| Interface | Radial tools; shared Reading/Study layouts; Tokyo Night, Light, Graphite |
 
 Night notebook is the only published web interface. The old standalone translator,
 language overview and My roots screens have been retired. Existing saved roots
