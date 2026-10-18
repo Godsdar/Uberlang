@@ -1,4 +1,4 @@
-# Uberlang implementation playbook
+# UberLang implementation playbook
 
 For bounded coding tasks, including Sol at medium reasoning. Read this after AGENTS.md. Applies to the entire repository. Follow the user's current request; ask only when a real product decision is missing.
 
@@ -10,8 +10,8 @@ For bounded coding tasks, including Sol at medium reasoning. Read this after AGE
 
 ## Product rules
 
-- Working product name: **Uberlang** (exact casing; owner decision 2026-10-16). Read the [brand brief](OWNER_BRIEF_2026-10-16.md#бренд-для-дальнейшей-работы). The repository is Godsdar/Uberlang (owner-authorized rename). The demo is https://uberlang.vercel.app/ on Vercel project lingua (owner-authorized domain). Other technical identifiers remain Lingua; do not rename code, accounts or stored data for branding. English UI. Minimal Zen Notes / Monkeytype direction; themes through CSS tokens.
-- Main flow: sentence or selected expression → meaning/grammar → selected word's origin → note/export.
+- Working product name: **UberLang** (U and L uppercase; latest owner instruction 2026-10-18). Read the [brand brief](OWNER_BRIEF_2026-10-16.md#бренд-для-дальнейшей-работы). The repository is Godsdar/Uberlang (owner-authorized rename). The demo is https://uberlang.vercel.app/ on Vercel project lingua (owner-authorized domain). Other technical identifiers remain Lingua; do not rename code, accounts or stored data for branding. English UI. Minimal Zen Notes / Monkeytype direction; themes through CSS tokens.
+- Positioning: explore words, their origins, and connections across languages. [Coverage by mode](MARKETING_POSITIONING.md#coverage-by-mode) governs claims: initial lookup/grammar are English; sourced history continuation can cross supported languages; prepared branches stay labeled.
 - $0 operation. No paid infrastructure/API, accounts, analytics, desktop signing, or mobile release as a shortcut. The local Node backend is authorized by ADR-012; ADR-013 authorizes the free stateless Vercel analysis rollout.
 - `/` is Night notebook. `/concept/` redirects to `/` (ADR-017). The notebook combines prepared examples with explicit live English grammar analysis. Grammar-based sentence readings and explicit Wiktionary lookup support new text (ADR-014); curated examples remain labeled.
 - Repeated words are separate occurrences. Keep exact text and UTF-16 `[start,end)` offsets. Editing invalidates old results.
@@ -63,4 +63,4 @@ New domain behavior goes into typed modules. Keep colors/spacing out of domain d
 
 ## Owner clarification 2026-10-16
 
-Read [the owner brief](OWNER_BRIEF_2026-10-16.md) for the working name Uberlang, brand direction and clarified product priority: self-directed language learners, curiosity, and a coherent tree aesthetic. It takes precedence over older grammar-first framing. The legacy Dictionary web shell was retired by the owner’s later request (ADR-017); do not restore it. Existing implementation and privacy rules still apply.
+Read [the owner brief](OWNER_BRIEF_2026-10-16.md) for the working name UberLang, brand direction and clarified product priority: self-directed language learners, curiosity, and a coherent tree aesthetic. It takes precedence over older grammar-first framing. The legacy Dictionary web shell was retired by the owner’s later request (ADR-017); do not restore it. Existing implementation and privacy rules still apply.

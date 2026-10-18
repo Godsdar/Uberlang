@@ -10,13 +10,13 @@ Read [docs/MODEL_PLAYBOOK.md](docs/MODEL_PLAYBOOK.md) before changes. It applies
 
 ## Product name
 
-The visible brand is **Uberlang** (only U uppercase). Use it in UI, page titles,
+The visible brand is **UberLang** (U and L uppercase; latest owner instruction, 2026-10-18). Use it in UI, page titles,
 README and new exports. The logo/favicon letter is **L**, by owner choice.
 The repository is **Godsdar/Uberlang** by explicit owner request.
 Production demo: **https://uberlang.vercel.app/**, attached to the existing Vercel
 project **lingua** (same project ID). The former lingua-lac domain is a compatibility
 alias. Package/API/storage identifiers remain Lingua/lingua; do not migrate them
-for branding. See the owner brief.
+for branding. See the owner brief and [current marketing/language coverage](docs/MARKETING_POSITIONING.md); multilingual histories do not imply multilingual initial lookup or grammar.
 
 ## Current web entry (ADR-017)
 

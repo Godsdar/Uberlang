@@ -1,12 +1,13 @@
 <div align="center">
 
-<img src="web/concept/favicon.svg" width="72" height="72" alt="Uberlang logo">
+<img src="web/concept/favicon.svg" width="72" height="72" alt="UberLang logo">
 
-# Uberlang
+# UberLang
 
-**Read a sentence. Follow a word. Find its story.**
+**Explore words, their origins, and connections across languages.**
 
-A language exploration project for meaning, grammar, and word histories.
+A space for independent language learners and curious readers to follow sourced word histories.
+Start with an English word or passage; explore supported forms across languages.
 Built with TypeScript, React, D3, and Motion.
 
 [![CI](https://github.com/Godsdar/Uberlang/actions/workflows/ci.yml/badge.svg)](https://github.com/Godsdar/Uberlang/actions/workflows/ci.yml)
@@ -19,7 +20,10 @@ Built with TypeScript, React, D3, and Motion.
 </div>
 
 > [!NOTE]
-> Uberlang is an early personal project. The reading workspace offers **live English grammar analysis**
+> UberLang is an early personal project. Reading and Study share the same capabilities.
+> Initial word lookup and sentence analysis are English; **Explore deeper** can follow
+> supported forms in other languages through the English-language edition of Wiktionary.
+> A prepared language branch is not proof of live coverage. The workspace offers **live English grammar analysis**
 > alongside three prepared examples. It uses spaCy, a statistical model that can
 > make mistakes. New sentences receive a grammar-based reading; an explicit word
 > lookup retrieves dictionary senses and supported etymological sources from
@@ -38,7 +42,21 @@ sources. Separate etymologies require a choice; components and inflected forms
 are labelled separately from ancestry. Expanded histories and their revision links
 travel with exported notes. No paid API is required.
 
-[![Uberlang word family: sourced ancestors and modern relatives](docs/assets/concept-family@2x.png)](docs/assets/concept-family@2x.png)
+[![UberLang word family: sourced ancestors and modern relatives](docs/assets/concept-family@2x.png)](docs/assets/concept-family@2x.png)
+
+## Language coverage
+
+| Mode | Coverage |
+|---|---|
+| Initial word lookup and live sentence grammar | English in both Reading and Study |
+| Live history continuation | Supported forms/language sections, including Spanish, French, Russian and Polish; available evidence and reachable nodes determine each path |
+| Prepared word families | Curated water/mother branches across languages, including German, Dutch, Swedish and Russian; water also includes Polish |
+| Translation | Prepared English → Russian examples |
+
+English Wiktionary names the source edition, not an English-only collection of words.
+There is no general non-English initial lookup or grammar selector in this notebook.
+Source coverage varies; reconstructed forms and incomplete histories remain labeled.
+[Detailed coverage and current marketing guidance](docs/MARKETING_POSITIONING.md).
 
 ## A sentence’s structure
 
@@ -46,9 +64,10 @@ Select a word to inspect its lemma, grammatical features, head, and dependency.
 Explore an expression or a particular occurrence inside longer text, then save
 its explanation and context as a study note.
 
-[![Uberlang Study workspace: selected word and contextual dependencies](docs/assets/concept-grammar@2x.png)](docs/assets/concept-grammar@2x.png)
+[![UberLang Study workspace: selected word and contextual dependencies](docs/assets/concept-grammar@2x.png)](docs/assets/concept-grammar@2x.png)
 
-Both images are fresh **2×, lossless PNG** captures of the actual interface.
+Both images are **2×, lossless PNG** captures from an earlier interface revision;
+they may show the previous brand spelling.
 Click an image to inspect it at full resolution.
 
 ## What works today
@@ -71,7 +90,7 @@ convert roots into session notes. Old `/concept/` links open the home page, and
 
 The concept demonstrates simple syntax, the present perfect progressive, and a
 relative clause. Choose **Analyze sentence** to parse your own English sentence. Only that sentence
-is sent to Uberlang; no third-party inference service is used. The separate lexical
+is sent to UberLang; no third-party inference service is used. The separate lexical
 lookup sends only the selected headword to Wiktionary. Dictionary senses are
 alternatives, and a grammar-based reading cannot resolve intent, irony or ambiguity.
 Unsupported histories remain explicitly unavailable.

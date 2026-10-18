@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "Uberlang — Etymology",
+  "name": "UberLang — Etymology",
   "version": "0.1.0",
-  "description": "See the etymology and Indo-European roots of any word, and where languages meet.",
+  "description": "Explore documented word origins and connections across languages where source evidence is available.",
   "action": {
     "default_popup": "index.html",
-    "default_title": "Uberlang — Etymology"
+    "default_title": "UberLang — Etymology"
   },
   "icons": {
     "16": "icon-16.png",

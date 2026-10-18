@@ -1,5 +1,7 @@
 # Reading concept
 
+Current product promise: **Explore words, their origins, and connections across languages.** Reading and Study are layouts of the same workspace. Initial dictionary lookup and live grammar are English; sourced history continuation uses the selected form’s supported language section in the English-language edition of Wiktionary. Prepared multilingual families stay distinct from live results. See [coverage by mode](MARKETING_POSITIONING.md#coverage-by-mode).
+
 Night notebook is the only web interface at `/` (`web/index.html`).
 `/concept/` and `/concept/index.html` redirect to the home page with query/hash
 preserved, including under GitHub Pages' repository prefix (ADR-017).
@@ -17,7 +19,7 @@ and private Python model. No paid inference service is required.
 - `fixtures.mjs`: three handcrafted sentence analyses and two curated families.
 - `domain/*.ts`: pure graph validation/layout, occurrence resolution, and report document scoping.
 - `components/explorers.tsx`: typed React family and dependency explorers using D3 and Motion.
-- `favicon.svg`: Uberlang’s initial-letter and leaf mark.
+- `favicon.svg`: the owner-selected L and leaf mark.
 
 There are no external scripts, fonts or analytics. The CSP permits same-origin
 API calls. Editing cancels requests and invalidates previous results. Prepared

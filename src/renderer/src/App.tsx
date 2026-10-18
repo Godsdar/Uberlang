@@ -77,7 +77,7 @@ export default function App () {
             <Avatar sx={{ bgcolor: 'primary.main', color: 'primary.contrastText' }}>L</Avatar>
             <Box sx={{ flexGrow: 1 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
-                Uberlang
+                UberLang
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 every word has a family

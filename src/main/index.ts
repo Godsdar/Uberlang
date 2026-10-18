@@ -11,7 +11,7 @@ function createWindow (): void {
     height: 820,
     minWidth: 900,
     minHeight: 640,
-    title: 'Uberlang',
+    title: 'UberLang',
     backgroundColor: '#f4f1ea',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
