@@ -103,3 +103,7 @@ exports. A path stops on repeated forms, at eight steps, or at 64 graph nodes.
 Cancel/selection changes keep already loaded history. Themes and reduced-motion
 behavior remain as in ADR-015. Quick sunflower/computer buttons perform real
 explicit lookups, not prepared graph matching. Other words use the same path.
+
+## Local notebook refinement — 2026-10-18
+
+[ADR-021](decisions/ADR-021-notebook-visual-refinement.md) records the owner's local visual refinement. An open page, shorter headings, quieter theme/branch controls and a plain tree canvas replace the earlier outer card, dotted background and halo. The passage precedes example menus. Evidence, partial-history and prepared/live labels remain; the English entry mode and broader cross-language exploration are still explicit. Keyboard skip/focus and native color schemes support access. Graph data, motion limits, source lookups, exports and storage contracts are unchanged. This local version has not been pushed or deployed; backend/Rust planning is separate.

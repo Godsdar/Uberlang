@@ -70,11 +70,14 @@ Both images are **2×, lossless PNG** captures from an earlier interface revisio
 they may show the previous brand spelling.
 Click an image to inspect it at full resolution.
 
-## Local tree presentation refinement
+## Local notebook design refinement
 
-The local source removes the decorative wide lineage halo and labels the inspector
-Selected form. Node geometry, source evidence and animation behavior remain intact.
-This visual revision has not been pushed or deployed.
+The current source uses an open page, restrained serif headings and a plain tree
+canvas. The passage comes before examples; language branches, selected paths,
+source evidence and all three themes remain available. A keyboard skip link,
+visible form focus and touch-sized controls support navigation. These local
+visual changes have not been pushed or deployed to the hosted demo.
+[Design decision and validation scope](docs/decisions/ADR-021-notebook-visual-refinement.md).
 
 ## What works today
 
