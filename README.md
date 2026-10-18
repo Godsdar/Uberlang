@@ -75,9 +75,13 @@ Click an image to inspect it at full resolution.
 The current source uses an open page, restrained serif headings and a plain tree
 canvas. The passage comes before examples; language branches, selected paths,
 source evidence and all three themes remain available. A keyboard skip link,
-visible form focus and touch-sized controls support navigation. Published on
-2026-10-18 at [uberlang.vercel.app](https://uberlang.vercel.app/) from
-[`9980696`](https://github.com/Godsdar/Uberlang/commit/998069627a95935752a36d57955a8b294a15506a); the [verified production deployment](https://vercel.com/godsdar/lingua/3AKrThopRgvdc21CnPxRzG1L4oFU) is Ready.
+visible form focus and touch-sized controls support navigation.
+
+Verified application release, 2026-10-18:
+[`c935fc3`](https://github.com/Godsdar/Uberlang/commit/c935fc3c49e215d362d71daaa1c233c8c4f3065d)
+at [uberlang.vercel.app](https://uberlang.vercel.app/). The
+[production deployment](https://vercel.com/godsdar/lingua/7ZEdaQGZnxWzkjhXsfj6eDkUMcow)
+is Ready and includes the Uberlang spelling and quieter section grouping.
 [Design decision and validation scope](docs/decisions/ADR-021-notebook-visual-refinement.md).
 
 Section headings and spacing group the notebook without repeated horizontal
@@ -113,7 +117,7 @@ with an exclusive end index. [Workflow and provenance](docs/CONCEPT.md).
 
 ## Quick start
 
-**Node.js 24+ and npm.** The concept requires no API key.
+**Node.js 24+ and npm.** Prepared examples and frontend development require no API key.
 
 ```sh
 git clone https://github.com/Godsdar/Uberlang.git
@@ -122,9 +126,13 @@ npm ci
 npm run dev:web
 ```
 
-Open Vite’s printed URL for Night notebook. Prepared examples work immediately. For live grammar and word lookup,
-start the local gateway/worker using the [runbook](docs/BACKEND_RUNBOOK.md#live-grammar-alpha-adr-013-2026-10-16),
-or use the hosted demo.
+Open Vite’s printed URL for Night notebook. Prepared examples work immediately.
+For local live grammar, word lookup and history continuation, follow the
+[runtime setup](docs/BACKEND_RUNBOOK.md#live-grammar-alpha-adr-013-2026-10-16):
+Python 3.12 runs the private worker; `npm run dev:api` starts the notebook adapter
+on `127.0.0.1:8788`. Configure `LINGUA_API_KEY` and `LINGUA_ENGINE_URL` server-side
+as described there. Vite proxies `/api` to that adapter; `npm run dev:server`
+serves the separate `/v1` API. The hosted demo is already configured.
 
 | Command | Purpose |
 |---|---|
@@ -132,12 +140,14 @@ or use the hosted demo.
 | `npm run typecheck` | Desktop, web, and API typechecking |
 | `npm run dev:web` / `npm run build:web` | Web development / production output in `web/dist` |
 | `npm run dev` / `npm run build` | Electron development / output in `out` |
-| `npm run dev:server` | Local Fastify API on `127.0.0.1:8787` |
-| `npm run build:server` / `start:server` | Standalone API in `server-dist` / run it |
+| `npm run dev:api` | Notebook `/api/*` adapter on `127.0.0.1:8788`; requires runtime setup above |
+| `npm run dev:server` | Separate Fastify `/v1` API on `127.0.0.1:8787` |
+| `npm run build:server` / `npm run start:server` | Standalone API in `server-dist` / run it |
+| `npm run build:gateway` | Bundle the public Node gateway in `server-dist/public-gateway.mjs` |
 | `npm run smoke:server` | Verify the built API and graceful shutdown |
 | `npm run preview` | Run the built desktop app |
 | `npm run build:ext` | Chrome MV3 extension in `extension/dist` |
-| `npm run dist:mac` / `dist:win` / `dist:linux` | Desktop installers in `release` |
+| `npm run dist:mac` / `npm run dist:win` / `npm run dist:linux` | Desktop installers in `release` |
 
 Electron and extension commands maintain the earlier local prototypes for compatibility;
 they are not the current product or published notebook releases. Their shared code
@@ -238,7 +248,7 @@ transitions are now implemented in the concept.
 - [Concept workflow](docs/CONCEPT.md) and [deployment](docs/DEPLOYMENT.md)
 - [Architecture decisions](docs/decisions/), [existing design](docs/DESIGN.md), and [graphics](docs/GRAPHICS.md)
 - [Interaction design](docs/TREE_AND_ANALYSIS_DESIGN.md), [architecture review](docs/reviews/2026-10-13-architecture.md), and [engine evaluation](docs/ENGINE_EVALUATION.md)
-- [First-user launch strategy](docs/LAUNCH_STRATEGY.md)
+- [Current marketing and language coverage](docs/MARKETING_POSITIONING.md); [archived launch plan](docs/LAUNCH_STRATEGY.md)
 - [Design research: Night notebook and alternatives](docs/DESIGN_RESEARCH_2026-10-16.md)
 - [Model implementation playbook](docs/MODEL_PLAYBOOK.md)
 - [Contribution guide](CONTRIBUTING.md) and [agent rules](AGENTS.md)
