@@ -70,13 +70,14 @@ Both images are **2×, lossless PNG** captures from an earlier interface revisio
 they may show the previous brand spelling.
 Click an image to inspect it at full resolution.
 
-## Local notebook design refinement
+## Notebook design refinement
 
 The current source uses an open page, restrained serif headings and a plain tree
 canvas. The passage comes before examples; language branches, selected paths,
 source evidence and all three themes remain available. A keyboard skip link,
-visible form focus and touch-sized controls support navigation. These local
-visual changes have not been pushed or deployed to the hosted demo.
+visible form focus and touch-sized controls support navigation. Published on
+2026-10-18 at [uberlang.vercel.app](https://uberlang.vercel.app/) from
+[`9980696`](https://github.com/Godsdar/Uberlang/commit/998069627a95935752a36d57955a8b294a15506a); the [verified production deployment](https://vercel.com/godsdar/lingua/3AKrThopRgvdc21CnPxRzG1L4oFU) is Ready.
 [Design decision and validation scope](docs/decisions/ADR-021-notebook-visual-refinement.md).
 
 ## What works today
