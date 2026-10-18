@@ -23,14 +23,14 @@ export function mountLauncher(app: HTMLElement, options: LauncherOptions) {
     <p class="lp-launch-intro">A small toolkit for curious language learners.</p>
     <nav class="lp-orbit" aria-label="Language tools">
       <div class="lp-orbit-guide" aria-hidden="true"></div>
-      <button class="lp-tool lp-tool-origins" data-tool="origins"><span class="lp-tool-symbol" aria-hidden="true">⌘</span><span>Word histories<small>Follow sourced forms across languages</small></span></button>
-      <button class="lp-tool lp-tool-understand" data-tool="understand"><span class="lp-tool-symbol" aria-hidden="true">Aa</span><span>Understand<small>English meanings & sentence reading</small></span></button>
+      <button class="lp-tool lp-tool-origins" data-tool="origins"><span class="lp-tool-copy"><span class="lp-tool-symbol" aria-hidden="true">⌘</span><span>Word histories<small>Follow sourced forms across languages</small></span></span></button>
+      <button class="lp-tool lp-tool-understand" data-tool="understand"><span class="lp-tool-copy"><span class="lp-tool-symbol" aria-hidden="true">Aa</span><span>Understand<small>English meanings & sentence reading</small></span></span></button>
       <div class="lp-orbit-center"><span data-launch-word></span><small data-launch-context></small></div>
-      <button class="lp-tool lp-tool-grammar" data-tool="grammar"><span class="lp-tool-symbol" aria-hidden="true">↳</span><span>Sentence structure<small>English grammar, one sentence at a time</small></span></button>
-      <button class="lp-tool lp-tool-notes" data-tool="notes"><span class="lp-tool-symbol" aria-hidden="true">＋</span><span>Study notes<small>Save a discovery · export to keep it</small></span></button>
+      <button class="lp-tool lp-tool-grammar" data-tool="grammar"><span class="lp-tool-copy"><span class="lp-tool-symbol" aria-hidden="true">↳</span><span>Sentence structure<small>English grammar, one sentence at a time</small></span></span></button>
+      <button class="lp-tool lp-tool-notes" data-tool="notes"><span class="lp-tool-copy"><span class="lp-tool-symbol" aria-hidden="true">＋</span><span>Study notes<small>Save a discovery · export to keep it</small></span></span></button>
     </nav>
     <div class="lp-launch-actions"><button data-launch-write>Use your own text</button><button data-launch-return>Open notebook <span aria-hidden="true">↗</span></button></div>
-    <p class="lp-launch-scope">Start with English. Follow supported word histories across languages.</p>`
+    <p class="lp-launch-scope">English lookup & grammar · Histories across supported languages · Session notes</p>`
   workspace.before(launchpad)
   launchpad.hidden = true
   let returnFocus: HTMLElement | null = null

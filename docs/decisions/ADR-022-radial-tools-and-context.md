@@ -12,14 +12,17 @@ being presented as two layouts of the same workspace.
 
 ## Decision
 
-Use a translucent radial entry around the current word/context. Four labeled
+Use a translucent circular sector entry around the current word/context. Four labeled
 actions open existing functions: Word histories, Understand, Sentence structure,
 and Study notes. Use your own text opens the existing editor. Open notebook and
 the keyboard skip link remain direct paths. Tools reopens the entry in place.
 Selecting a tool never starts a provider request.
 
-The desktop orbit unfolds with a brief, staggered transform/opacity transition.
-Narrow screens use a two-column set of touch targets with the word above it.
+The annular wheel unfolds with a brief, staggered transform/opacity transition.
+Each native button is clipped to a quarter-annulus; the entire visible sector
+is its hit target. Desktop and mobile both retain a circular wheel, with the
+selected word in its center. This supersedes the initially published orbit of
+separate cards and mobile grid, following the owner's explicit correction.
 Reduced motion disables the unfolding and workspace transition. Reduced
 transparency and unsupported backdrop filtering use an opaque surface. Themes
 continue to supply all product colors. No graphics/provider dependencies change.
@@ -68,9 +71,19 @@ provider changes, accounts, telemetry, new data storage or network hosts.
   blocked. Keyboard Tab/Enter/Escape retain visible focus and return to Tools.
 - Browser-emulated reduced motion reports no launcher CSS animation. Screenshots
   use that preference to record stable states, not intermediate unfolding frames.
+- Sector correction: real-browser bounds are 284 × 284 at a 320 px viewport and
+  354 × 354 at 390 px. Clicking blank sector space outside its label opens that
+  tool. Focus highlights the wedge and outlines its label. Mobile labels remain
+  at least 14 px; scope stays visible below the wheel. Long query text at 320 px
+  keeps an 85 × 85 center, truncates visually without changing the stored text,
+  and cannot intercept sector taps.
 
-Local preview does not provide a live parser. Production verification is recorded
-separately after deployment; prepared examples are never presented as live checks.
+The first deployment (`cd24559`) was verified on production: sunflower lookup,
+sun's separate etymology choice, continuation to Middle English sonne, and live
+spaCy grammar. The live expanded tree survived tool switching. The production
+`/concept/?q=water%20water#lingua-concept` redirect also preserved input/hash.
+The sector correction changes only presentation; its deployment is verified
+separately. Prepared examples are never presented as live checks.
 
 ## Scope and remaining work
 
