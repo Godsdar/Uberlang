@@ -12,18 +12,25 @@ being presented as two layouts of the same workspace.
 
 ## Decision
 
-Use a translucent circular sector entry around the current word/context. Four labeled
-actions open existing functions: Word histories, Understand, Sentence structure,
+Use a translucent circular sector entry around the current word/context. Four icon-only
+sectors open existing functions: Word histories, Understand, Sentence structure,
 and Study notes. Use your own text opens the existing editor. Open notebook and
 the keyboard skip link remain direct paths. Tools reopens the entry in place.
-Selecting a tool never starts a provider request.
+Selecting a tool never starts a provider request. Original plain-outline icons
+represent histories, an open book, sentence dependencies and a notebook. The
+owner explicitly requested removal of decorative sparkles and promotional
+headings. Names and mode limits appear outside the wheel on hover or keyboard
+focus; an optional Tool guide provides labeled buttons on touch screens.
+All sector buttons retain accessible names and descriptions.
 
 The annular wheel unfolds with a brief, staggered transform/opacity transition.
 Each native button is clipped to a quarter-annulus; the entire visible sector
 is its hit target. Desktop and mobile both retain a circular wheel, with the
 selected word in its center. This supersedes the initially published orbit of
 separate cards and mobile grid, following the owner's explicit correction.
-Reduced motion disables the unfolding and workspace transition. Reduced
+On fine-pointer hover, only the active sector scales to 1.035 and rotates 1°
+over 260 ms. Reduced motion disables that transform, unfolding and workspace
+transition. Reduced
 transparency and unsupported backdrop filtering use an opaque surface. Themes
 continue to supply all product colors. No graphics/provider dependencies change.
 
@@ -73,10 +80,14 @@ provider changes, accounts, telemetry, new data storage or network hosts.
   use that preference to record stable states, not intermediate unfolding frames.
 - Sector correction: real-browser bounds are 284 × 284 at a 320 px viewport and
   354 × 354 at 390 px. Clicking blank sector space outside its label opens that
-  tool. Focus highlights the wedge and outlines its label. Mobile labels remain
-  at least 14 px; scope stays visible below the wheel. Long query text at 320 px
+  tool. Focus highlights the wedge and outlines its label. Mobile icons are 38 px; optional guide labels are 16 px and descriptions 14 px.
+  Scope stays visible below the wheel. Long query text at 320 px
   keeps an 85 × 85 center, truncates visually without changing the stored text,
   and cannot intercept sector taps.
+- Icon refinement: real-browser hover settled at scale 1.035 / rotation 1°;
+  keyboard focus revealed the correct description and Enter opened Understand.
+  Escape restored Tools focus. The mobile Tool guide opened Study notes; 320 px
+  remained free of horizontal page overflow. Reduced motion disables hover travel.
 
 The first deployment (`cd24559`) was verified on production: sunflower lookup,
 sun's separate etymology choice, continuation to Middle English sonne, and live
