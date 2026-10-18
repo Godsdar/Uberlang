@@ -1,3 +1,4 @@
+import { NotebookPanels } from './domain/panels';
 import { passageFromLink } from './domain/entry';
 import { mountRootsBackup } from './roots-backup';
 import { lexicalMatches, parseLexicon, selectedLexicalWord } from './domain/lexicon';
@@ -195,7 +196,11 @@ import { mountFamily, mountSyntax, unmountExplorers } from './components/explore
     return `<aside class="lp-inspector"><div class="lp-label">Selected word</div><p class="lp-word">${esc(t.text)}</p><span class="lp-label">${esc(t.pos)} · lemma ${esc(t.lemma)}</span><dl><div><dt>Relation</dt><dd>${esc(t.relation)}</dd></div><div><dt>Head</dt><dd>${esc(head)}</dd></div>${Object.entries(t.features).map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl><p>${esc(t.explanation||'Inspect the relation and features above. Grammar predictions describe structure; they do not explain every possible meaning.')}</p><span class="lp-label">Offsets ${s.start}–${s.end} · ${esc(grammarLabel(s))}</span></aside>`;
   }
   function renderContent(app,s){
-    const area=app.querySelector('[data-ui="content"]');
+    const host=app.querySelector('[data-ui="content"]');
+    s.panels??=new NotebookPanels(()=>{const panel=document.createElement('div');host.append(panel);return panel;},panel=>{unmountExplorers(panel);panel.remove();});
+    const {value:area,fresh}=s.panels.visit(s.view,[s.text,s.analyzed,s.start,s.end,s.live,s.lexical,s.familyId,s.analysisStatus]);
+    for(const panel of host.children)panel.hidden=panel!==area;
+    if(!fresh)return;
     const focusId=area.contains(document.activeElement)?document.activeElement.dataset.focusId:null;
     const previousSyntax=s.view==='grammar'?area.querySelector('[data-ui="syntax"]'):null;
     if(previousSyntax)previousSyntax.remove();
