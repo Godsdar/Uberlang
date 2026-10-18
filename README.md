@@ -80,6 +80,10 @@ visible form focus and touch-sized controls support navigation. Published on
 [`9980696`](https://github.com/Godsdar/Uberlang/commit/998069627a95935752a36d57955a8b294a15506a); the [verified production deployment](https://vercel.com/godsdar/lingua/3AKrThopRgvdc21CnPxRzG1L4oFU) is Ready.
 [Design decision and validation scope](docs/decisions/ADR-021-notebook-visual-refinement.md).
 
+Section headings and spacing group the notebook without repeated horizontal
+dividers. Tree connections, active-control cues, input boundaries and keyboard
+focus remain visible across all three themes and both layouts.
+
 ## What works today
 
 | Feature | Night notebook |
