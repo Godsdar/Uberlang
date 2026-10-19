@@ -19,7 +19,12 @@ Without a configured model, unknown sentences return `unavailable` grammar.
 With the model, new sentences receive live grammar and a structure-based reading.
 Editing source text requires a new
 document version/ID; the client must discard stale responses. Offsets are UTF-16,
-zero-based and end-exclusive. API analysis currently supports English only.
+zero-based and end-exclusive. API analysis currently supports English only. The declared language is forwarded to
+the worker and echoed in the response. Unsupported languages/scripts produce 422
+with a stable code before inference; script checks are not language identification.
+The private worker requires both `text` and `language`. Deploy the gateway and
+worker together; an old text-only gateway is rejected by the new worker.
+`/v1/capabilities` describes configured models, not current worker health.
 
 ## Configuration
 

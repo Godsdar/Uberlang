@@ -322,3 +322,7 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp .lp-anki summary::before{content:'';position:absolute;left:0;top:50%;width:10px;border-top:1px solid currentColor;}
 #lingua-concept .lp .lp-anki summary::after{content:'';position:absolute;left:4.5px;top:calc(50% - 5px);height:10px;border-left:1px solid currentColor;}
 #lingua-concept .lp .lp-anki details[open]>summary::after{display:none;}
+
+/* The declared language remains usable at the narrow notebook width. */
+.lp-analysis-language{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px}
+.lp-analysis-language select{max-width:100%}

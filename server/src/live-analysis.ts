@@ -1,3 +1,4 @@
+import { analysisWarnings } from '../../src/shared/analysis-policy.ts'
 import { conceptData } from '../../src/data/reading-fixtures.mjs'
 import { analyzeSelection, type AnalysisInput } from './analysis.ts'
 import { explainSentence } from './sentence-meaning.ts'
@@ -8,16 +9,16 @@ export interface ParsedToken {
   features: Record<string, string>; head: number; relation: string; explanation: string
 }
 export interface ParsedSentence {
-  tokens: ParsedToken[]; engine: string; model: string; version: string; warnings: string[]
+  language: string; tokens: ParsedToken[]; engine: string; model: string; version: string; warnings: string[]
   modelVersion?: string; dependencyScheme?: string; license?: string; source?: string
 }
-export type Parse = (text: string, signal: AbortSignal) => Promise<unknown>
+export type Parse = (text: string, signal: AbortSignal, language: string) => Promise<unknown>
 const invalid = () => new ServiceError(502, 'INVALID_ANALYSIS', 'The language engine returned an invalid analysis')
 const object = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === 'object' && !Array.isArray(value)
 
 /** Validate external model output before it reaches graphs or reports. */
-export function validateParse(value: unknown, text: string): ParsedSentence {
-  if (!object(value) || !Array.isArray(value.tokens) || value.tokens.length < 1 || value.tokens.length > 150) throw invalid()
+export function validateParse(value: unknown, text: string, language = 'en'): ParsedSentence {
+  if (!object(value) || value.language !== language || !Array.isArray(value.tokens) || value.tokens.length < 1 || value.tokens.length > 150) throw invalid()
   for (const key of ['engine', 'model', 'version']) if (typeof value[key] !== 'string' || !value[key] || (value[key] as string).length > 100) throw invalid()
   const count = value.tokens.length
   let previous = 0
@@ -39,16 +40,16 @@ export function validateParse(value: unknown, text: string): ParsedSentence {
   if (!Array.isArray(value.warnings) || value.warnings.length > 10 || value.warnings.some(w => typeof w !== 'string' || w.length > 1000)) throw invalid()
   const details: Record<string, string> = {}
   for (const key of ['modelVersion', 'dependencyScheme', 'license', 'source']) if (typeof value[key] === 'string' && (value[key] as string).length < 300) details[key] = value[key] as string
-  return { ...details, tokens, engine: value.engine as string, model: value.model as string, version: value.version as string, warnings: value.warnings }
+  return { ...details, language, tokens, engine: value.engine as string, model: value.model as string, version: value.version as string, warnings: value.warnings }
 }
 
 export function liveResult(input: AnalysisInput, raw: unknown) {
   const prepared = analyzeSelection(input)
-  const parsed = validateParse(raw, input.text)
+  const parsed = validateParse(raw, input.text, input.language)
   const selected = parsed.tokens.find(t => t.start === input.selection.start && t.end === input.selection.end)
   const family = selected ? (conceptData.families as Record<string, unknown>)[selected.lemma.toLowerCase()] : undefined
-  const provenance = { engine: parsed.engine, model: parsed.model, version: parsed.version, modelVersion: parsed.modelVersion, dependencyScheme: parsed.dependencyScheme, license: parsed.license, source: parsed.source, live: true }
-  return { ...prepared, warnings: parsed.warnings, layers: {
+  const provenance = { language: parsed.language, engine: parsed.engine, model: parsed.model, version: parsed.version, modelVersion: parsed.modelVersion, dependencyScheme: parsed.dependencyScheme, license: parsed.license, source: parsed.source, live: true }
+  return { ...prepared, warnings: [...analysisWarnings, ...parsed.warnings], layers: {
     ...prepared.layers,
     meaning: prepared.layers.meaning.status === 'prepared' ? prepared.layers.meaning : { status: 'live', provenance: { ...provenance, engine: 'grammar-reading' }, data: explainSentence(parsed.tokens) },
     grammar: { status: 'live', provenance, data: { scope: 'sentence', tokens: parsed.tokens.map(t => ({ ...t, start: input.contextStart + t.start, end: input.contextStart + t.end })) } },
@@ -57,10 +58,10 @@ export function liveResult(input: AnalysisInput, raw: unknown) {
 }
 
 export function httpParser(url: string, key: string, bypass?: string): Parse {
-  return async (text, signal) => {
+  return async (text, signal, language) => {
     const response = await fetch(url, { method: 'POST', redirect: 'error', signal,
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}`, ...(bypass ? { 'x-vercel-protection-bypass': bypass } : {}) },
-      body: JSON.stringify({ text }) })
+      body: JSON.stringify({ text, language }) })
     if (response.status === 422) throw new ServiceError(422, 'SENTENCE_REQUIRED', 'Select one sentence for analysis')
     if (!response.ok) {
       console.warn(JSON.stringify({ event: 'engine_http_failure', status: response.status }))

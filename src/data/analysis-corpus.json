@@ -1,0 +1,21 @@
+[
+  {"id":"unseen-otter","language":"en","text":"The curious otter carried a silver spoon across the garden.","expected":"accepted"},
+  {"id":"question-negation","language":"en","text":"Why didn't the gardener open the blue gate?","expected":"accepted"},
+  {"id":"passive","language":"en","text":"The old gate was painted by a careful gardener.","expected":"accepted"},
+  {"id":"ambiguous-attachment","language":"en","text":"The astronomer saw the sailor with a telescope.","expected":"accepted"},
+  {"id":"repeated","language":"en","text":"Water, water everywhere.","expected":"accepted"},
+  {"id":"astral","language":"en","text":"🌱 The gardener opened the gate.","expected":"accepted","grammarExpected":"MULTIPLE_SENTENCES"},
+  {"id":"nfc","language":"en","text":"The café serves tea.","expected":"accepted"},
+  {"id":"nfd","language":"en","text":"The café serves tea.","expected":"accepted"},
+  {"id":"russian-declared","language":"ru","text":"Мама читает книгу.","expected":"UNSUPPORTED_LANGUAGE"},
+  {"id":"russian-misdeclared","language":"en","text":"Мама читает книгу.","expected":"UNSUPPORTED_SCRIPT"},
+  {"id":"mixed-script","language":"en","text":"My мама reads a book.","expected":"UNSUPPORTED_SCRIPT"},
+  {"id":"non-latin-name","language":"en","text":"I visited 北京 yesterday.","expected":"UNSUPPORTED_SCRIPT"},
+  {"id":"spanish-declared","language":"es","text":"La madre lee un libro.","expected":"UNSUPPORTED_LANGUAGE"},
+  {"id":"french-declared","language":"fr","text":"La mère lit un livre.","expected":"UNSUPPORTED_LANGUAGE"},
+  {"id":"latin-not-lid","language":"en","text":"La madre lee un libro.","expected":"accepted","limitation":"Misdeclared Latin-script languages cannot be detected by the script guard; no quality claim."},
+  {"id":"chinese","language":"zh","text":"妈妈在看书。","expected":"UNSUPPORTED_LANGUAGE"},
+  {"id":"unknown","language":"und","text":"Some text.","expected":"UNSUPPORTED_LANGUAGE"},
+  {"id":"mixed-declared","language":"mul","text":"Hello bonjour.","expected":"UNSUPPORTED_LANGUAGE"},
+  {"id":"no-words","language":"en","text":"123 🌱 !","expected":"NO_LANGUAGE_CONTENT"}
+]

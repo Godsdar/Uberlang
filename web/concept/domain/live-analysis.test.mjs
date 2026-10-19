@@ -2,10 +2,11 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { sentenceRequest, parseAnalysis, AnalysisRequestGate, readingRanges } from './live-analysis.ts'
 
-const request = sentenceRequest('doc', 'First sentence. Birds sing.', 16, 21)
-const result = () => ({ schemaVersion: 1, documentId: request.documentId, contextStart: request.contextStart,
+const englishRequest = (...args) => sentenceRequest(...args, 'en')
+const request = englishRequest('doc', 'First sentence. Birds sing.', 16, 21)
+const result = () => ({ schemaVersion: 1, language: 'en', documentId: request.documentId, contextStart: request.contextStart,
   coordinateSystem: 'UTF-16, end-exclusive', selection: { ...request.selection, absoluteStart: 16, absoluteEnd: 21, text: 'Birds' },
-  layers: { grammar: { status: 'live', provenance: { engine: 'test-parser', model: 'english', version: '1', live: true }, data: { scope: 'sentence', tokens: [
+  layers: { grammar: { status: 'live', provenance: { language: 'en', engine: 'test-parser', model: 'english', version: '1', live: true }, data: { scope: 'sentence', tokens: [
     { id: 1, text: 'Birds', start: 16, end: 21, lemma: 'bird', pos: 'NOUN', features: { Number: 'Plur' }, head: 2, relation: 'nsubj' },
     { id: 2, text: 'sing', start: 22, end: 26, lemma: 'sing', pos: 'VERB', features: {}, head: 0, relation: 'root' },
     { id: 3, text: '.', start: 26, end: 27, lemma: '.', pos: 'PUNCT', features: {}, head: 2, relation: 'punct' }
@@ -13,16 +14,16 @@ const result = () => ({ schemaVersion: 1, documentId: request.documentId, contex
 
 test('sentence context preserves repeated occurrence offsets and limits outgoing text', () => {
   const document = 'Birds sing. Birds sing.'
-  const second = sentenceRequest('two', document, 12, 17)
+  const second = englishRequest('two', document, 12, 17)
   assert.equal(second.contextStart, 12)
   assert.equal(second.text, 'Birds sing.')
   assert.deepEqual(second.selection, { start: 0, end: 5 })
-  assert.throws(() => sentenceRequest('two', document, 0, document.length), /one sentence/)
-  assert.throws(() => sentenceRequest('long', 'word '.repeat(51) + '.', 0, 4), /shorter sentence/)
-  const emoji = sentenceRequest('unicode', '😀 Birds sing.', 3, 8)
+  assert.throws(() => englishRequest('two', document, 0, document.length), /one sentence/)
+  assert.throws(() => englishRequest('long', 'word '.repeat(51) + '.', 0, 4), /shorter sentence/)
+  const emoji = englishRequest('unicode', '😀 Birds sing.', 3, 8)
   assert.equal(emoji.selection.start, 3)
-  assert.throws(() => sentenceRequest('unicode', '😀 Birds sing.', 1, 2), /Select a word/)
-  assert.equal(sentenceRequest('caret', document, document.length, document.length).text, 'Birds sing.')
+  assert.throws(() => englishRequest('unicode', '😀 Birds sing.', 1, 2), /Select a word/)
+  assert.equal(englishRequest('caret', document, document.length, document.length).text, 'Birds sing.')
 })
 
 test('live adapter preserves offsets and evidence, rejects stale and malformed dependencies', () => {

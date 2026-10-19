@@ -1,0 +1,115 @@
+{
+  "platform": "macOS-27.0.1-arm64-arm-64bit",
+  "python": "3.12.14",
+  "engine": "spaCy",
+  "version": "3.8.7",
+  "model": "en_core_web_sm",
+  "modelVersion": "3.8.0",
+  "license": "MIT",
+  "coldMilliseconds": 674.649,
+  "warmMedianMilliseconds": 1.464,
+  "maxRssBytes": 145178624,
+  "validSamples": 20,
+  "samples": [
+    {
+      "text": "My mother gives me water.",
+      "milliseconds": 1.685,
+      "tokens": 6
+    },
+    {
+      "text": "She has been reading the book.",
+      "milliseconds": 1.512,
+      "tokens": 7
+    },
+    {
+      "text": "The book that I bought yesterday is fascinating.",
+      "milliseconds": 1.608,
+      "tokens": 9
+    },
+    {
+      "text": "Did she give him water?",
+      "milliseconds": 1.025,
+      "tokens": 6
+    },
+    {
+      "text": "Please give me the book.",
+      "milliseconds": 1.673,
+      "tokens": 6
+    },
+    {
+      "text": "I don't think he knows.",
+      "milliseconds": 1.558,
+      "tokens": 7
+    },
+    {
+      "text": "The book was written by her.",
+      "milliseconds": 1.22,
+      "tokens": 7
+    },
+    {
+      "text": "I saw her duck.",
+      "milliseconds": 1.191,
+      "tokens": 5
+    },
+    {
+      "text": "Visiting relatives can be tiring.",
+      "milliseconds": 1.756,
+      "tokens": 6
+    },
+    {
+      "text": "They saw the man with a telescope.",
+      "milliseconds": 1.555,
+      "tokens": 8
+    },
+    {
+      "text": "The water is cold, but the tea is hot.",
+      "milliseconds": 1.764,
+      "tokens": 11
+    },
+    {
+      "text": "If it rains, we will stay home.",
+      "milliseconds": 1.674,
+      "tokens": 9
+    },
+    {
+      "text": "The children have two books.",
+      "milliseconds": 1.073,
+      "tokens": 6
+    },
+    {
+      "text": "Water, water everywhere.",
+      "milliseconds": 0.954,
+      "tokens": 5
+    },
+    {
+      "text": "I'm looking forward to seeing you.",
+      "milliseconds": 1.116,
+      "tokens": 8
+    },
+    {
+      "text": "She gave it up.",
+      "milliseconds": 1.138,
+      "tokens": 5
+    },
+    {
+      "text": "Can you open the window?",
+      "milliseconds": 1.416,
+      "tokens": 6
+    },
+    {
+      "text": "\ud83c\udf31 My mother gives me water.",
+      "milliseconds": 1.147,
+      "tokens": 7
+    },
+    {
+      "text": "Cafe\u0301 is a borrowed word.",
+      "milliseconds": 1.167,
+      "tokens": 6
+    },
+    {
+      "text": "  My mother  gives me water.  ",
+      "milliseconds": 1.682,
+      "tokens": 6
+    }
+  ]
+}

@@ -62,13 +62,13 @@ class EngineHandler(BaseHTTPRequestHandler):
             if len(raw) != length:
                 raise ValueError('incomplete body')
             body = json.loads(raw)
-            if not isinstance(body, dict) or set(body) != {'text'}:
+            if not isinstance(body, dict) or set(body) != {'text', 'language'}:
                 raise ValueError('invalid fields')
         except (ValueError, UnicodeDecodeError, TimeoutError):
-            self._error(400, 'INVALID_REQUEST', 'Provide a JSON object with a text field.')
+            self._error(400, 'INVALID_REQUEST', 'Provide a JSON object with text and language fields.')
             return
         try:
-            result = analyze(body['text'])
+            result = analyze(body['text'], body['language'])
             self._send(200, result)
         except AnalysisError as error:
             self._error(error.status, error.code, str(error))

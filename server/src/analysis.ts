@@ -1,22 +1,24 @@
 import { conceptData } from '../../src/data/reading-fixtures.mjs'
+import { textIssue, languageIssue } from '../../src/shared/analysis-policy.ts'
 import { ServiceError } from './errors.ts'
 
 export interface AnalysisInput {
   documentId: string
-  language: 'en'
+  language: string
   text: string
   contextStart: number
   selection: { start: number; end: number }
 }
 
 export function validateText(text: string): void {
-  if (!text.trim() || text.length > 500 || (text.match(/[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*/gu)?.length ?? 0) > 50) {
-    throw new ServiceError(400, 'TEXT_LIMIT', 'Provide a nonempty sentence of at most 500 UTF-16 units and 50 words')
-  }
+  const issue = textIssue(text)
+  if (issue) throw new ServiceError(400, issue.code, issue.message)
 }
 
 export function analyzeSelection(input: AnalysisInput) {
   validateText(input.text)
+  const issue = languageIssue(input.language, input.text)
+  if (issue) throw new ServiceError(422, issue.code, issue.message)
   const { start, end } = input.selection
   const splitsSurrogate = (index: number) => /[\uD800-\uDBFF]/.test(input.text[index - 1] ?? '') && /[\uDC00-\uDFFF]/.test(input.text[index] ?? '')
   if (end <= start || end > input.text.length || splitsSurrogate(start) || splitsSurrogate(end)) {
@@ -29,7 +31,7 @@ export function analyzeSelection(input: AnalysisInput) {
   const unavailable = { status: 'unavailable' as const, reason: 'No prepared result for this selection. Live parsing is not configured.' }
   const prepared = <T>(data: T) => ({ status: 'prepared' as const, provenance: { engine: 'curated-examples', version: '2026-10-11', live: false }, data })
   return {
-    schemaVersion: 1, documentId: input.documentId, contextStart: input.contextStart,
+    schemaVersion: 1, language: input.language, documentId: input.documentId, contextStart: input.contextStart,
     coordinateSystem: 'UTF-16, end-exclusive',
     selection: { ...input.selection, absoluteStart: input.contextStart + start, absoluteEnd: input.contextStart + end, text: input.text.slice(start, end) },
     layers: {

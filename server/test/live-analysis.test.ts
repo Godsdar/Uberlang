@@ -7,7 +7,7 @@ import { publicOriginAllowed, clientAddress } from '../src/public-gateway.ts'
 import type { IncomingMessage } from 'node:http'
 
 const text = 'Birds sing.'
-const parsed = { engine: 'spaCy', model: 'en_core_web_sm', version: '3.8.7', warnings: ['Statistical analysis can be wrong.'], tokens: [
+const parsed = { language: 'en', engine: 'spaCy', model: 'en_core_web_sm', version: '3.8.7', warnings: ['Statistical analysis can be wrong.'], tokens: [
   { id: 1, text: 'Birds', start: 0, end: 5, lemma: 'bird', pos: 'NOUN', features: { Number: 'Plur' }, head: 2, relation: 'nsubj' },
   { id: 2, text: 'sing', start: 6, end: 10, lemma: 'sing', pos: 'VERB', features: { Tense: 'Pres' }, head: 0, relation: 'root' },
   { id: 3, text: '.', start: 10, end: 11, lemma: '.', pos: 'PUNCT', features: {}, head: 2, relation: 'punct' }
@@ -26,7 +26,7 @@ test('live API handles unseen sentences with structure reading and independently
   assert.equal(data.layers.meaning.data.kind, 'structure')
   assert.match(data.layers.meaning.data.caveat, /does not resolve word senses/)
   assert.equal(data.layers.etymology.status, 'unavailable')
-  assert.equal(data.warnings[0], parsed.warnings[0])
+  assert.ok(data.warnings.includes(parsed.warnings[0]))
   assert.equal((await app.inject('/v1/capabilities')).json().analysis.liveGrammar, true)
 })
 test('model boundaries reject cycles, wrong slices, missing tokens and forged ranges', () => {
@@ -55,7 +55,34 @@ test('public gateway trusts exact origins and platform IP only in Vercel', () =>
 test('private parser rejects oversized payloads and never forwards raw model errors', async t => {
   const original = globalThis.fetch; t.after(() => { globalThis.fetch = original })
   globalThis.fetch = async () => new Response('secret model error', { status: 500 })
-  await assert.rejects(httpParser('https://test.invalid', 'test')(text, new AbortController().signal), /temporarily unavailable/)
+  await assert.rejects(httpParser('https://test.invalid', 'test')(text, new AbortController().signal, 'en'), /temporarily unavailable/)
   globalThis.fetch = async () => new Response('x'.repeat(131073))
-  await assert.rejects(httpParser('https://test.invalid', 'test')(text, new AbortController().signal), /invalid analysis/)
+  await assert.rejects(httpParser('https://test.invalid', 'test')(text, new AbortController().signal, 'en'), /invalid analysis/)
+})
+
+test('language and script boundaries reject the shared corpus before calling a configured engine', async t => {
+  const { readFileSync } = await import('node:fs')
+  const corpus = JSON.parse(readFileSync(new URL('../../src/data/analysis-corpus.json', import.meta.url), 'utf8'))
+  let calls = 0
+  const { app } = await buildApp(readConfig({ LINGUA_RATE_MAX: '1000' }), { parse: async () => { calls++; return parsed } }); t.after(() => app.close())
+  for (const item of corpus.filter((item: { expected: string }) => item.expected !== 'accepted')) {
+    const response = await app.inject({method:'POST',url:'/v1/analysis',payload:{...input,language:item.language,text:item.text,selection:{start:0,end:item.text.length}}})
+    assert.equal(response.statusCode,422,item.id)
+    assert.equal(response.json().error.code,item.expected,item.id)
+  }
+  assert.equal(calls,0)
+  const caps=(await app.inject('/v1/capabilities')).json()
+  assert.deepEqual(caps.analysis.languages,['en'])
+  assert.equal(caps.analysis.languageDetection,false)
+  assert.equal(caps.analysis.readiness,'configuration-only')
+  assert.equal(caps.limits.sentences,1)
+})
+test('declared language reaches the private worker and a wrong-language response is rejected', async t => {
+  const original=globalThis.fetch; t.after(()=>{globalThis.fetch=original})
+  globalThis.fetch=async (_url, options)=>{
+    assert.deepEqual(JSON.parse(String(options?.body)),{text,language:'en'})
+    return Response.json(parsed)
+  }
+  assert.equal(validateParse(await httpParser('https://test.invalid','test')(text,new AbortController().signal,'en'),text).language,'en')
+  assert.throws(()=>validateParse({...parsed,language:'ru'},text),/invalid analysis/)
 })

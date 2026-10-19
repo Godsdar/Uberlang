@@ -56,3 +56,11 @@ Before any later approved announcement, check the actual deployment and channel 
 ## Related project documents
 
 [Owner brief](OWNER_BRIEF_2026-10-16.md) · [Implementation playbook](MODEL_PLAYBOOK.md) · [Workspace scope](CONCEPT.md) · [Launch history](LAUNCH_STRATEGY.md). The legacy web shell has already been retired (ADR-017); retain compatibility links, the roots backup and existing data.
+
+## Explicit input language (unreleased, 2026-10-19)
+
+The notebook can declare other input languages to report unavailable grammar.
+Only English has an installed grammar model; this control does not add language
+coverage. A conservative Latin-letter gate is not language detection. New text
+examples have no prepared answers. Structure readings are rule-derived; dictionary
+senses remain alternatives and live translation is unavailable in the notebook.
