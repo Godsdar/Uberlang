@@ -26,7 +26,7 @@ export function mountDeckLibrary(app: HTMLElement, openNotebook: (entry: DeckNot
         <div class="lp-anki-fields"><label class="lp-anki-wide">Note type<select data-deck-type></select></label>
         <label>Word or expression<select data-map="word"></select></label><label>Example · optional<select data-map="example"></select></label>
         <label>Answer · optional<select data-map="answer"></select></label><label>Language code<input data-map="language" placeholder="en, es, fr…" list="${app.id}-deck-languages" maxlength="40" autocapitalize="none" spellcheck="false"><datalist id="${app.id}-deck-languages"></datalist></label></div>
-        <p class="lp-label">Set a language for each selected note type. English grammar only; word histories cover supported languages. Languages are never inferred from deck names.</p>
+        <p class="lp-label">Set a language for each selected note type. English grammar only; word histories cover supported languages. For mixed languages, select a subset and import each language separately.</p>
         <details><summary>Mapped sample</summary><pre data-deck-sample></pre></details>
         <details><summary>What this file contains & import warnings</summary><ul data-deck-warnings></ul></details>
       </div>
@@ -124,9 +124,9 @@ export function mountDeckLibrary(app: HTMLElement, openNotebook: (entry: DeckNot
       q('[data-deck-warnings]').replaceChildren(...value.warnings.map(w => element('li', w)))
       status.textContent = `${value.format}. Review fields and language before importing. Media and schedules are omitted.`
       show('[data-deck-start]', false); for (const name of ['mapping', 'selection', 'import-actions']) show(`[data-deck-${name}]`, true)
-      filters(); mappingUI(); select('[data-deck-type]').focus(); dialog.scrollTop = 0
+      filters(); mappingUI(); dialog.scrollTop = 0
     } catch (error) { if (generation === revision) status.textContent = (error as Error).name === 'AbortError' ? 'File reading cancelled.' : (error as Error).message }
-    finally { if (generation === revision) { work.disabled = false; field.disabled = false; show('[data-deck-cancel]', false); field.value = '' } }
+    finally { if (generation === revision) { work.disabled = false; field.disabled = false; show('[data-deck-cancel]', false); field.value = ''; if (batch) select('[data-deck-type]').focus() } }
   })
   select('[data-deck-type]').addEventListener('change', mappingUI)
   for (const key of ['word', 'example', 'answer', 'language'] as const) q(`[data-map="${key}"]`).addEventListener(key === 'language' ? 'input' : 'change', () => {
@@ -162,8 +162,11 @@ export function mountDeckLibrary(app: HTMLElement, openNotebook: (entry: DeckNot
     status.textContent = 'Saving to this browser…'
     try {
       const result = await saveLibrary(ready.notes, select('[data-deck-duplicates]').value === 'update')
-      library = await listLibrary(); libraryUI()
-      status.textContent = `Saved locally: ${result.added} new, ${result.updated} updated. ${result.skipped} existing and ${result.withinFile} repeated identities skipped. Open one note to explore.`
+      let refreshError = false
+      try { library = await listLibrary() } catch { refreshError = true }
+      libraryUI()
+      status.textContent = `Saved locally: ${result.added} new, ${result.updated} updated. ${result.skipped} existing and ${result.withinFile} repeated identities skipped. ${refreshError ? 'The list could not refresh; reopen My decks to read the saved notes.' : 'Open one note to explore.'}`
+      status.tabIndex = -1; status.focus(); dialog.scrollTop = 0
     } catch (error) { status.textContent = (error as Error).message }
     finally { saving = false; work.disabled = false; q<HTMLButtonElement>('[data-deck-close]').disabled = false }
   })
