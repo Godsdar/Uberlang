@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict'
-import { setup } from './check-export-harness.mjs'
+import { setup, settle } from './check-export-harness.mjs'
 const h = setup('?q=water%20water#direct')
 h.click('[data-action="analyze"]'); h.click('[data-start="6"]'); h.click('[data-action="save"]')
 h.w.openImportedEntry({ text: 'The water is clear.', word: 'water', language: 'en', source: { filename: 'synthetic.apkg', guid: 'fake-guid', decks: ['English::Nature'], tags: ['nature'] } })
 assert.equal(h.q('[data-ui="input"]').value, 'The water is clear.')
+assert.equal(h.q('[data-action="language"]').value, 'en', 'the explicit import mapping replaces the previous undeclared language')
 assert.equal(h.q('[data-start="4"]').getAttribute('aria-pressed'), 'true')
 assert.match(h.q('[data-ui="status"]').textContent, /English::Nature.*synthetic.apkg/)
 assert.equal(h.q('.lp-shell').hidden, false)
@@ -14,5 +15,32 @@ assert.equal(h.q('[name="context"]').value, 'water water', 'an old saved occurre
 h.click('[data-anki-close]')
 h.w.openImportedEntry({ text: 'agua', word: 'agua', language: 'es', source: {} })
 assert.equal(h.q('[data-ui="input"]').value, 'The water is clear.', 'non-English entries cannot enter the English contract')
+assert.equal(h.requests.length, 0)
+h.w.openImportedEntry({ text: 'aqua', word: 'aqua', language: 'la', source: {} })
+assert.equal(h.q('[data-ui="input"]').value, 'The water is clear.')
+// Only the deliberately requested sentence, with its declared language and exact
+// word range, may cross the controller boundary. The rest of a deck never does.
+h.click('[data-action="live"]'); await settle()
+assert.equal(h.requests.length, 1)
+const request = JSON.parse(h.requests[0][1].body)
+assert.equal(request.language, 'en')
+assert.equal(request.text, 'The water is clear.')
+assert.equal(request.text.slice(request.selection.start, request.selection.end), 'water')
+assert.ok(!('source' in request)); assert.ok(!('notes' in request)); assert.ok(!('answer' in request))
+// Switching from a language refusal to an imported English note restores the
+// explicit mapping; a late old response cannot restore the previous analysis.
+const language = h.q('[data-action="language"]'); language.value = 'ru'
+language.dispatchEvent(new h.w.Event('change', { bubbles: true }))
+const { analyzeSelection } = await import('../server/src/analysis.ts')
+let finish
+h.w.fetch = (_url, options) => new Promise(resolve => { finish = () => resolve({ ok: true, json: async () => analyzeSelection(JSON.parse(options.body)) }) })
+h.click('[data-example="mother-water"]'); h.click('[data-action="live"]')
+h.w.openImportedEntry({ text: 'A bright bird crossed the river.', word: 'bird', language: 'en', source: { filename: 'synthetic.apkg', guid: 'new-guid', decks: ['English'], tags: [] } })
+finish(); await settle()
+assert.equal(h.q('[data-action="language"]').value, 'en')
+assert.equal(h.q('[data-ui="input"]').value, 'A bright bird crossed the river.')
+assert.equal(h.q('[data-ui="model-notes"]').hidden, true)
+assert.ok(!h.q('[data-ui="status"]').textContent.includes('Live'))
+assert.deepEqual(h.errors, [])
 h.dom.window.close()
-console.log('PASS imported entry is local, focusable, language-guarded and preserves previous saved occurrences')
+console.log('PASS imported entry is local, language-preserving, focusable, guarded, explicitly submitted, stale-safe and preserves saved occurrences')
