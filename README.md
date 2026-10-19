@@ -73,7 +73,11 @@ travel with exported notes. No paid API is required.
 | Translation | Prepared English → Russian examples |
 
 English Wiktionary names the source edition, not an English-only collection of words.
-There is no general non-English initial lookup or grammar selector in this notebook.
+The text-language selector declares the input language; only English has an installed
+grammar model. Other languages remain readable but have no initial lookup or grammar.
+After editing or pasting, choose the language explicitly. A conservative script check
+rejects non-Latin/mixed-script input even if English is selected. This is not language
+detection: misdeclared Spanish/French on Latin script can still get incorrect predictions.
 Source coverage varies; reconstructed forms and incomplete histories remain labeled.
 [Detailed coverage and current marketing guidance](docs/MARKETING_POSITIONING.md).
 
@@ -157,7 +161,10 @@ convert roots into session notes. Old `/concept/` links open the home page, and
 `?q=` links prefill text without submitting it.
 
 The concept demonstrates simple syntax, the present perfect progressive, and a
-relative clause. Choose **Analyze sentence** to parse your own English sentence. Only that sentence
+relative clause. The **New text · no prepared answers** examples only load text locally.
+Choose **Analyze sentence** to compute grammar for your own English sentence.
+The editor holds 6000 UTF-16 units, but each request sends only one selected sentence
+(maximum 50 words / 500 UTF-16 units; some symbols count as two). Only that sentence
 is sent to Uberlang; no third-party inference service is used. The separate lexical
 lookup sends only the selected headword to Wiktionary. Dictionary senses are
 alternatives, and a grammar-based reading cannot resolve intent, irony or ambiguity.
@@ -294,6 +301,7 @@ sourced families, and add durable local notes.
 Branch disclosure, selected-lineage focus, dependency arcs, and reduced-motion-aware
 transitions are now implemented in the concept.
 
+- [Arbitrary text analysis requirements, quality limits and multilingual stages](docs/specs/ARBITRARY_TEXT_ANALYSIS.md)
 - [Product specification](docs/PRODUCT_SPEC.md) and [architecture plan](docs/ARCHITECTURE_PLAN.md)
 - [Concept workflow](docs/CONCEPT.md) and [deployment](docs/DEPLOYMENT.md)
 - [Architecture decisions](docs/decisions/), [existing design](docs/DESIGN.md), and [graphics](docs/GRAPHICS.md)

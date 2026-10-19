@@ -1,0 +1,245 @@
+[
+  {
+    "name": "new English sentence",
+    "status": 200,
+    "language": "en",
+    "layers": {
+      "meaning": {
+        "status": "live",
+        "provenance": {
+          "language": "en",
+          "engine": "grammar-reading",
+          "model": "en_core_web_sm",
+          "version": "3.8.7",
+          "modelVersion": "3.8.0",
+          "dependencyScheme": "spaCy English (OntoNotes-style)",
+          "license": "MIT",
+          "source": "https://spacy.io/models/en#en_core_web_sm",
+          "live": true
+        },
+        "data": {
+          "scope": "sentence",
+          "kind": "structure",
+          "explanation": "“The curious otter” is the grammatical subject of “carried”. “a silver spoon” is the direct object of the predicate.",
+          "caveat": "This reading follows a statistical grammar model. It does not resolve word senses, references, irony or the speaker’s intention."
+        }
+      },
+      "grammar": {
+        "status": "live",
+        "provenance": {
+          "language": "en",
+          "engine": "spaCy",
+          "model": "en_core_web_sm",
+          "version": "3.8.7",
+          "modelVersion": "3.8.0",
+          "dependencyScheme": "spaCy English (OntoNotes-style)",
+          "license": "MIT",
+          "source": "https://spacy.io/models/en#en_core_web_sm",
+          "live": true
+        },
+        "data": {
+          "scope": "sentence",
+          "tokens": [
+            {
+              "id": 1,
+              "text": "The",
+              "start": 0,
+              "end": 3,
+              "lemma": "the",
+              "pos": "DET",
+              "tag": "DT",
+              "features": {
+                "Definite": "Def",
+                "PronType": "Art"
+              },
+              "head": 3,
+              "relation": "det",
+              "explanation": ""
+            },
+            {
+              "id": 2,
+              "text": "curious",
+              "start": 4,
+              "end": 11,
+              "lemma": "curious",
+              "pos": "ADJ",
+              "tag": "JJ",
+              "features": {
+                "Degree": "Pos"
+              },
+              "head": 3,
+              "relation": "amod",
+              "explanation": ""
+            },
+            {
+              "id": 3,
+              "text": "otter",
+              "start": 12,
+              "end": 17,
+              "lemma": "otter",
+              "pos": "NOUN",
+              "tag": "NN",
+              "features": {
+                "Number": "Sing"
+              },
+              "head": 4,
+              "relation": "nsubj",
+              "explanation": ""
+            },
+            {
+              "id": 4,
+              "text": "carried",
+              "start": 18,
+              "end": 25,
+              "lemma": "carry",
+              "pos": "VERB",
+              "tag": "VBD",
+              "features": {
+                "Tense": "Past",
+                "VerbForm": "Fin"
+              },
+              "head": 0,
+              "relation": "root",
+              "explanation": ""
+            },
+            {
+              "id": 5,
+              "text": "a",
+              "start": 26,
+              "end": 27,
+              "lemma": "a",
+              "pos": "DET",
+              "tag": "DT",
+              "features": {
+                "Definite": "Ind",
+                "PronType": "Art"
+              },
+              "head": 7,
+              "relation": "det",
+              "explanation": ""
+            },
+            {
+              "id": 6,
+              "text": "silver",
+              "start": 28,
+              "end": 34,
+              "lemma": "silver",
+              "pos": "ADJ",
+              "tag": "JJ",
+              "features": {
+                "Degree": "Pos"
+              },
+              "head": 7,
+              "relation": "amod",
+              "explanation": ""
+            },
+            {
+              "id": 7,
+              "text": "spoon",
+              "start": 35,
+              "end": 40,
+              "lemma": "spoon",
+              "pos": "NOUN",
+              "tag": "NN",
+              "features": {
+                "Number": "Sing"
+              },
+              "head": 4,
+              "relation": "dobj",
+              "explanation": ""
+            },
+            {
+              "id": 8,
+              "text": "across",
+              "start": 41,
+              "end": 47,
+              "lemma": "across",
+              "pos": "ADP",
+              "tag": "IN",
+              "features": {},
+              "head": 4,
+              "relation": "prep",
+              "explanation": ""
+            },
+            {
+              "id": 9,
+              "text": "the",
+              "start": 48,
+              "end": 51,
+              "lemma": "the",
+              "pos": "DET",
+              "tag": "DT",
+              "features": {
+                "Definite": "Def",
+                "PronType": "Art"
+              },
+              "head": 10,
+              "relation": "det",
+              "explanation": ""
+            },
+            {
+              "id": 10,
+              "text": "garden",
+              "start": 52,
+              "end": 58,
+              "lemma": "garden",
+              "pos": "NOUN",
+              "tag": "NN",
+              "features": {
+                "Number": "Sing"
+              },
+              "head": 8,
+              "relation": "pobj",
+              "explanation": ""
+            },
+            {
+              "id": 11,
+              "text": ".",
+              "start": 58,
+              "end": 59,
+              "lemma": ".",
+              "pos": "PUNCT",
+              "tag": ".",
+              "features": {
+                "PunctType": "Peri"
+              },
+              "head": 4,
+              "relation": "punct",
+              "explanation": ""
+            }
+          ]
+        }
+      },
+      "etymology": {
+        "status": "unavailable",
+        "reason": "No sourced word family is available for this selection."
+      }
+    },
+    "warnings": [
+      "English was declared by the user; language is not automatically detected. Latin-script text in another language may produce incorrect English predictions.",
+      "The script check rejects non-Latin letters, including names or quotations inside English text.",
+      "Statistical analysis can be wrong, especially for ambiguous sentences.",
+      "Dependency labels follow spaCy English conventions, not Universal Dependencies.",
+      "This model provides grammar and morphology, not semantic or etymological evidence."
+    ]
+  },
+  {
+    "name": "Russian correctly declared",
+    "status": 422,
+    "error": "UNSUPPORTED_LANGUAGE"
+  },
+  {
+    "name": "Russian misdeclared English",
+    "status": 422,
+    "error": "UNSUPPORTED_SCRIPT"
+  },
+  {
+    "name": "mixed-script English",
+    "status": 422,
+    "error": "UNSUPPORTED_SCRIPT"
+  },
+  {
+    "name": "private worker rejects missing credential",
+    "status": 401
+  }
+]
