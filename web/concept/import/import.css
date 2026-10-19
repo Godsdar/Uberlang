@@ -1,4 +1,6 @@
 #lingua-concept .lp .lp-import {width:min(800px,calc(100% - 24px));}
+#lingua-concept .lp [data-open-decks]{min-height:44px;white-space:nowrap;font-size:13px;}
+@media(max-width:360px){#lingua-concept .lp-header{flex-wrap:wrap;}#lingua-concept .lp-brand{flex-basis:100%;}#lingua-concept .lp-appearance{margin-left:auto;}}
 #lingua-concept .lp .lp-import fieldset{border:0;min-width:0;padding:0;margin:0;}
 #lingua-concept .lp .lp-import h3{font:1.35rem/1.45 Georgia,serif;overflow-wrap:anywhere;margin:16px 0 6px;}
 #lingua-concept .lp .lp-import :is(label,input,select){min-width:0;max-width:100%;}
