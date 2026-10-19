@@ -118,6 +118,26 @@ at [uberlang.vercel.app](https://uberlang.vercel.app/).
 The earlier [visual refinement](docs/decisions/ADR-021-notebook-visual-refinement.md)
 remains the basis for the notebook’s typography, themes and tree presentation.
 
+## Save a context card for Anki
+
+Choose **Anki…** beside the selected fragment or a saved session note. Review the
+original source, edit the word/language/context/answer, and reveal preview,
+deck/tags/optional sense label and sourced word history when needed. Export one
+UTF-8 TXT for Anki Desktop 2.1.54+: map Front/Back/Tags, keep HTML off and select
+**Ignore duplicates** before importing. A download or repeated-export warning
+does not confirm membership in your Anki collection.
+
+This release candidate is based directly on published main. It includes no
+unpublished declutter work, AnkiConnect connection, API-key entry or localhost/CSP
+permission change. The broader desktop adapter exists in a separate development
+branch and is verified with mocks only; real installed-release and HTTPS-origin
+compatibility remain unverified. Anki's clients handle mobile synchronization;
+Uberlang does not implement direct AnkiWeb sync or APKG export.
+
+See [scope and verification](docs/ANKI_EXPORT_MVP.md).
+
+[![Anki draft on the published notebook base](docs/assets/anki-export/desktop.jpg)](docs/assets/anki-export/desktop.jpg)
+
 ## What works today
 
 | Feature | Night notebook |
