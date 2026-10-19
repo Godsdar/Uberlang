@@ -7,6 +7,7 @@ const root = import.meta.dirname
 export default defineConfig({
   root,
   base: './',
+  worker: { format: 'es' },
   server: { proxy: { '/api': 'http://127.0.0.1:8788' } },
   resolve: {
     alias: { '@shared': resolve(root, '../src/shared') }
