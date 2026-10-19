@@ -22,7 +22,7 @@ No AnkiConnect client, localhost connection, origin permission, add-on/config
 mutation, API key entry or CSP expansion is included. The separate full integration
 branch has an opt-in mocked AnkiConnect adapter; its installed-version and real
 HTTPS-origin behavior remain unverified. Neither branch claims direct AnkiWeb
-sync. APKG/native-mobile adapters remain future work; use Anki desktop import and
+sync. APKG export/native-mobile adapters remain future work; use Anki desktop import and
 its own client sync for mobile.
 
 Release criteria: domain tests, typecheck and web build; real desktop/mobile dialog

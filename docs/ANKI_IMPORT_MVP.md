@@ -2,6 +2,8 @@
 
 Implementation specification, 2026-10-19. Base: published `87b10bd`.
 This work is isolated from the unpublished AnkiConnect/declutter branch.
+Implemented on `feat/anki-local-import`; publication is coordinated separately
+with the parent task. [Verification record](reviews/2026-10-19-anki-import.md).
 
 ## Observable workflow
 
@@ -45,6 +47,8 @@ invented analysis. Editing/importing never makes the entire deck a network paylo
   32,000 characters per field, 8 million total text characters. Stream inflation
   and Zstandard output under limits; limit Zstandard window before allocation.
   Terminate worker after 20 seconds or cancellation. No filesystem extraction.
+  The persistent library additionally caps serialized records at 16 million
+  characters / 10,000 notes, with transaction rollback if exceeded.
 - Parse HTML as inert text without DOM attachment; strip scripts/styles/embedded
   objects/remote media, retain cloze answer text with a warning. No template JS,
   rendered card HTML, tracking requests, audio, images, scheduling or review log.
@@ -75,3 +79,18 @@ Small commits; coordinate main publication with the parent task.
   [normalized schema](https://github.com/ankitects/anki/blob/56a79f3b93b934a553460b2941ccf9323fd6b201/rslib/src/storage/upgrades/schema15_upgrade.sql).
 
 The importer is an independent reader of these data formats, not copied Anki code.
+
+## Explicit compatibility boundaries
+
+`.colpkg`, raw databases, ZIP64, encrypted archives, unknown package/schema
+versions, Zstandard dictionaries/multiple frames and non-UTF-8 text are unsupported.
+Only ZIP stored/deflate entries are accepted. ZIP CRC is checked on extracted
+entries; the Zstandard library does not independently validate frame checksums.
+Numeric media entries are counted and bounded from ZIP metadata but left unopened.
+The file is an import snapshot, not a live view of the Anki collection.
+
+All source fields are preserved as sanitized text; original HTML, card-specific
+template rendering and cloze scheduling semantics are intentionally not preserved.
+No actual personal collection or installed Anki app was used for validation.
+Browser QA used Chromium; Safari/Firefox and real exported packages from every
+Anki release are not certified by these synthetic fixtures.
