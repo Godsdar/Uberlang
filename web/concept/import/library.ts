@@ -49,7 +49,7 @@ export async function listLibrary(): Promise<LibraryNote[]> {
   const db = await openDB()
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, 'readonly'), request = tx.objectStore(STORE).getAll()
-    tx.oncomplete = () => { db.close(); resolve(request.result) }
+    tx.oncomplete = () => { db.close(); resolve(request.result.sort((a: LibraryNote, b: LibraryNote) => b.importedAt.localeCompare(a.importedAt) || a.word.localeCompare(b.word))) }
     tx.onabort = () => { db.close(); reject(new Error('Local deck storage could not be read.')) }
   })
 }

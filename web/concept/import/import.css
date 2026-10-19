@@ -1,0 +1,23 @@
+#lingua-concept .lp .lp-import {width:min(800px,calc(100% - 24px));}
+#lingua-concept .lp .lp-import fieldset{border:0;min-width:0;padding:0;margin:0;}
+#lingua-concept .lp .lp-import h3{font:1.35rem/1.45 Georgia,serif;overflow-wrap:anywhere;margin:16px 0 6px;}
+#lingua-concept .lp .lp-import :is(label,input,select){min-width:0;max-width:100%;}
+#lingua-concept .lp .lp-import input:not([type=checkbox]){box-sizing:border-box;width:100%;padding:10px;border:1px solid var(--lp-line);background:var(--lp-surface);color:var(--lp-fg);border-radius:6px;font:inherit;}
+#lingua-concept .lp .lp-import-file{display:grid;gap:8px;margin:18px 0;font-size:1rem;}
+#lingua-concept .lp .lp-import :is(p,li,blockquote){overflow-wrap:anywhere;}
+#lingua-concept .lp .lp-import-row{border-top:1px solid var(--lp-line);padding:10px 0;}
+#lingua-concept .lp .lp-import-note{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;}
+#lingua-concept .lp .lp-import-note span{min-width:0;overflow-wrap:anywhere;}
+#lingua-concept .lp .lp-import-note strong{font:1.1rem/1.5 Georgia,serif;}
+#lingua-concept .lp .lp-import-note small{display:block;color:var(--lp-muted);font-size:.8rem;}
+#lingua-concept .lp .lp-import-note input{flex:none;accent-color:var(--lp-accent);width:18px;height:18px;}
+#lingua-concept .lp .lp-import-row details{font-size:.85rem;margin:4px 0 0 30px;}
+#lingua-concept .lp .lp-import blockquote{white-space:pre-wrap;border-left:1px solid var(--lp-line);padding:8px 16px;margin:12px 0;max-height:14rem;overflow:auto;}
+#lingua-concept .lp .lp-import [data-deck-confirm]{border-top:1px solid var(--lp-line);padding-top:12px;}
+#lingua-concept .lp .lp-import-choice{display:block;text-align:left;margin:8px 0;border:1px solid var(--lp-line);width:100%;white-space:normal;}
+#lingua-concept .lp .lp-import-history{max-width:100%;overflow:hidden;}
+#lingua-concept .lp .lp-import .lp-actions{flex-wrap:wrap;}
+#lingua-concept .lp .lp-import .lp-anki-heading{position:sticky;top:-24px;background:var(--lp-bg);padding-block:8px;z-index:2;}
+@media(max-width:600px){#lingua-concept .lp .lp-import .lp-anki-heading{top:-18px;}}
+
+#lingua-concept .lp .lp-import .lp-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}

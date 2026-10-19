@@ -33,7 +33,7 @@ function setup(search = '') {
   w.scrollTo=()=>{}
   w.HTMLElement.prototype.animate=()=>{}
   Object.assign(w, {NotebookPanels,passageFromLink,lexicalMatches,parseLexicon,selectedLexicalWord,familyLayout,AnalysisRequestGate,parseAnalysis,readingRanges,sentenceRequest,exportDocuments,resolveSelection,conceptData,structuredClone,AbortController,TextEncoder,ankiFields,createAnkiDraft,serializeAnki,ankiIdentity,
-    mountRootsBackup:()=>{},ResizeObserver:class {observe(){}},requestAnimationFrame:f=>f(),
+    mountDeckLibrary:(_app,open)=>{w.openImportedEntry=open;return {open(){}}},mountRootsBackup:()=>{},ResizeObserver:class {observe(){}},requestAnimationFrame:f=>f(),
     mountFamily:(el,props)=>{if(!mounts.has(el))mounts.set(el,{kind:'family',props,localState:{}})},
     mountSyntax:(el,props)=>{if(!mounts.has(el))mounts.set(el,{kind:'syntax',props,localState:{}})},
     unmountExplorers:parent=>{for(const el of mounts.keys())if(parent===el||parent.contains(el))mounts.delete(el)},
