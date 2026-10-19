@@ -47,11 +47,19 @@ and [client-managed sync](https://docs.ankiweb.net/manual/syncing).
   dialog: text-only hostile preview, original saved occurrence after edit, real
   serialized download and explicit repeated download. Isolated jsdom runtime only:
   `NODE_PATH=/tmp/uberlang-anki-dom/node_modules node scripts/check-anki-export-dom.mjs`.
-- Real in-app Chromium: dialog at 1280×900 and390×844, opening/cancel/Escape/focus
+- Real in-app Chromium: dialog at 1280×900 and 390×844, opening/cancel/Escape/focus
   return, actual TXT download and repeat warning. Narrow dialog client/scroll width
-  350 px, page width390 px. Existing tool/tree controls and report buttons remain.
+  350 px, page width 390 px. Existing tool/tree controls and report buttons remain.
 - The built page retains exactly the original self-only connect-src CSP. No
   direct-connection UI exists. No real Anki service was contacted or configured.
 - [Desktop evidence](assets/anki-export/desktop.jpg) and
   [narrow evidence](assets/anki-export/mobile.jpg). These are local captures, not
   proof of deployment or actual browser zoom200.
+
+Independent read-only review of cdafab5..34990bc41d6f9ea6929525e7e7d8fa23fc80b6d0
+completed with no actionable findings. The reviewer confirmed this candidate has
+no ancestry or source dependency on declutter and recommends its separate release.
+The final documentation-only update records that result; executable sources remain
+identical to 614ca02. All six theme/size states (Tokyo, Light, Graphite × 1280/390 px)
+were also checked in the real in-app browser: page width equals viewport and dialog
+scroll/client widths match. No native zoom or Anki connectivity claim is made.
