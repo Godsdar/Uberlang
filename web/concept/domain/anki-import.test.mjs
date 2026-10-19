@@ -75,3 +75,41 @@ test('Zstd allocation preflight rejects huge windows, truncated frames and conca
   assert.throws(() => expandZstd(data.subarray(0, data.length-1)))
   assert.throws(() => expandZstd(new Uint8Array([...data,...data])), /Zstandard/)
 })
+
+test('empty mapped words are counted and unmatched source fields remain available', async () => {
+  const batch = parseText(strToU8('one\tcontext\tanswer\textra\n\tcontext two\tanswer two\textra two'), 'notes.tsv')
+  const result = await mappedNotes(batch, mapping(batch), new Set(['0', '1']))
+  assert.equal(result.empty, 1); assert.equal(result.notes.length, 1)
+  assert.equal(result.notes[0].fields[3], 'extra')
+})
+test('IndexedDB batches recheck concurrent duplicates and roll back on capacity errors', async () => {
+  const { indexedDB } = await import('fake-indexeddb'); globalThis.indexedDB = indexedDB
+  const { listLibrary, saveLibrary, removeLibrary } = await import('../import/library.ts')
+  const batch = parseApkg(apkg(SQL), SQL, 'synthetic.apkg')
+  const { notes } = await mappedNotes(batch, mapping(batch), new Set(batch.notes.map(n => n.id)))
+  const results = await Promise.all([saveLibrary(notes, false), saveLibrary(notes, false)])
+  assert.equal(results.reduce((sum, p) => sum + p.added, 0), 3)
+  assert.equal(results.reduce((sum, p) => sum + p.skipped, 0), 3)
+  assert.equal((await listLibrary()).length, 3)
+  await assert.rejects(saveLibrary([{ ...notes[0], key: 'over-capacity', answer: 'x'.repeat(16_000_001) }], false), /limit/)
+  assert.equal((await listLibrary()).length, 3, 'failed batch must not partially write')
+  await saveLibrary([{ ...notes[0], answer: 'new answer', decks: ['Updated::Deck'] }], true)
+  assert.equal((await listLibrary()).find(n => n.key === notes[0].key).answer, 'new answer')
+  await removeLibrary(notes[0].key); assert.equal((await listLibrary()).length, 2)
+})
+
+test('worker cancellation, timeout and file budget terminate parsing without a result', async t => {
+  const { readDeck } = await import('../import/client.ts')
+  const workers = []
+  class WorkerFixture { terminated = false; constructor() { workers.push(this) } postMessage() {} terminate() { this.terminated = true } }
+  const original = globalThis.Worker; globalThis.Worker = WorkerFixture
+  t.after(() => { globalThis.Worker = original })
+  const file = { name: 'fixture.apkg', size: 10, arrayBuffer: async () => new ArrayBuffer(10) }
+  const signal = new AbortController(), pending = readDeck(file, signal.signal)
+  signal.abort(); await assert.rejects(pending, { name: 'AbortError' }); assert.equal(workers[0].terminated, true)
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const expired = readDeck(file, new AbortController().signal)
+  t.mock.timers.tick(20000); await assert.rejects(expired, /20 seconds/); assert.equal(workers[1].terminated, true)
+  await assert.rejects(readDeck({ ...file, size: 33 * 1024 * 1024 }, new AbortController().signal), /32 MiB/)
+  assert.equal(workers.length, 2)
+})

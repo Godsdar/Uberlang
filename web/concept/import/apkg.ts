@@ -57,11 +57,12 @@ export function parseDatabase(bytes: Uint8Array, version: number, SQL: SqlJsStat
     let total = 0, unassigned = 0
     const ids = new Set<string>()
     const notes: ImportNote[] = rows(db, 'SELECT CAST(id AS TEXT), guid, CAST(mid AS TEXT), tags, flds FROM notes NOT INDEXED', LIMIT.notes).map(([id, guid, mid, tags, flds]) => {
-      const type = types.get(str(mid)), raw = str(flds).split('\x1f')
+      const type = types.get(str(mid)), raw = str(flds).split('\x1f', LIMIT.fields + 1)
       if (!type || !type.fields.length || raw.length !== type.fields.length) fail('A note does not match its note type. Nothing was dropped; export it again.')
       const fields = raw.map(field => plainField(field, true)); total += fields.reduce((n, f) => n + f.length, 0)
       if (total > LIMIT.text) fail('Text exceeds the local 8-million-character limit. Export a smaller deck.')
       const deck = memberships.get(str(id)); if (!deck) unassigned++
+      if (ids.has(str(id))) fail('Repeated note IDs in this database. Export it again.')
       ids.add(str(id))
       return { id: str(id), guid: cleanLabel(guid), type: str(mid), fields, decks: deck || ['Unassigned'], tags: tagsFrom(str(tags)) }
     })
