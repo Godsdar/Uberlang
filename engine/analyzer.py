@@ -4,7 +4,7 @@ spaCy English dependencies are not Universal Dependencies. Preserve their labels
 No network call or model download is allowed during a request.
 """
 from functools import lru_cache
-import re
+import unicodedata
 from threading import BoundedSemaphore
 
 ENGINE_VERSION = '3.8.7'
@@ -20,6 +20,36 @@ class AnalysisError(Exception):
         self.status = status
 
 
+def word_count(text):
+    # Same categories/apostrophes as the browser/Node policy; combining marks
+    # stay inside a word without normalizing the submitted source.
+    count, inside = 0, False
+    for index, char in enumerate(text):
+        category = unicodedata.category(char)[0]
+        if category in ('L', 'N'):
+            if not inside:
+                count += 1
+            inside = True
+        elif category == 'M' and inside:
+            continue
+        elif char in "'’" and inside and index + 1 < len(text) and unicodedata.category(text[index + 1])[0] in ('L', 'N'):
+            continue
+        else:
+            inside = False
+    return count
+
+
+def validate_language(language, text):
+    if language != 'en':
+        raise AnalysisError('UNSUPPORTED_LANGUAGE', 'Only the English grammar model is installed.', 422)
+    letters = [char for char in text if unicodedata.category(char).startswith('L')]
+    if not letters:
+        raise AnalysisError('NO_LANGUAGE_CONTENT', 'Choose a sentence containing words.', 422)
+    if any(not (0x41 <= ord(char) <= 0x5A or 0x61 <= ord(char) <= 0x7A
+                or 0xC0 <= ord(char) <= 0x24F or 0x1E00 <= ord(char) <= 0x1EFF) for char in letters):
+        raise AnalysisError('UNSUPPORTED_SCRIPT', 'This English pilot accepts only basic and extended Latin letters.', 422)
+
+
 def validate_text(text):
     if not isinstance(text, str):
         raise AnalysisError('INVALID_TEXT', 'Text must be a string.')
@@ -27,7 +57,7 @@ def validate_text(text):
         length = len(text.encode('utf-16-le')) // 2
     except UnicodeEncodeError:
         raise AnalysisError('INVALID_TEXT', 'Text contains invalid Unicode.') from None
-    if not text.strip() or length > 500 or len(re.findall(r"[^\W_]+(?:['’][^\W_]+)*", text)) > 50:
+    if not text.strip() or length > 500 or word_count(text) > 50:
         raise AnalysisError('TEXT_LIMIT', 'Use one sentence, at most 500 UTF-16 units and 50 words.')
 
 
@@ -77,8 +107,9 @@ def validate_tokens(text: str, tokens: list):
             node = tokens[node - 1]['head']
 
 
-def analyze(text: str) -> dict:
+def analyze(text: str, language: str = 'en') -> dict:
     validate_text(text)
+    validate_language(language, text)
     if not _CAPACITY.acquire(blocking=False):
         raise AnalysisError('BUSY', 'The grammar engine is busy. Try again shortly.', 503)
     try:
@@ -105,7 +136,7 @@ def analyze(text: str) -> dict:
             })
         validate_tokens(text, tokens)
         return {
-            'tokens': tokens, 'engine': 'spaCy', 'version': ENGINE_VERSION,
+            'language': language, 'tokens': tokens, 'engine': 'spaCy', 'version': ENGINE_VERSION,
             'model': MODEL_NAME, 'modelVersion': MODEL_VERSION,
             'dependencyScheme': 'spaCy English (OntoNotes-style)', 'license': 'MIT',
             'source': 'https://spacy.io/models/en#en_core_web_sm',

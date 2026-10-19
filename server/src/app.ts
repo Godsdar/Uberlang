@@ -1,3 +1,4 @@
+import { analysisCapabilities, analysisLimits } from '../../src/shared/analysis-policy.ts'
 import type { HistoryTarget } from '../../src/shared/etymology.ts'
 import { createHash, randomUUID, timingSafeEqual } from 'node:crypto'
 import Fastify, { LogController } from 'fastify'
@@ -74,13 +75,13 @@ export async function buildApp(config: Config, dependencies: {
   app.setNotFoundHandler((request, reply) => reply.code(404).send({ requestId: request.id, error: { code: 'NOT_FOUND', message: 'Route not found' } }))
   app.get('/health/live', { config: { rateLimit: false }, schema: { hide: true } }, async () => ({ status: 'ok' }))
   app.get('/health/ready', { config: { rateLimit: false }, schema: { hide: true } }, async (_request, reply) => reply.code(draining ? 503 : 200).send({ status: draining ? 'draining' : 'ready' }))
-  app.get('/v1/capabilities', { schema: { security: apiSecurity } }, async () => ({ version: 1, analysis: { engine: parse ? 'spacy' : 'curated-examples', liveGrammar: Boolean(parse), language: 'en' }, translation: { enabled: config.translationEnabled, sendsTextToProvider: true }, limits: { utf16Units: 500, words: 50 }, persistence: false }))
+  app.get('/v1/capabilities', { schema: { security: apiSecurity } }, async () => ({ version: 1, analysis: analysisCapabilities(Boolean(parse)), translation: { enabled: config.translationEnabled, sendsTextToProvider: true }, limits: analysisLimits, persistence: false }))
   app.get('/v1/openapi.json', { schema: { hide: true } }, async () => app.swagger())
   app.post<{ Body: AnalysisInput }>('/v1/analysis', { schema: { security: apiSecurity, body: analysisSchema, response: { 200: analysisResponse, ...errors } } }, async request => {
     const prepared = analyzeSelection(request.body)
     if (!parse) return { requestId: request.id, ...prepared }
     const parent = AbortSignal.any([shutdown.signal, cancellations.get(request)!.signal])
-    const raw = await parsing.run(signal => parse(request.body.text, signal), parent)
+    const raw = await parsing.run(signal => parse(request.body.text, signal, request.body.language), parent)
     return { requestId: request.id, ...liveResult(request.body, raw) }
   })
   app.post<{ Body: LexiconInput }>('/v1/lexicon', { schema: { security: apiSecurity, body: lexiconSchema } }, async request => {

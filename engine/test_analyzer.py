@@ -1,7 +1,9 @@
 import copy
+import json
+from pathlib import Path
 import unittest
 from unittest.mock import patch
-from engine.analyzer import AnalysisError, analyze, validate_tokens, _CAPACITY
+from engine.analyzer import AnalysisError, analyze, validate_text, validate_language, word_count, validate_tokens, _CAPACITY
 
 
 CORPUS = [
@@ -18,6 +20,32 @@ CORPUS = [
 
 
 class EngineTests(unittest.TestCase):
+    def test_shared_language_corpus(self):
+        corpus = json.loads((Path(__file__).parent.parent / 'src/data/analysis-corpus.json').read_text())
+        for item in corpus:
+            with self.subTest(case=item['id']):
+                if item['expected'] == 'accepted':
+                    validate_language(item['language'], item['text'])
+                    if not item.get('limitation'):
+                        result = analyze(item['text'], item['language'])
+                        self.assertEqual(result['language'], 'en')
+                        validate_tokens(item['text'], result['tokens'])
+                else:
+                    with patch('engine.analyzer._model') as model:
+                        with self.assertRaises(AnalysisError) as error:
+                            analyze(item['text'], item['language'])
+                        self.assertEqual(error.exception.code, item['expected'])
+                        model.assert_not_called()
+
+    def test_combining_marks_and_exact_limits(self):
+        self.assertEqual(word_count("café l'été 42"), 3)
+        for text in ['a' * 500, 'é ' * 50]:
+            validate_text(text)
+        for text in ['a' * 501, 'é ' * 51]:
+            with self.assertRaises(AnalysisError) as error:
+                validate_text(text)
+            self.assertEqual(error.exception.code, 'TEXT_LIMIT')
+
     def test_real_model_corpus_has_valid_slices_and_heads(self):
         for text in CORPUS:
             with self.subTest(text=text):

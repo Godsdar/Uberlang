@@ -9,7 +9,7 @@ from engine.http_handler import EngineHandler
 KEY = 'local-unit-test-only-credential-123456789'
 
 
-def request(body=b'{"text":"She reads."}', headers=None, key=KEY):
+def request(body=b'{"text":"She reads.","language":"en"}', headers=None, key=KEY):
     handler = object.__new__(EngineHandler)
     handler.headers = Message()
     defaults = {'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json', 'Content-Length': str(len(body))}
@@ -46,6 +46,13 @@ class HttpTests(unittest.TestCase):
         for raw, headers, expected in cases:
             with self.subTest(headers=headers): self.assertEqual(request(raw, headers)[0], expected)
 
+    def test_explicit_language_required_and_wrong_script_rejected(self):
+        self.assertEqual(request(b'{"text":"She reads."}')[0], 400)
+        for language, expected in [('ru', 'UNSUPPORTED_LANGUAGE'), ('en', 'UNSUPPORTED_SCRIPT')]:
+            status, body = request(json.dumps({'text': 'Мама читает книгу.', 'language': language}).encode())
+            self.assertEqual(status, 422)
+            self.assertEqual(body['error']['code'], expected)
+
     def test_real_model_success(self):
         status, body = request()
         self.assertEqual(status, 200)
@@ -53,7 +60,7 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(body['tokens'][1]['lemma'], 'read')
 
     def test_multi_sentence_error_and_sensitive_exception_sanitized(self):
-        self.assertEqual(request(b'{"text":"She reads. He listens."}')[0], 422)
+        self.assertEqual(request(b'{"text":"She reads. He listens.","language":"en"}')[0], 422)
         with patch('engine.http_handler.analyze', side_effect=RuntimeError('private-user-text')):
             status, body = request()
         self.assertEqual(status, 503)
