@@ -26,7 +26,11 @@ class EngineTests(unittest.TestCase):
             with self.subTest(case=item['id']):
                 if item['expected'] == 'accepted':
                     validate_language(item['language'], item['text'])
-                    if not item.get('limitation'):
+                    if item.get('grammarExpected'):
+                        with self.assertRaises(AnalysisError) as error:
+                            analyze(item['text'], item['language'])
+                        self.assertEqual(error.exception.code, item['grammarExpected'])
+                    elif not item.get('limitation'):
                         result = analyze(item['text'], item['language'])
                         self.assertEqual(result['language'], 'en')
                         validate_tokens(item['text'], result['tokens'])

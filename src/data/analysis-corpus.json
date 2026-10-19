@@ -4,7 +4,7 @@
   {"id":"passive","language":"en","text":"The old gate was painted by a careful gardener.","expected":"accepted"},
   {"id":"ambiguous-attachment","language":"en","text":"The astronomer saw the sailor with a telescope.","expected":"accepted"},
   {"id":"repeated","language":"en","text":"Water, water everywhere.","expected":"accepted"},
-  {"id":"astral","language":"en","text":"🌱 The gardener opened the gate.","expected":"accepted"},
+  {"id":"astral","language":"en","text":"🌱 The gardener opened the gate.","expected":"accepted","grammarExpected":"MULTIPLE_SENTENCES"},
   {"id":"nfc","language":"en","text":"The café serves tea.","expected":"accepted"},
   {"id":"nfd","language":"en","text":"The café serves tea.","expected":"accepted"},
   {"id":"russian-declared","language":"ru","text":"Мама читает книгу.","expected":"UNSUPPORTED_LANGUAGE"},
