@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict'
+import { setup } from './check-export-harness.mjs'
+const h = setup('?q=water%20water#direct')
+h.click('[data-action="analyze"]'); h.click('[data-start="6"]'); h.click('[data-action="save"]')
+h.w.openImportedEntry({ text: 'The water is clear.', word: 'water', language: 'en', source: { filename: 'synthetic.apkg', guid: 'fake-guid', decks: ['English::Nature'], tags: ['nature'] } })
+assert.equal(h.q('[data-ui="input"]').value, 'The water is clear.')
+assert.equal(h.q('[data-start="4"]').getAttribute('aria-pressed'), 'true')
+assert.match(h.q('[data-ui="status"]').textContent, /English::Nature.*synthetic.apkg/)
+assert.equal(h.q('.lp-shell').hidden, false)
+assert.equal(h.requests.length, 0, 'opening a local note must never submit analysis')
+assert.equal(h.document.activeElement, h.q('[data-ui="input"]'))
+h.click('[data-anki-note]')
+assert.equal(h.q('[name="context"]').value, 'water water', 'an old saved occurrence stays immutable')
+h.click('[data-anki-close]')
+h.w.openImportedEntry({ text: 'agua', word: 'agua', language: 'es', source: {} })
+assert.equal(h.q('[data-ui="input"]').value, 'The water is clear.', 'non-English entries cannot enter the English contract')
+h.dom.window.close()
+console.log('PASS imported entry is local, focusable, language-guarded and preserves previous saved occurrences')

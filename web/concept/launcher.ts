@@ -79,4 +79,5 @@ export function mountLauncher(app: HTMLElement, options: LauncherOptions) {
   app.addEventListener('keydown', event => { if (event.key === 'Escape' && !launchpad.hidden) { event.preventDefault(); close() } })
   document.querySelector('.lp-skip-link')?.addEventListener('click', () => { if (!launchpad.hidden) close(false) })
   if (!options.directEntry) open(false)
+  return { showNotebook: () => close(false) }
 }

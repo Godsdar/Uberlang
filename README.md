@@ -131,7 +131,7 @@ UTF-8 TXT for Anki Desktop 2.1.54+: map Front/Back/Tags, keep HTML off and selec
 **Ignore duplicates** before importing. A download or repeated-export warning
 does not confirm membership in your Anki collection.
 
-This release candidate is based directly on published main. It includes no
+The TXT export was built directly on published main. Its scope includes no
 unpublished declutter work, AnkiConnect connection, API-key entry or localhost/CSP
 permission change. The broader desktop adapter exists in a separate development
 branch and is verified with mocks only; real installed-release and HTTPS-origin
@@ -141,6 +141,36 @@ Uberlang does not implement direct AnkiWeb sync or APKG export.
 See [scope and verification](docs/ANKI_EXPORT_MVP.md).
 
 [![Anki draft on the published notebook base](docs/assets/anki-export/desktop.jpg)](docs/assets/anki-export/desktop.jpg)
+
+## Explore an Anki deck in Uberlang
+
+Choose **My decks → Import a deck** and select an `.apkg` or UTF-8 Notes in Plain
+Text (`.txt`/`.tsv`). Legacy schema 11 packages and modern schema 18 / Zstandard
+packages are read locally in a cancellable worker. No Anki installation or
+connection is needed. This implementation is awaiting coordinated publication.
+
+Map word/expression, optional example and answer for each note type, then set its
+language. Filter by deck, tag or text; select notes and review the import counts.
+Only 20 previews appear at a time. Every sanitized field, nested deck membership,
+tag and source GUID is retained in a separate local browser library. Existing
+identities are skipped by default; explicit updates replace the local copy.
+
+Open one English example in the notebook, or expand **Explore word history** for
+a supported language. Opening an example sends nothing. A history lookup sends
+only the word and language after clicking Look up; sentence analysis still needs
+its own explicit action. Mixed languages in one note type require separate
+selections/imports. Grammar remains English-only.
+
+Limits: 32 MiB file/SQLite, 5,000 archive entries, 10,000 notes; export without
+media or split large decks. Media, card templates, formatting and review schedules
+are omitted with warnings; cloze answers become plain text. Unknown formats and
+unsafe/corrupt packages are rejected. No scheduling transfer or two-way sync.
+Storage belongs to this browser and site origin, may be cleared by the browser,
+and is not a backup: keep the original file.
+
+See the [format/safety specification](docs/ANKI_IMPORT_MVP.md),
+[architecture decision](docs/decisions/ADR-024-local-anki-import.md) and
+[synthetic tests and browser QA](docs/reviews/2026-10-19-anki-import.md).
 
 ## What works today
 
