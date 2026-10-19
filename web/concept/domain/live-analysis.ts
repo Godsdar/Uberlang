@@ -1,9 +1,10 @@
+import { languageIssue, textIssue } from '../../../src/shared/analysis-policy.ts'
 import type { Token } from './graphs'
 import type { Sentence } from './selection'
 
 export interface AnalysisRequest {
   documentId: string
-  language: 'en'
+  language: string
   text: string
   contextStart: number
   selection: { start: number; end: number }
@@ -13,7 +14,7 @@ export interface LiveContext {
   example: Sentence
   offset: number
   status: 'live' | 'prepared'
-  provenance: { engine: string; model?: string; version: string; live: boolean }
+  provenance: { language?: string; engine: string; model?: string; version: string; live: boolean }
   warnings: string[]
   meaning?: { kind: 'structure'; explanation: string; caveat: string }
 }
@@ -24,7 +25,7 @@ const boundary = (text: string, index: number) =>
   !(/[\uD800-\uDBFF]/.test(text[index - 1] ?? '') && /[\uDC00-\uDFFF]/.test(text[index] ?? ''))
 
 /** Send one complete sentence, never silently truncate a long document or selection. */
-export function sentenceRequest(documentId: string, document: string, start: number, end: number): AnalysisRequest {
+export function sentenceRequest(documentId: string, document: string, start: number, end: number, language: string): AnalysisRequest {
   if (!document.trim() || !Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < start || end > document.length || !boundary(document, start) || !boundary(document, end)) {
     throw new Error('Select a word or place the cursor in an English sentence.')
   }
@@ -37,10 +38,9 @@ export function sentenceRequest(documentId: string, document: string, start: num
     const contextStart = segment.index + segment.segment.indexOf(text)
     const contextEnd = contextStart + text.length
     if (start !== end && (start < contextStart || end > contextEnd)) throw new Error('Select words within one sentence. Analyze other sentences separately.')
-    if (!text || text.length > 500 || (text.match(/[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*/gu)?.length ?? 0) > 50) {
-      throw new Error('Choose a shorter sentence: up to 50 words and 500 characters. Your text has not been sent.')
-    }
-    return { documentId, language: 'en', text, contextStart,
+    const issue = textIssue(text) ?? languageIssue(language, text)
+    if (issue) throw new Error(`${issue.message} Your text has not been sent.`)
+    return { documentId, language, text, contextStart,
       selection: start === end ? { start: 0, end: text.length } : { start: start - contextStart, end: end - contextStart } }
   }
   throw new Error('Place the cursor inside a sentence to analyze it.')
@@ -49,10 +49,10 @@ export function sentenceRequest(documentId: string, document: string, start: num
 /** Reject foreign/stale envelopes and malformed graphs before any SVG traversal. */
 export function parseAnalysis(value: unknown, request: AnalysisRequest): LiveContext {
   const invalid = () => new Error('The analysis service returned an invalid result. Please try again.')
-  if (!record(value) || value.schemaVersion !== 1 || value.documentId !== request.documentId || value.contextStart !== request.contextStart || value.coordinateSystem !== 'UTF-16, end-exclusive' || !record(value.selection) || value.selection.start !== request.selection.start || value.selection.end !== request.selection.end || value.selection.absoluteStart !== request.contextStart + request.selection.start || value.selection.absoluteEnd !== request.contextStart + request.selection.end || value.selection.text !== request.text.slice(request.selection.start, request.selection.end) || !record(value.layers) || !record(value.layers.grammar)) throw invalid()
+  if (!record(value) || value.schemaVersion !== 1 || value.language !== request.language || value.documentId !== request.documentId || value.contextStart !== request.contextStart || value.coordinateSystem !== 'UTF-16, end-exclusive' || !record(value.selection) || value.selection.start !== request.selection.start || value.selection.end !== request.selection.end || value.selection.absoluteStart !== request.contextStart + request.selection.start || value.selection.absoluteEnd !== request.contextStart + request.selection.end || value.selection.text !== request.text.slice(request.selection.start, request.selection.end) || !record(value.layers) || !record(value.layers.grammar)) throw invalid()
   const grammar = value.layers.grammar
-  if (grammar.status !== 'live' && grammar.status !== 'prepared') throw new Error('Grammar analysis is unavailable right now. Prepared examples still work offline; you can retry this sentence.')
-  if (!record(grammar.provenance) || typeof grammar.provenance.engine !== 'string' || !grammar.provenance.engine || typeof grammar.provenance.version !== 'string' || typeof grammar.provenance.live !== 'boolean' || grammar.provenance.live !== (grammar.status === 'live') || (grammar.provenance.model !== undefined && typeof grammar.provenance.model !== 'string') || !record(grammar.data) || grammar.data.scope !== 'sentence' || !Array.isArray(grammar.data.tokens) || grammar.data.tokens.length < 1 || grammar.data.tokens.length > 200) throw invalid()
+  if (grammar.status !== 'live' && grammar.status !== 'prepared') throw new Error('Grammar is unavailable for this sentence on this deployment. Only exact prepared examples work offline; a live engine is required for new text.')
+  if (!record(grammar.provenance) || (grammar.status === 'live' && grammar.provenance.language !== request.language) || typeof grammar.provenance.engine !== 'string' || !grammar.provenance.engine || typeof grammar.provenance.version !== 'string' || typeof grammar.provenance.live !== 'boolean' || grammar.provenance.live !== (grammar.status === 'live') || (grammar.provenance.model !== undefined && typeof grammar.provenance.model !== 'string') || !record(grammar.data) || grammar.data.scope !== 'sentence' || !Array.isArray(grammar.data.tokens) || grammar.data.tokens.length < 1 || grammar.data.tokens.length > 200) throw invalid()
   let previousEnd = 0
   const tokens: Token[] = grammar.data.tokens.map((item: unknown, index: number) => {
     if (!record(item) || item.id !== index + 1 || typeof item.text !== 'string' || !item.text || !Number.isInteger(item.start) || !Number.isInteger(item.end) || !Number.isInteger(item.head) || typeof item.lemma !== 'string' || typeof item.pos !== 'string' || typeof item.relation !== 'string' || !record(item.features) || Object.values(item.features).some(v => typeof v !== 'string') || (item.explanation !== undefined && typeof item.explanation !== 'string')) throw invalid()

@@ -75,3 +75,9 @@ test('prepared explanations are labeled and unknown meaning stays blank', () => 
   assert.equal(createAnkiDraft({ ...note, explanationSource: 'prepared', explanation: 'A prepared explanation.' }, text).answer, 'Prepared explanation: A prepared explanation.')
   assert.equal(createAnkiDraft(note, text).answer, '')
 })
+
+test('declared source language survives the Anki draft; legacy English notes remain compatible',()=>{
+  assert.equal(createAnkiDraft({...note,language:'ru'},text).language,'ru')
+  assert.equal(createAnkiDraft({...note,language:'und'},text).language,'und')
+  assert.equal(createAnkiDraft(note,text).language,'en')
+})

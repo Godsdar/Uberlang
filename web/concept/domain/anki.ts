@@ -1,5 +1,6 @@
 /** Portable Anki text import. This module never contacts or mutates a collection. */
 export interface AnkiSourceNote {
+  language?: string
   selectedText: string
   start: number
   end: number
@@ -53,7 +54,7 @@ export function createAnkiDraft(note: AnkiSourceNote, document: string): AnkiDra
   ].filter(Boolean).join('\n')
   const history = note.origin ? [note.origin.note, ...note.origin.nodes.map(node => `${node.label} (${node.lang})${node.relation ? ' · ' + node.relation : ''}${node.historyNote ? ' · ' + node.historyNote : ''}${node.skipped?.length ? ' · Condensed stages: ' + node.skipped.join(' → ') : ''} — ${node.source}`)].join('\n') : ''
   return {
-    word: note.selectedText, language: 'en',
+    word: note.selectedText, language: note.language ?? 'en',
     context: note.context === note.selectedText ? sentenceContext(document, note.start, note.end) : note.context,
     // A model's grammar reading and dictionary alternatives are not a chosen meaning.
     answer: note.explanationSource === 'prepared' && note.explanation ? `Prepared explanation: ${note.explanation}` : '',

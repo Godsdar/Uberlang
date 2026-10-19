@@ -1,3 +1,6 @@
+import { analysisLimits, languageChoices, languageIssue, wordCount } from '../src/shared/analysis-policy.ts'
+import { analysisExamples } from '../web/concept/domain/analysis-examples.ts'
+import { analysisError } from '../web/concept/domain/analysis-errors.ts'
 // Controller integration checks, not a browser/layout test.
 // Run with NODE_PATH pointing to a temporary jsdom installation (see validation doc).
 import assert from 'node:assert/strict'
@@ -32,7 +35,7 @@ function setup(search = '') {
   w.HTMLElement.prototype.scrollIntoView=()=>{}
   w.scrollTo=()=>{}
   w.HTMLElement.prototype.animate=()=>{}
-  Object.assign(w, {NotebookPanels,passageFromLink,lexicalMatches,parseLexicon,selectedLexicalWord,familyLayout,AnalysisRequestGate,parseAnalysis,readingRanges,sentenceRequest,exportDocuments,resolveSelection,conceptData,structuredClone,AbortController,TextEncoder,ankiFields,createAnkiDraft,serializeAnki,ankiIdentity,
+  Object.assign(w, {analysisLimits,languageChoices,languageIssue,wordCount,analysisExamples,analysisError,NotebookPanels,passageFromLink,lexicalMatches,parseLexicon,selectedLexicalWord,familyLayout,AnalysisRequestGate,parseAnalysis,readingRanges,sentenceRequest,exportDocuments,resolveSelection,conceptData,structuredClone,AbortController,TextEncoder,ankiFields,createAnkiDraft,serializeAnki,ankiIdentity,
     mountRootsBackup:()=>{},ResizeObserver:class {observe(){}},requestAnimationFrame:f=>f(),
     mountFamily:(el,props)=>{if(!mounts.has(el))mounts.set(el,{kind:'family',props,localState:{}})},
     mountSyntax:(el,props)=>{if(!mounts.has(el))mounts.set(el,{kind:'syntax',props,localState:{}})},
