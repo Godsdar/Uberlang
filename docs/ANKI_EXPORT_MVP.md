@@ -38,3 +38,20 @@ release depends on technical verification, not a new authorization ritual.
 
 Sources: [Anki text import](https://docs.ankiweb.net/manual/importing/text-files)
 and [client-managed sync](https://docs.ankiweb.net/manual/syncing).
+
+## Checks performed for this candidate
+
+- npm test: 45 core/notebook + 34 server tests passed.
+- npm run typecheck (node/web/server) and build:web passed.
+- Three scenarios execute the actual original-main notebook controller and new
+  dialog: text-only hostile preview, original saved occurrence after edit, real
+  serialized download and explicit repeated download. Isolated jsdom runtime only:
+  `NODE_PATH=/tmp/uberlang-anki-dom/node_modules node scripts/check-anki-export-dom.mjs`.
+- Real in-app Chromium: dialog at 1280×900 and390×844, opening/cancel/Escape/focus
+  return, actual TXT download and repeat warning. Narrow dialog client/scroll width
+  350 px, page width390 px. Existing tool/tree controls and report buttons remain.
+- The built page retains exactly the original self-only connect-src CSP. No
+  direct-connection UI exists. No real Anki service was contacted or configured.
+- [Desktop evidence](assets/anki-export/desktop.jpg) and
+  [narrow evidence](assets/anki-export/mobile.jpg). These are local captures, not
+  proof of deployment or actual browser zoom200.
