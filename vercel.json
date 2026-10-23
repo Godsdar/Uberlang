@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "buildCommand": "npm test && npm run typecheck && npm run build:web && npm run build:gateway",
+  "buildCommand": "npm run build:web && npm run build:gateway",
   "outputDirectory": "web/dist",
   "installCommand": "npm ci",
   "functions": {

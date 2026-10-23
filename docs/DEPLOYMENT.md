@@ -7,7 +7,7 @@ The branded domain is attached to the existing `lingua` project (same project ID
 The former `lingua-lac.vercel.app` address remains available for compatibility.
 Old `/concept/` and `/concept/index.html` links redirect to the notebook.
 
-`vercel.json` installs with `npm ci`, runs tests/typechecks and builds the web
+`vercel.json` installs with `npm ci` and builds the web
 app plus Node gateway. It deploys static `web/dist`, public analysis/lexicon/health
 functions and the private Python model. No paid inference service is used.
 GitHub CI checks tests, types, all surfaces, the Python model and Docker images.
@@ -27,15 +27,15 @@ separate configuration step. Do not commit `.vercel/`, `.env*`, or access tokens
 
 Mirror: https://godsdar.github.io/Uberlang/
 The repository is named `Godsdar/Uberlang`; use that capitalization in Pages paths.
-The Pages workflow runs tests and typechecking before uploading its web build.
+The Pages workflow builds and uploads the web app. Tests/types run in independent GitHub CI.
 
-The notebook entry is `web/index.html`; `web/concept/index.html` builds only a compatibility redirect. The old browser adapter and its React/MUI bundle have been removed. Vercel runs tests and typechecking before building; GitHub Pages retains its own equivalent gates.
+The notebook entry is `web/index.html`; `web/concept/index.html` builds only a compatibility redirect. The old browser adapter and its React/MUI bundle have been removed. Vercel and Pages do not repeat CI tests/types (ADR-026). Run local checks before publishing; asynchronous CI may finish after deployment.
 Relative assets work on Vercel’s root and the Pages repository prefix.
 
 ## Verification
 
 Check `/`, `/index.html`, `/concept/`, `/concept/index.html`, `?q=` links, favicon, theme selection, Reading/Study switching, and a
-report download. Concept notes are session-only and disappear when reloading.
+report download. Verify a saved discovery restores its selected node, branches, zoom and notes after reload, plus JSON backup/restore. Context session notes remain temporary.
 
 ## Service backend
 
