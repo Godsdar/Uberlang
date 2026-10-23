@@ -1,0 +1,40 @@
+/* One close-fitting focus ring; programmatic reading targets are not controls. */
+#lingua-concept .lp :is(button,a,summary,input,textarea,select,[tabindex]):focus-visible {
+  outline:2px solid var(--lp-accent);
+  outline-offset:2px;
+}
+#lingua-concept .lp .lp-research :is(input,textarea,select):focus-visible,
+#lingua-concept .lp .lp-anki :is(input,textarea,select):focus-visible {
+  outline:2px solid var(--lp-accent);
+  outline-offset:-1px;
+  border-color:var(--lp-accent);
+}
+#lingua-concept .lp .lp-family-node:focus-visible {
+  outline:2px solid var(--lp-accent);
+  outline-offset:-1px;
+  border-color:var(--lp-accent);
+}
+#lingua-concept .lp :is(h2,aside)[tabindex="-1"]:focus { outline:none; }
+
+#lingua-concept .lp-language-picker{position:relative;width:240px;min-width:0;flex-shrink:0}
+#lingua-concept .lp-language-picker>label{margin-bottom:6px}
+#lingua-concept .lp-language-field{position:relative}
+#lingua-concept .lp .lp-language-field input{width:100%;padding-right:38px;cursor:pointer;border-radius:10px}
+#lingua-concept .lp-language-field svg{position:absolute;right:13px;top:50%;width:16px;height:16px;transform:translateY(-50%);pointer-events:none;fill:none;stroke:var(--lp-muted);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:transform 180ms ease}
+#lingua-concept .lp-language-field svg.is-open{transform:translateY(-50%) rotate(180deg)}
+#lingua-concept .lp-language-menu{position:absolute;z-index:12;top:calc(100% + 8px);right:0;width:340px;max-width:calc(100vw - 36px);padding:6px;background:var(--lp-bg);border:1px solid var(--lp-line);border-radius:14px;box-shadow:0 12px 36px #0003;animation:lp-language-open 140ms ease-out}
+#lingua-concept .lp-language-options{max-height:min(340px,42dvh);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--lp-line) transparent;padding:2px}
+#lingua-concept .lp-language-group{padding:14px 12px 6px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--lp-muted)}
+#lingua-concept .lp-language-option{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;box-sizing:border-box;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:14px;line-height:1.4;color:var(--lp-fg)}
+#lingua-concept .lp-language-option.is-active{background:var(--lp-soft);box-shadow:inset 2px 0 var(--lp-accent)}
+#lingua-concept .lp-language-option[aria-selected=true]{color:var(--lp-accent)}
+#lingua-concept .lp-language-menu p{padding:18px 12px;margin:0;color:var(--lp-muted);font-size:14px}
+#lingua-concept .lp-language-help{border-top:1px solid var(--lp-line);margin-top:6px;padding:10px 12px 5px;font-size:10px;color:var(--lp-muted)}
+@media(hover:hover){#lingua-concept .lp-language-option:hover{background:var(--lp-surface)}}
+@media(max-width:760px){
+  #lingua-concept .lp-language-picker{flex:1;width:auto}
+  #lingua-concept .lp-language-menu{left:0;right:auto}
+}
+@keyframes lp-language-open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){#lingua-concept .lp-language-menu{animation:none}#lingua-concept .lp-language-field svg{transition:none}}
+@media(forced-colors:active){#lingua-concept .lp-language-option.is-active{outline:2px solid Highlight;outline-offset:-2px}}

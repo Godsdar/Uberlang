@@ -29,7 +29,7 @@ Built with TypeScript, React, D3, and Motion.
 
 ## Start with a word
 
-Choose a language and **Explore**. The word and its cited forms are looked up
+Search or browse the grouped **Language** menu, then choose **Explore**. The word and its cited forms are looked up
 sequentially toward **Proto-Indo-European (PIE)**. Separate etymologies pause for
 your choice. Other origins, unsupported forms or missing evidence can end a
 branch earlier; the app never invents a PIE connection. **Stop tracing** keeps

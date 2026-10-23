@@ -1,3 +1,4 @@
+import { LanguagePicker } from './language-picker'
 import { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { FamilyExplorer } from './explorers'
@@ -147,7 +148,7 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
       void explore(target)
     }}>
       <label className="lp-search-word">A word to explore<input ref={search} value={term} maxLength={80} placeholder="computer, water, mother…" autoComplete="off" onChange={e => { cancel(); setChoices(null); setTerm(e.target.value); setContext(''); setStatus('') }} /></label>
-      <label>Language<select value={language} onChange={e => { cancel(); setChoices(null); setLanguage(e.target.value); setContext(''); setStatus('') }}>{Object.entries(historyLanguages).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select></label>
+      <LanguagePicker value={language} onChange={code => { cancel(); setChoices(null); setLanguage(code); setContext(''); setStatus('') }} />
       <button className="lp-main" type="submit" disabled={pending}>Explore →</button>
       {pending && <button type="button" onClick={() => { cancel(); setStatus('Lookup cancelled. Your tree is unchanged.') }}>Cancel</button>}
     </form>
