@@ -48,3 +48,15 @@ test('Anki from a German form in an English research tree keeps the form languag
  item.view={selectedId:node.id,endpoints:[node.id],pathOnly:false,zoom:1,scrollLeft:0,scrollTop:0}
  const card=discoveryCard(item);assert.equal(card.note.language,'de');assert.equal(card.note.selectedText,'Wasser');assert.equal(card.document.slice(card.note.start,card.note.end),'Wasser');assert.deepEqual(card.note.origin,item.family)
 })
+
+test('imported card answer is retained only for its original form', async () => {
+  const {createAnkiDraft} = await import('./anki.ts')
+  const {discoveryCard, validateDiscovery} = await import('./explorations.ts')
+  const {historyLanguages} = await import('../../../src/shared/etymology.ts')
+  const source='https://en.wiktionary.org/w/index.php?oldid=123'
+  const d = validateDiscovery({id:'imported',word:'árbol',language:'es',note:'',marks:{},updatedAt:'2026-10-23T00:00:00Z',context:'El árbol es alto',importedCard:{answer:'tree',deck:'Spanish',tags:'noun'},family:{direction:'sources',nodes:[{id:'root',parent:null,label:'árbol',lang:historyLanguages.es,lookup:{language:'es',term:'árbol'},source,skipped:[]},{id:'other',parent:'root',label:'árbol',lang:'French',lookup:{language:'fr',term:'árbol'},source,edgeSource:source,relation:'borrowed',skipped:[]}],note:'Partial',attribution:'Wiktionary CC BY-SA',verifiedOn:'2026-10-23'}})
+  const original=discoveryCard(d), draft=createAnkiDraft(original.note, original.document)
+  assert.equal(draft.answer,'tree');assert.equal(draft.deck,'Spanish');assert.equal(draft.context,'El árbol es alto')
+  const historical=discoveryCard({...d,view:{selectedId:'other'}})
+  assert.equal(createAnkiDraft(historical.note,historical.document).answer,'')
+})

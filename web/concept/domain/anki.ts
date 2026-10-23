@@ -1,5 +1,6 @@
 /** Portable Anki text import. This module never contacts or mutates a collection. */
 export interface AnkiSourceNote {
+  importedCard?: { answer: string; deck: string; tags: string }
   language?: string
   selectedText: string
   start: number
@@ -57,8 +58,8 @@ export function createAnkiDraft(note: AnkiSourceNote, document: string): AnkiDra
     word: note.selectedText, language: note.language ?? 'en',
     context: note.context === note.selectedText ? sentenceContext(document, note.start, note.end) : note.context,
     // A model's grammar reading and dictionary alternatives are not a chosen meaning.
-    answer: note.explanationSource === 'prepared' && note.explanation ? `Prepared explanation: ${note.explanation}` : '',
-    deck: 'Uberlang', tags: 'uberlang', includeHistory: false, evidence, history
+    answer: note.importedCard?.answer || (note.explanationSource === 'prepared' && note.explanation ? `Prepared explanation: ${note.explanation}` : ''),
+    deck: note.importedCard?.deck || 'Uberlang', tags: note.importedCard?.tags || 'uberlang', includeHistory: false, evidence, history
   }
 }
 
@@ -82,7 +83,7 @@ export function ankiFields(draft: AnkiDraft): { front: string; back: string; tag
   if (/[\r\n\t]/u.test(deck)) throw new Error('Deck must use one line without tabs.')
   if (draft.tags.length > 500 || /[\r\n\t]/u.test(draft.tags)) throw new Error('Tags must use one line, separated by spaces (maximum 500 characters).')
   const tags = [...new Set(draft.tags.trim().split(/ +/u).filter(Boolean))]
-  if (tags.some(tag => !/^[\p{L}\p{N}_:.-]+$/u.test(tag))) throw new Error('Use letters, numbers, underscores, colons, dots or hyphens in tags.')
+  if (tags.some(tag => !/^[\p{L}\p{N}_:.;-]+$/u.test(tag))) throw new Error('Use letters, numbers, underscores, colons, semicolons, dots or hyphens in tags.')
   return {
     front: `${word} [${language}]${sense ? ' · ' + sense : ''}\n${context}`,
     back: [answer, draft.includeHistory && draft.history ? `Word history\n${draft.history}` : '', draft.evidence].filter(Boolean).join('\n\n'),

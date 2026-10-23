@@ -323,3 +323,19 @@ not an implemented migration. It starts with measured bottlenecks, one bounded
 prototype and API/UTF-16/source compatibility gates. Python/spaCy stays behind
 its existing boundary initially; any replacement needs quality evidence and a
 safe rollback. It does not add services, dependencies or new language modes.
+
+### Sourced word families (ADR-028)
+
+Research preserves explicitly cited intermediate stages and word components,
+including Russian **брать** and **исследовать**. The tree distinguishes sources
+from cognates, descendants, borrowed descendants and derivatives. Use **Choose
+branches** to reveal loaded forms and **Load this form’s relatives** on an older
+form to expand into other languages. Separate etymologies still require a choice.
+Missing stages remain marked, and no universal PIE ancestry is assumed.
+
+**My decks** imports a local file; it cannot discover an installed Anki collection.
+Numbered example fields and Spanish/English note-type names provide reviewable
+mapping suggestions. Search works without accents. Open a note, edit its lookup
+word if needed, then explore with the original context. Exporting the original
+form retains its imported answer and deck suggestion for review. Historical forms
+start with an empty answer. Storage belongs to this browser and site address.

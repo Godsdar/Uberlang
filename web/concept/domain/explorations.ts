@@ -11,6 +11,7 @@ export interface Discovery {
   id: string; word: string; language: string; family: Family; view?: ExplorerView
   note: string; marks: Record<string, 'known' | 'curious'>; updatedAt: string
   context?: string
+  importedCard?: { answer: string; deck: string; tags: string }
 }
 export interface DiscoveryLibrary {
   version: 1; activeId: string | null; languages: string[]; discoveries: Discovery[]
@@ -37,7 +38,7 @@ export function validateFamily(value: unknown): Family {
       (n.reconstructed !== undefined && typeof n.reconstructed !== 'boolean') ||
       (n.condensed !== undefined && typeof n.condensed !== 'boolean') ||
       (n.historyState !== undefined && !['expanded', 'unavailable', 'cycle'].includes(String(n.historyState))) ||
-      (n.relation !== undefined && !['inherited', 'borrowed', 'derived', 'component', 'form-of'].includes(String(n.relation))) ||
+      (n.relation !== undefined && !['inherited', 'borrowed', 'derived', 'component', 'form-of', 'cognate', 'descendant', 'descendant-borrowed', 'related', 'derivative'].includes(String(n.relation))) ||
       (value.direction === 'sources' && n.parent !== null && (!n.relation || !n.edgeSource))) throw bad()
     if (n.lookup !== undefined) {
       if (!object(n.lookup) || typeof n.lookup.language !== 'string' || typeof n.lookup.term !== 'string' ||
@@ -56,6 +57,7 @@ export function validateDiscovery(value: unknown): Discovery {
     !string(value.language, 30) || !Object.hasOwn(historyLanguages, value.language) ||
     !string(value.note, 4000) || !string(value.updatedAt, 40) || !Number.isFinite(Date.parse(value.updatedAt)) ||
     !object(value.marks) || (value.context !== undefined && !string(value.context, 6000))) throw bad()
+  if (value.importedCard !== undefined && (!object(value.importedCard) || !string(value.importedCard.answer, 10000) || !string(value.importedCard.deck, 120) || !string(value.importedCard.tags, 500))) throw bad()
   const family = validateFamily(value.family), ids = new Set(family.nodes.map(n => n.id))
   if (Object.entries(value.marks).some(([id, mark]) => !ids.has(id) || !['known', 'curious'].includes(String(mark)))) throw bad()
   if (value.view !== undefined) {
@@ -111,7 +113,7 @@ export function discoveryCard(discovery: Discovery) {
   if (!language) throw new Error('Choose the language of this historical form before making a card.')
   return {
     document: node.label,
-    note: { language, selectedText: node.label, start: 0, end: node.label.length,
+    note: { ...(node.parent === null && discovery.importedCard ? { importedCard: discovery.importedCard } : {}), language, selectedText: node.label, start: 0, end: node.label.length,
       context: discovery.context || node.label, documentId: discovery.id,
       provenance: discovery.family.direction === 'sources' ? 'Sourced history · partial' : 'Prepared sourced family',
       origin: discovery.family }

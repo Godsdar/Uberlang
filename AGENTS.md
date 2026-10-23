@@ -26,7 +26,7 @@ reading, English grammar and Anki support that journey. Saved discovery storage
 is `uberlang.explorations.v1`; never clear or overwrite corrupt/unknown data.
 Keep the separate session-note, imported-deck and old roots contracts intact.
 Vercel/Pages build without duplicate CI checks (ADR-026); CI remains independent.
-Explicit research Explore traces cited roots toward PIE (ADR-027), pausing for
+Explicit research Explore traces cited roots and shows typed relatives (ADR-027/028), pausing for
 alternative etymologies and preserving partial evidence. Saved trees stay local
 until Continue tracing roots; never fabricate a PIE connection.
 
@@ -98,7 +98,7 @@ verbatim local JSON backup action in the notebook.
 
 ## Data & privacy (non-negotiable)
 
-- Etymology/POS/translations come from English Wiktionary under **CC BY-SA** — keep
+- Etymology/POS/translations come from English Wiktionary (ADR-028 adds a narrowly parsed Russian Wiktionary etymology fallback) under **CC BY-SA** — keep
   the attribution in the UI; never scrape Etymonline.
 - No accounts or product telemetry. Input remains local until explicit analysis; API analysis must
   be an explicit submission of selected context. Translation is opt-in on the API.

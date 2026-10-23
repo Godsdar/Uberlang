@@ -2,9 +2,9 @@ import { LIMIT, fail, type ImportBatch, type LibraryNote, type Mapping } from '.
 const DB_NAME = 'lingua-anki-library-v1'
 const STORE = 'notes'
 export const libraryLanguage = (s: string) => /^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/.test(s) && s.length <= 40
-export function defaultMapping(fields: string[]): Mapping {
-  const find = (pattern: RegExp, fallback: number) => { const i = fields.findIndex(f => pattern.test(f)); return i >= 0 ? i : fallback }
-  return { word: find(/^(word|expression|front|term|vocabulary)$/i, 0), example: find(/^(context|example|sentence|text)$/i, -1), answer: find(/^(back|answer|meaning|definition|translation)$/i, fields.length > 1 ? 1 : -1), language: '' }
+export function defaultMapping(fields: string[], typeName = '', sampleFields?: string[]): Mapping {
+  const find = (pattern: RegExp, fallback: number) => { const i = fields.findIndex((f, index) => pattern.test(f) && (!sampleFields || sampleFields[index]?.trim())); return i >= 0 ? i : fallback }
+  return { word: find(/^(word|expression|front|term|vocabulary)$/i, 0), example: find(/^(context|example|sentence|text)(?:[ _-]*\d+)?$/i, -1), answer: find(/^(back|answer|meaning|definition|translation)$/i, fields.length > 1 ? 1 : -1), language: /\bspanish\b/i.test(typeName) ? 'es' : /\benglish\b/i.test(typeName) ? 'en' : '' }
 }
 export async function mappedNotes(batch: ImportBatch, mappings: Map<string, Mapping>, selected: Set<string>): Promise<{ notes: LibraryNote[]; empty: number }> {
   const notes: LibraryNote[] = []; let empty = 0
@@ -83,3 +83,6 @@ export async function removeLibrary(key: string): Promise<void> {
     tx.onabort = () => { db.close(); reject(new Error('The local note could not be removed.')) }
   })
 }
+
+/** Search ignores editorial accents while retaining the original field text. */
+export const deckSearchKey = (text: string) => text.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase().trim()

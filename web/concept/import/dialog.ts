@@ -1,6 +1,6 @@
 import type { ResearchEntry } from '../components/research-workspace'
 import { readDeck } from './client'
-import { defaultMapping, listLibrary, mappedNotes, planImport, removeLibrary, saveLibrary, type ImportPlan } from './library'
+import { defaultMapping, deckSearchKey, listLibrary, mappedNotes, planImport, removeLibrary, saveLibrary, type ImportPlan } from './library'
 import { historyLanguages, historyTarget } from '../../../src/shared/etymology'
 import { parseHistory } from '../domain/history'
 import { mountFamily, unmountExplorers } from '../components/explorers'
@@ -17,9 +17,9 @@ export function mountDeckLibrary(app: HTMLElement, openNotebook: (entry: DeckNot
   dialog.setAttribute('aria-labelledby', `${app.id}-decks-title`)
   dialog.innerHTML = `<div class="lp-anki-heading"><h2 id="${app.id}-decks-title">My decks</h2><button type="button" data-deck-close>Close</button></div>
     <p class="lp-label">Local to this browser · no Anki connection</p>
-    <p class="lp-label">Import text to explore one word or example at a time. Files stay on this device.</p>
+    <p class="lp-label">Your Anki decks do not appear automatically. Import an exported file once to browse and explore it here.</p>
     <div data-deck-start><label class="lp-import-file">Import a deck<input data-deck-file type="file" accept=".apkg,.txt,.tsv"></label>
-    <details><summary>Formats & limits</summary><p>Choose an Anki deck (.apkg, legacy or modern) or UTF-8 Notes in Plain Text (.txt/.tsv). Maximum 32 MiB, 10,000 notes and 5,000 archive files. Export without media for large decks.</p><p>Text only: no pictures, audio, card templates, styling or review schedules. Cloze answers become plain text. No two-way sync. Existing Anki data is never changed.</p><p>Imported notes persist here until removed or browser data is cleared. Keep the original file as your backup; other devices and site origins have separate libraries.</p></details></div>
+    <details><summary>How to bring a deck from Anki</summary><ol><li>In Anki Desktop, select your deck and choose Export.</li><li>Choose Notes in Plain Text with field names, or Anki Deck Package (.apkg) without media.</li><li>Choose the exported file below, review each note type and import.</li></ol><p>Nothing is uploaded. This browser and site address have their own library; clearing browser data removes it. This is a copy, without automatic sync.</p></details><details><summary>Formats & limits</summary><p>Choose an Anki deck (.apkg, legacy or modern) or UTF-8 Notes in Plain Text (.txt/.tsv). Maximum 32 MiB, 10,000 notes and 5,000 archive files. Export without media for large decks.</p><p>Text only: no pictures, audio, card templates, styling or review schedules. Cloze answers become plain text. No two-way sync. Existing Anki data is never changed.</p><p>Imported notes persist here until removed or browser data is cleared. Keep the original file as your backup; other devices and site origins have separate libraries.</p></details></div>
     <p data-deck-status class="lp-live-status" role="status" aria-live="polite"></p>
     <button data-deck-cancel hidden>Cancel file reading</button>
     <fieldset data-deck-work><legend class="lp-sr-only">Deck library</legend>
@@ -27,8 +27,8 @@ export function mountDeckLibrary(app: HTMLElement, openNotebook: (entry: DeckNot
         <div class="lp-anki-fields"><label class="lp-anki-wide">Note type<select data-deck-type></select></label>
         <label>Word or expression<select data-map="word"></select></label><label>Example · optional<select data-map="example"></select></label>
         <label>Answer · optional<select data-map="answer"></select></label><label>Language code<input data-map="language" placeholder="en, es, fr…" list="${app.id}-deck-languages" maxlength="40" autocapitalize="none" spellcheck="false"><datalist id="${app.id}-deck-languages"></datalist></label></div>
-        <p class="lp-label">Set a language for each selected note type. English grammar only; word histories cover supported languages. For mixed languages, select a subset and import each language separately.</p>
-        <details><summary>Mapped sample</summary><pre data-deck-sample></pre></details>
+        <p class="lp-label">Review the language for every note type. Spanish / English may be suggested from the note type name. English grammar only; word histories cover supported languages. For mixed languages, select a subset and import each language separately.</p>
+        <details open><summary>Mapped sample</summary><pre data-deck-sample></pre></details>
         <details><summary>What this file contains & import warnings</summary><ul data-deck-warnings></ul></details>
       </div>
       <div data-deck-browse><div class="lp-anki-fields"><label class="lp-anki-wide">Find a note<input data-deck-search type="search" maxlength="200" placeholder="Word, example or answer"></label>
@@ -63,8 +63,8 @@ export function mountDeckLibrary(app: HTMLElement, openNotebook: (entry: DeckNot
     q<HTMLInputElement>('[data-deck-search]').value = ''; page = 0
   }
   function matching(): ImportNote[] {
-    const search = q<HTMLInputElement>('[data-deck-search]').value.toLocaleLowerCase(), deck = select('[data-deck-filter]').value, tag = select('[data-deck-tag]').value
-    return (batch?.notes || library).filter(n => (!batch || n.type === select('[data-deck-type]').value) && (!deck || n.decks.some(d => d === deck || d.startsWith(deck + '::'))) && (!tag || n.tags.includes(tag)) && (!search || n.fields.some(f => f.toLocaleLowerCase().includes(search))))
+    const search = deckSearchKey(q<HTMLInputElement>('[data-deck-search]').value), deck = select('[data-deck-filter]').value, tag = select('[data-deck-tag]').value
+    return (batch?.notes || library).filter(n => (!batch || n.type === select('[data-deck-type]').value) && (!deck || n.decks.some(d => d === deck || d.startsWith(deck + '::'))) && (!tag || n.tags.includes(tag)) && (!search || n.fields.some(f => deckSearchKey(f).includes(search))))
   }
   function sample() {
     if (!batch) return
@@ -100,7 +100,7 @@ export function mountDeckLibrary(app: HTMLElement, openNotebook: (entry: DeckNot
       }
       host.append(row)
     }
-    q('[data-deck-count]').textContent = filtered.length ? `${filtered.length} matching notes · showing ${page * 20 + 1}–${Math.min((page + 1) * 20, filtered.length)}` : batch ? 'No matching notes.' : 'No notes here yet. Import a deck to begin.'
+    q('[data-deck-count]').textContent = filtered.length ? `${filtered.length} matching notes · showing ${page * 20 + 1}–${Math.min((page + 1) * 20, filtered.length)}` : batch || library.length ? 'No matching notes. Try another word or clear the filters.' : 'No imported notes on this site yet. Export your deck from Anki, then choose the file above.'
     q('[data-deck-page]').textContent = `${page + 1} / ${pages}`
     q<HTMLButtonElement>('[data-deck-prev]').disabled = page === 0; q<HTMLButtonElement>('[data-deck-next]').disabled = page + 1 >= pages
     selectionCount()
@@ -120,7 +120,7 @@ export function mountDeckLibrary(app: HTMLElement, openNotebook: (entry: DeckNot
     try {
       const value = await readDeck(file, controller.signal)
       if (generation !== revision || !dialog.open) return
-      batch = value; selected = new Set(value.notes.map(n => n.id)); mappings = new Map(value.types.map(t => [t.id, defaultMapping(t.fields)]))
+      batch = value; selected = new Set(value.notes.map(n => n.id)); mappings = new Map(value.types.map(t => [t.id, defaultMapping(t.fields, t.name, value.notes.find(n => n.type === t.id)?.fields)]))
       options(select('[data-deck-type]'), value.types.map(t => [t.id, `${t.name} · ${value.notes.filter(n => n.type === t.id).length} notes`]), value.types[0].id)
       q('[data-deck-warnings]').replaceChildren(...value.warnings.map(w => element('li', w)))
       status.textContent = `${value.format}. Review fields and language before importing. Media and schedules are omitted.`
@@ -186,11 +186,12 @@ export function mountDeckLibrary(app: HTMLElement, openNotebook: (entry: DeckNot
     const scope = element('p', note.language === 'en' ? text.length > 6000 ? 'This example exceeds the notebook’s 6,000-character limit. Choose a shorter example field when importing; the full text is preserved here.' : 'Opening is local. In the notebook, explicitly choose a word lookup or sentence analysis to send that selection.' : 'Notebook grammar and initial meanings are English-only. This note keeps its selected language; use Explore this word for supported word histories.')
     scope.className = 'lp-label'; host.append(open, scope)
     if (openResearch) {
+      const lookupLabel = element('label', 'Word to explore'); const lookupWord = element('input'); lookupWord.value = note.word; lookupWord.maxLength = 80; lookupLabel.append(lookupWord); host.insertBefore(lookupLabel, open);
       const explore = element('button', 'Explore this word →'); explore.className = 'lp-main';
-      explore.disabled = !historyTarget(note.language, note.word.trim());
-      explore.addEventListener('click', () => { returnFocus = null; dialog.close(); openResearch({ word: note.word.trim(), language: note.language, context: (note.example || note.word).slice(0, 6000) }) });
+      const updateWord = () => { explore.disabled = !historyTarget(note.language, lookupWord.value.trim()) }; updateWord(); lookupWord.addEventListener('input', updateWord);
+      explore.addEventListener('click', () => { returnFocus = null; dialog.close(); openResearch({ word: lookupWord.value.trim(), language: note.language, context: (note.example || note.word).slice(0, 6000), ...(lookupWord.value.trim() === note.word.trim() && { importedCard: { answer: note.answer.slice(0, 10000), deck: (note.decks[0] || 'Uberlang').slice(0, 120), tags: note.tags.join(' ').slice(0, 500) } }) }) });
       host.insertBefore(explore, open);
-      const hint = element('p', 'Open the word in your research workspace, then choose Explore. No lookup is sent when opening. Save its tree there to return later.'); hint.className = 'lp-label'; host.insertBefore(hint, open);
+      const hint = element('p', 'For a phrase or annotated card, edit the word above first. Open it in research, then choose Explore. No lookup is sent when opening. Save its tree there to return later.'); hint.className = 'lp-label'; host.insertBefore(hint, open);
     }
     if (!openResearch) {
     const history = element('details'); history.append(element('summary', 'Explore word history'))

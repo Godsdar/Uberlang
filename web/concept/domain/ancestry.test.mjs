@@ -11,12 +11,12 @@ const family = (root, children=[]) => ({id:'etymology-1',label:'Etymology',direc
 const result = (t, children=[]) => parseHistory({schemaVersion:1,target:t,source,reason:'No further supported evidence.',choices:[{...family(t,children),summary:'Water',reason:'No further supported evidence.'}]},t)
 const run = (f,load,extra={}) => traceAncestry(f,{signal:new AbortController().signal,progress(){},load,...extra})
 
-test('traces sequential cited ancestry to PIE, retaining revisions and stopping at PIE', async()=>{
+test('traces sequential cited ancestry to PIE, retaining revisions and checking PIE word formation', async()=>{
   const original=family(en,[old]), calls=[], updates=[]; let inFlight=0
-  const outcome=await run(original,async t=>{assert.equal(inFlight++,0);calls.push(t);await Promise.resolve();inFlight--;return result(t,t.language==='ang'?[gem]:[pie])},{progress:f=>updates.push(f)})
-  assert.deepEqual(calls,[old,gem]);assert.equal(original.nodes.length,2)
+  const outcome=await run(original,async t=>{assert.equal(inFlight++,0);calls.push(t);await Promise.resolve();inFlight--;return result(t,t.language==='ang'?[gem]:t.language==='gem-pro'?[pie]:[])},{progress:f=>updates.push(f)})
+  assert.deepEqual(calls,[old,gem,pie]);assert.equal(original.nodes.length,2)
   assert.equal(outcome.family.nodes.length,4);assert.ok(isPIE(outcome.family.nodes.at(-1)))
-  assert.ok(outcome.family.nodes.slice(1).every(n=>n.edgeSource===source));assert.match(outcome.message,/every loaded branch/)
+  assert.ok(outcome.family.nodes.slice(1).every(n=>n.edgeSource===source));assert.match(outcome.message,/every loaded source path/)
   assert.equal(updates.at(-1).nodes.length,4)
 })
 
@@ -25,7 +25,7 @@ test('ambiguous ancestry pauses without adding alternatives; reader choice resum
   const paused=await run(f,async()=>ambiguous)
   assert.equal(paused.family.nodes.length,2);assert.equal(paused.choice.nodeId,'n0')
   const chosen=extendHistory(paused.family,'n0',paused.choice.result,'etymology-1')
-  const finished=await run(chosen,async t=>result(t,[pie]))
+  const finished=await run(chosen,async t=>result(t,t.language==='ine-pro'?[]:[pie]))
   assert.ok(finished.family.nodes.some(isPIE));assert.ok(!finished.family.nodes.some(n=>n.label==='aqua'))
   assert.equal(finished.family.nodes.find(n=>n.id==='n0').historyChoice.readerSelected,true)
 })
@@ -38,7 +38,7 @@ test('non-IE and unavailable branches stop honestly without synthetic PIE nodes'
 
 test('abort after a response cannot attach stale ancestry',async()=>{
   const controller=new AbortController(), updates=[]
-  await assert.rejects(run(family(en,[old]),async t=>{controller.abort();return result(t,[pie])},{signal:controller.signal,progress:f=>updates.push(f)}),{name:'AbortError'})
+  await assert.rejects(run(family(en,[old]),async t=>{controller.abort();return result(t,t.language==='ine-pro'?[]:[pie])},{signal:controller.signal,progress:f=>updates.push(f)}),{name:'AbortError'})
   assert.ok(updates.every(f=>f.nodes.length===2))
 })
 
@@ -47,8 +47,8 @@ test('cycles terminate and repeated targets share a request without joining bran
   const cycle=await run(family(en,[old]),async t=>{calls++;return result(t,[en])})
   assert.equal(calls,1);assert.equal(cycle.family.nodes.at(-1).historyState,'cycle')
   calls=0
-  const repeated=await run(family(en,[old,old]),async t=>{calls++;return result(t,[pie])})
-  assert.equal(calls,1);assert.equal(repeated.family.nodes.filter(isPIE).length,2)
+  const repeated=await run(family(en,[old,old]),async t=>{calls++;return result(t,t.language==='ine-pro'?[]:[pie])})
+  assert.equal(calls,2);assert.equal(repeated.family.nodes.filter(isPIE).length,2)
   assert.notEqual(repeated.family.nodes.at(-1).parent,repeated.family.nodes.at(-2).parent)
 })
 
@@ -66,6 +66,6 @@ test('a network failure preserves previous progress for an explicit retry',async
   let latest=family(en,[old])
   await assert.rejects(run(latest,async t=>{if(t.language==='gem-pro')throw new Error('offline');return result(t,[gem])},{progress:f=>latest=f}),/offline/)
   assert.equal(latest.nodes.length,3)
-  const resumed=await run(latest,async t=>{assert.equal(t.language,'gem-pro');return result(t,[pie])})
+  const resumed=await run(latest,async t=>{assert.ok(['gem-pro','ine-pro'].includes(t.language));return result(t,t.language==='ine-pro'?[]:[pie])})
   assert.ok(resumed.family.nodes.some(isPIE))
 })

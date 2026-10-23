@@ -14,7 +14,7 @@
   },
   "permissions": ["contextMenus", "storage"],
   "host_permissions": [
-    "https://en.wiktionary.org/*",
+    "https://en.wiktionary.org/*", "https://ru.wiktionary.org/*",
     "https://api.mymemory.translated.net/*"
   ],
   "background": {
@@ -22,6 +22,6 @@
     "type": "module"
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://en.wiktionary.org https://api.mymemory.translated.net https://api-free.deepl.com https://api.deepl.com"
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://en.wiktionary.org https://ru.wiktionary.org https://api.mymemory.translated.net https://api-free.deepl.com https://api.deepl.com"
   }
 }

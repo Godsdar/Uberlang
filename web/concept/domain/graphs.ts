@@ -16,7 +16,7 @@ export interface FamilyNode {
   condensed?: boolean
   skipped: string[]
   gloss?: string
-  relation?: 'inherited' | 'borrowed' | 'derived' | 'component' | 'form-of'
+  relation?: 'inherited' | 'borrowed' | 'derived' | 'component' | 'form-of' | 'cognate' | 'descendant' | 'descendant-borrowed' | 'related' | 'derivative'
 }
 
 export interface Family {

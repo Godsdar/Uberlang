@@ -107,8 +107,8 @@ interface RawResponse {
   data?: any
 }
 
-async function fetchOnce (params: Record<string, string>, parent?: AbortSignal): Promise<RawResponse> {
-  const url = `${API}?${new URLSearchParams({ format: 'json', formatversion: '2', redirects: '1', origin: '*', ...params })}`
+async function fetchOnce (params: Record<string, string>, parent?: AbortSignal, edition: 'en' | 'ru' = 'en'): Promise<RawResponse> {
+  const url = `${edition === 'ru' ? 'https://ru.wiktionary.org/w/api.php' : API}?${new URLSearchParams({ format: 'json', formatversion: '2', redirects: '1', origin: '*', ...params })}`
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), 9000)
   try {
@@ -138,10 +138,10 @@ async function fetchOnce (params: Record<string, string>, parent?: AbortSignal):
   }
 }
 
-async function api (params: Record<string, string>, signal?: AbortSignal): Promise<any> {
+async function api (params: Record<string, string>, signal?: AbortSignal, edition: 'en' | 'ru' = 'en'): Promise<any> {
   for (let attempt = 0; ; attempt++) {
     signal?.throwIfAborted()
-    const res = await schedule(() => fetchOnce(params, signal), signal)
+    const res = await schedule(() => fetchOnce(params, signal, edition), signal)
     if (res.status === 429 && attempt < 2) {
       await delay(Math.min(res.retryAfter, 5) * 1000, signal)
       continue
@@ -545,16 +545,16 @@ export async function getLexicons (
 export interface WiktionaryPage {
   title: string; revision: number; timestamp: string; wikitext: string; source: string
 }
-export async function queryWiktionaryPages(titles: string[], signal?: AbortSignal): Promise<WiktionaryPage[]> {
+export async function queryWiktionaryPages(titles: string[], signal?: AbortSignal, edition: 'en' | 'ru' = 'en'): Promise<WiktionaryPage[]> {
   const unique = [...new Set(titles)]
   if (!unique.length || unique.length > 20) throw new Error('Invalid Wiktionary batch size')
   signal?.throwIfAborted()
-  const data = await api({ action: 'query', prop: 'revisions', rvprop: 'ids|timestamp|content', rvslots: 'main', titles: unique.join('|') }, signal)
+  const data = await api({ action: 'query', prop: 'revisions', rvprop: 'ids|timestamp|content', rvslots: 'main', titles: unique.join('|') }, signal, edition)
   if (!Array.isArray(data?.query?.pages)) throw new Error('Invalid Wiktionary response')
   return data.query.pages.flatMap((page: any) => {
     if (page?.missing) return []
     const revision = page?.revisions?.[0]
     if (typeof page?.title !== 'string' || !Number.isSafeInteger(revision?.revid) || typeof revision?.timestamp !== 'string' || typeof revision?.slots?.main?.content !== 'string') throw new Error('Invalid Wiktionary revision')
-    return [{ title: page.title, revision: revision.revid, timestamp: revision.timestamp, wikitext: revision.slots.main.content, source: `https://en.wiktionary.org/w/index.php?oldid=${revision.revid}` }]
+    return [{ title: page.title, revision: revision.revid, timestamp: revision.timestamp, wikitext: revision.slots.main.content, source: `https://${edition}.wiktionary.org/w/index.php?oldid=${revision.revid}` }]
   })
 }

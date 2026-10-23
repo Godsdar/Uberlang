@@ -113,3 +113,13 @@ test('worker cancellation, timeout and file budget terminate parsing without a r
   await assert.rejects(readDeck({ ...file, size: 33 * 1024 * 1024 }, new AbortController().signal), /32 MiB/)
   assert.equal(workers.length, 2)
 })
+
+test('mixed Spanish and English exports suggest populated context fields and separate languages', async () => {
+  const batch = parseText(strToU8('#separator:Tab\n#notetype column:5\n#columns:Word\tDefinition\tExample 1\tExample\tNote type\nárbol\ttree\tEl árbol es alto\t\tSpanish Voc\nwater\tвода\t\tWater is clear.\tEnglish Voc'), 'mixed.tsv')
+  const mappings = new Map(batch.types.map(t => [t.id, defaultMapping(t.fields, t.name, batch.notes.find(n => n.type === t.id).fields)]))
+  const {notes} = await mappedNotes(batch, mappings, new Set(batch.notes.map(n => n.id)))
+  assert.deepEqual(notes.map(n => [n.language, n.example]), [['es', 'El árbol es alto'], ['en', 'Water is clear.']])
+  const {deckSearchKey} = await import('../import/library.ts')
+  assert.equal(deckSearchKey('árbol'), deckSearchKey('ARBOL'))
+  assert.equal(defaultMapping(['Word','Example 1','Definition']).example, 1)
+})

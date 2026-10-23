@@ -13,7 +13,7 @@ export function parseHistory(value: unknown, target: HistoryTarget): HistoryResu
   const choices = value.choices.map(raw => {
     const family = parseSourcedFamily(raw)
     const root = family.nodes.find(n => n.parent === null)!
-    if (!record(raw) || !text(raw.summary) || !text(raw.reason) || !root.lookup || historyKey(root.lookup) !== historyKey(target) || root.source !== value.source || family.nodes.some(n => n.parent !== null && (n.parent !== root.id || n.edgeSource !== value.source))) throw invalid()
+    if (!record(raw) || !text(raw.summary) || !text(raw.reason) || !root.lookup || historyKey(root.lookup) !== historyKey(target) || root.source !== value.source || family.nodes.some(n => n.parent !== null && (!isWiktionarySource(n.edgeSource) || !/^\d+$/.test(new URL(n.edgeSource).searchParams.get('oldid') ?? '')))) throw invalid()
     return { ...family, summary: raw.summary, reason: raw.reason }
   })
   if (new Set(choices.map(c => c.id)).size !== choices.length) throw invalid()
@@ -28,7 +28,7 @@ export function historyLimit(family: Family, nodeId: string): string | null {
   return null
 }
 
-/** Attach one chosen, revision-backed immediate history. Never merge alternatives. */
+/** Attach one chosen, revision-backed history. Never merge alternatives. */
 export function extendHistory(family: Family, nodeId: string, result: HistoryResult, choiceId?: string): Family {
   const node = family.nodes.find(n => n.id === nodeId)
   if (family.direction !== 'sources' || !node?.lookup || historyKey(node.lookup) !== historyKey(result.target) || family.nodes.some(n => n.parent === nodeId) || node.historyState === 'cycle') throw new Error('This form cannot receive that history.')
@@ -47,10 +47,11 @@ export function extendHistory(family: Family, nodeId: string, result: HistoryRes
   const updated = family.nodes.map(n => n.id === nodeId ? { ...n, source: root?.source ?? result.source ?? n.source,
     historyState: sources.length ? 'expanded' as const : 'unavailable' as const, historyNote: note,
     ...(choice && { historyChoice: { id: choice.id, source: root!.source, readerSelected: result.choices.length > 1 } }) } : n)
-  const children = sources.map((n, i) => ({ ...n, id: `${nodeId}.${i + 1}`, parent: nodeId,
+  const ids = new Map(sources.map((n, i) => [n.id, `${nodeId}.${i + 1}`]))
+  const children = sources.map((n, i) => ({ ...n, id: `${nodeId}.${i + 1}`, parent: n.parent === root?.id ? nodeId : ids.get(n.parent!)!,
     ...(n.lookup && keys.has(historyKey(n.lookup)) ? { historyState: 'cycle' as const, historyNote: 'This form already occurs on this path. Further expansion is stopped.' } : {}) }))
   const next = { ...family, nodes: [...updated, ...children] }
-  familyHierarchy(next.nodes)
+  if (familyHierarchy(next.nodes).height > HISTORY_DEPTH_LIMIT) throw new Error('This continuation exceeds eight steps. Open this form as a new word to continue.')
   return next
 }
 
@@ -59,4 +60,33 @@ export function foldHistory(family: Family, endpoints: string[], nodeId: string)
   if (!branch) return endpoints
   const below = new Set(branch.descendants().map(n => n.data.id))
   return [...endpoints.filter(id => !below.has(id)), nodeId]
+}
+
+export const isRelative = (node: Family['nodes'][number]) => ['cognate', 'descendant', 'descendant-borrowed', 'related', 'derivative'].includes(node.relation ?? '')
+
+/** Add only the explicitly listed family branches of a chosen entry. */
+export function extendRelatives(family: Family, nodeId: string, result: HistoryResult, choiceId?: string): Family {
+  const node = family.nodes.find(n => n.id === nodeId)
+  if (!node?.lookup || historyKey(node.lookup) !== historyKey(result.target)) throw new Error('This result belongs to a different form.')
+  if (result.choices.length > 1 && !choiceId) throw new Error('Choose a separate etymology before loading relatives.')
+  const choice = result.choices.find(c => c.id === choiceId) ?? (result.choices.length === 1 ? result.choices[0] : undefined)
+  if (!choice) return family
+  const chosenId = node.historyChoice?.id ?? (node.parent === null ? family.id : undefined)
+  if (chosenId && chosenId !== choice.id) throw new Error('A different etymology is already attached. Explore this form as a new word to keep those histories separate.')
+  const root = choice.nodes.find(n => n.parent === null)!
+  const relatives = choice.nodes.filter(isRelative)
+  const ids = new Map<string, string>([[root.id, nodeId]])
+  const added: Family['nodes'] = []
+  for (const n of relatives) {
+    const parent = ids.get(n.parent!)
+    if (!parent) continue
+    const existing = family.nodes.find(e => e.parent === parent && e.relation === n.relation && e.label === n.label && e.lang === n.lang)
+    const id = existing?.id ?? `${nodeId}.r${family.nodes.length + added.length}`
+    ids.set(n.id, id)
+    if (!existing) added.push({ ...n, id, parent })
+  }
+  if (family.nodes.length + added.length > HISTORY_NODE_LIMIT) throw new Error('This family has reached its 64-form limit. Open this form as a new word to explore its relatives.')
+  const next = { ...family, nodes: [...family.nodes.map(n => n.id === nodeId ? { ...n, source: root.source, historyChoice: { id: choice.id, source: root.source, readerSelected: result.choices.length > 1 } } : n), ...added] }
+  if (familyHierarchy(next.nodes).height > HISTORY_DEPTH_LIMIT) throw new Error('This continuation exceeds eight steps. Open this form as a new word to continue.')
+  return next
 }

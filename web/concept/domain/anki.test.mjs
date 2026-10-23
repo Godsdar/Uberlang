@@ -81,3 +81,7 @@ test('declared source language survives the Anki draft; legacy English notes rem
   assert.equal(createAnkiDraft({...note,language:'und'},text).language,'und')
   assert.equal(createAnkiDraft(note,text).language,'en')
 })
+
+test('Anki semicolon tags survive a text export',()=>{
+  assert.equal(ankiFields({...draft(),tags:'topic;example'}).tags,'topic;example')
+})

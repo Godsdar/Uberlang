@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { historyLanguages } from '../../../src/shared/etymology'
 
-const historical = new Set(['enm','ang','la','fro','frm','xno','grc','goh','gmh','dum','non','got','orv','sa'])
+const historical = new Set(['enm','ang','la','fro','frm','xno','grc','goh','gmh','dum','non','got','orv','cu','sa'])
 const groups = ['Modern languages', 'Historical languages', 'Reconstructed languages']
 const languages = Object.entries(historyLanguages).map(([code, name]) => ({code, name,
   group:code.endsWith('-pro') ? 2 : historical.has(code) ? 1 : 0

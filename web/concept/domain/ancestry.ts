@@ -1,18 +1,25 @@
 import { historyKey, type HistoryTarget } from '../../../src/shared/etymology.ts'
 import type { Family, FamilyNode } from './graphs.ts'
-import { extendHistory, historyLimit, parseHistory, type HistoryResult } from './history.ts'
+import { extendHistory, historyLimit, isRelative, parseHistory, type HistoryResult } from './history.ts'
 
 export const ANCESTRY_REQUEST_LIMIT = 24
 export const isPIE = (node: FamilyNode) => node.lookup?.language === 'ine-pro' || node.lang === 'Proto-Indo-European'
 export const ancestryLeaves = (family: Family) => {
-  const parents = new Set(family.nodes.map(n => n.parent))
-  return family.nodes.filter(n => !parents.has(n.id))
+  const byId = new Map(family.nodes.map(n => [n.id, n]))
+  const primary = family.nodes.filter(n => {
+    let current: FamilyNode | undefined = n
+    const seen = new Set<string>()
+    while (current) { if (isRelative(current) || seen.has(current.id)) return false; seen.add(current.id); current = current.parent ? byId.get(current.parent) : undefined }
+    return true
+  })
+  const parents = new Set(primary.map(n => n.parent))
+  return primary.filter(n => !parents.has(n.id))
 }
-export const canTrace = (node: FamilyNode) => !!node.lookup && !node.historyState && !isPIE(node)
+export const canTrace = (node: FamilyNode) => !!node.lookup && !isRelative(node) && !node.historyState && !(isPIE(node) && node.label.endsWith('-'))
 export function ancestrySummary(family: Family): string {
   const leaves = ancestryLeaves(family), pie = leaves.filter(isPIE).length
   if (leaves.some(n => canTrace(n) && !historyLimit(family, n.id))) return 'Continue tracing to follow the remaining cited forms toward Proto-Indo-European.'
-  if (pie === leaves.length) return 'Proto-Indo-European reached on every loaded branch. Reconstructed forms are marked with *.'
+  if (leaves.length && pie === leaves.length) return 'Proto-Indo-European reached on every loaded source path. Reconstructed forms are marked with *.'
   return `${pie ? 'Proto-Indo-European reached on part of this tree. ' : ''}Other origins, missing evidence or unsupported forms can stop a branch before PIE. Select its last form to read the source.`
 }
 

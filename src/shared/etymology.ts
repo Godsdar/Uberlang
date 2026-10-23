@@ -6,6 +6,8 @@ export const historyLanguages: Record<string, string> = {
   grc: 'Ancient Greek', el: 'Greek', it: 'Italian', de: 'German',
   goh: 'Old High German', gmh: 'Middle High German', nl: 'Dutch', dum: 'Middle Dutch',
   non: 'Old Norse', sv: 'Swedish', da: 'Danish', got: 'Gothic',
+  cu: 'Old Church Slavonic', uk: 'Ukrainian', be: 'Belarusian', bg: 'Bulgarian', cs: 'Czech', sk: 'Slovak', lt: 'Lithuanian', lv: 'Latvian',
+  'grk-pro': 'Proto-Hellenic', 'iir-pro': 'Proto-Indo-Iranian', 'inc-pro': 'Proto-Indo-Aryan', 'ira-pro': 'Proto-Iranian',
   ru: 'Russian', orv: 'Old East Slavic', pl: 'Polish', sa: 'Sanskrit',
   es: 'Spanish', pt: 'Portuguese', ar: 'Arabic', fa: 'Persian',
   'gem-pro': 'Proto-Germanic', 'gmw-pro': 'Proto-West Germanic',
@@ -16,7 +18,9 @@ export function historyTarget(language: string, term: string): HistoryTarget | u
   if (!Object.hasOwn(historyLanguages, language) || term.length > 80 ||
       !/^\*?-?[\p{L}\p{M}\p{N}]+(?:[ '\u2019\u02bc-][\p{L}\p{M}\p{N}]+)*-?$/u.test(term)) return undefined
   // These dictionaries omit editorial length/dot marks from page titles.
-  const normalized = ['la', 'ang'].includes(language)
+  const normalized = ['ru', 'orv', 'cu', 'uk', 'be', 'bg', 'sla-pro'].includes(language)
+    ? term.normalize('NFD').replace(/[\u0300\u0301\u030f\u0311]/g, '').normalize('NFC')
+    : ['la', 'ang'].includes(language)
     ? term.normalize('NFD').replace(/[\u0304\u0307]/g, '').normalize('NFC') : term.normalize('NFC')
   if (language.endsWith('-pro') !== normalized.startsWith('*')) return undefined
   return { language, term: normalized }

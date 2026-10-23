@@ -7,7 +7,7 @@ import { parseHistory, type HistoryResult } from '../domain/history'
 import { DISCOVERY_KEY, MAX_BACKUP, emptyLibrary, parseLibrary, saveDiscovery, sharedForms, validateDiscovery, writeLibrary, type Discovery, type DiscoveryLibrary, type ExplorerView } from '../domain/explorations'
 import type { Family } from '../domain/graphs'
 
-export interface ResearchEntry { word: string; language: string; family?: Family; context?: string }
+export interface ResearchEntry { word: string; language: string; family?: Family; context?: string; importedCard?: Discovery['importedCard'] }
 interface Options { prepared: Record<string, Family>; onAnki: (discovery: Discovery) => void; onContext: () => void }
 interface Bridge { open: (entry: ResearchEntry) => void }
 const message = (error: unknown) => error instanceof Error ? error.message : 'This action could not be completed.'
@@ -38,6 +38,7 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
   const [term, setTerm] = useState(active?.word ?? '')
   const [language, setLanguage] = useState(active?.language ?? 'en')
   const [context, setContext] = useState('')
+  const [importedCard, setImportedCard] = useState<Discovery['importedCard']>()
   const [pending, setPending] = useState(false)
   const [status, setStatus] = useState('')
   const [choices, setChoices] = useState<HistoryResult | null>(null)
@@ -83,7 +84,7 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
     requestAnimationFrame(() => { resultHeading.current?.scrollIntoView({ block: 'start', behavior: 'instant' }); resultHeading.current?.focus({ preventScroll: true }) })
   }
   bridge.open = entry => {
-    cancel(); setChoices(null); setTerm(entry.word); setLanguage(entry.language); setContext(entry.context ?? '')
+    cancel(); setChoices(null); setTerm(entry.word); setLanguage(entry.language); setContext(entry.context ?? ''); setImportedCard(entry.importedCard)
     if (entry.family) { activate(newDiscovery({ ...entry, family: entry.family })); setStatus('History opened locally. Save it to keep exploring later.') }
     else { setStatus('Word ready. Choose Explore to follow this word and its cited roots.'); search.current?.focus() }
   }
@@ -112,7 +113,7 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
     window.addEventListener('beforeunload', leaving); window.addEventListener('pagehide', flush); document.addEventListener('visibilitychange', visibility); window.addEventListener('storage', changed)
     return () => { window.removeEventListener('beforeunload', leaving); window.removeEventListener('pagehide', flush); document.removeEventListener('visibilitychange', visibility); window.removeEventListener('storage', changed) }
   }, [])
-  async function explore(target: HistoryTarget) {
+  async function explore(target: HistoryTarget, seed: Pick<ResearchEntry, 'context' | 'importedCard'> = { context, importedCard }) {
     cancel(); setChoices(null)
     const controller = new AbortController(); request.current = controller
     setPending(true); setStatus(`Looking up ${target.term} in ${historyLanguages[target.language]}…`)
@@ -123,7 +124,7 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
       const result = parseHistory(await response.json(), target)
       if (request.current !== controller || controller.signal.aborted) return
       if (result.choices.length === 1) {
-        activate(newDiscovery({ word: target.term, language: target.language, family: result.choices[0], ...(context && { context }) }), true)
+        activate(newDiscovery({ word: target.term, language: target.language, family: result.choices[0], ...seed }), true)
         setStatus('Following cited roots toward Proto-Indo-European where the evidence allows.')
       } else {
         setChoices(result)
@@ -147,17 +148,17 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
       if (!target) { setStatus('Enter a supported word or dictionary expression, up to 80 characters. Reconstructed forms need an asterisk (*).'); return }
       void explore(target)
     }}>
-      <label className="lp-search-word">A word to explore<input ref={search} value={term} maxLength={80} placeholder="computer, water, mother…" autoComplete="off" onChange={e => { cancel(); setChoices(null); setTerm(e.target.value); setContext(''); setStatus('') }} /></label>
-      <LanguagePicker value={language} onChange={code => { cancel(); setChoices(null); setLanguage(code); setContext(''); setStatus('') }} />
+      <label className="lp-search-word">A word to explore<input ref={search} value={term} maxLength={80} placeholder="computer, water, mother…" autoComplete="off" onChange={e => { cancel(); setChoices(null); setTerm(e.target.value); setContext(''); setImportedCard(undefined); setStatus('') }} /></label>
+      <LanguagePicker value={language} onChange={code => { cancel(); setChoices(null); setLanguage(code); setContext(''); setImportedCard(undefined); setStatus('') }} />
       <button className="lp-main" type="submit" disabled={pending}>Explore →</button>
       {pending && <button type="button" onClick={() => { cancel(); setStatus('Lookup cancelled. Your tree is unchanged.') }}>Cancel</button>}
     </form>
-    <p className="lp-label">Explore follows this word and its cited roots through Wiktionary toward Proto-Indo-European. Other origins and gaps in the evidence may stop a branch earlier.</p>
-    <div className="lp-research-starts"><span>Try a prepared family</span>{['water', 'mother'].filter(word => options.prepared[word]).map(word => <button key={word} onClick={() => { activate(newDiscovery({ word, language: 'en', family: options.prepared[word] })); setStatus('Prepared family opened offline. Each connection includes its source.'); setContext('') }}>{word} ↗</button>)}<button onClick={options.onContext}>Explore a word from a passage ↓</button></div>
+    <p className="lp-label">Explore sends this word and its cited sources to Wiktionary. Follow the source path and open relatives from a shared form. Missing evidence stays visible; not every language leads to Proto-Indo-European.</p>
+    <div className="lp-research-starts"><span>Try a prepared family</span>{['water', 'mother'].filter(word => options.prepared[word]).map(word => <button key={word} onClick={() => { activate(newDiscovery({ word, language: 'en', family: options.prepared[word] })); setStatus('Prepared family opened offline. Each connection includes its source.'); setContext(''); setImportedCard(undefined) }}>{word} ↗</button>)}<button onClick={options.onContext}>Explore a word from a passage ↓</button></div>
     <p className="lp-research-status" role="status" aria-live="polite">{status}</p>
     {storageError && <div role="alert" className="lp-storage-error"><p>{storageError}</p><button onClick={backupCurrent} disabled={!active}>Download current discovery</button><button onClick={() => { try { download(localStorage.getItem(DISCOVERY_KEY) ?? '', 'uberlang-stored-data.json') } catch { setStatus('The browser is blocking access to stored data.') } }}>Download stored data</button><button onClick={() => { const next = load(); raw.current = next.raw; loaded.error = next.error; libraryRef.current = next.library; setLibrary(next.library); setStorageError(next.error); if (!next.error) { const current = next.library.discoveries.find(d => d.id === next.library.activeId); if (current) { setAutoTrace(false); update(current); setGeneration(g => g + 1) } } }}>Reload saved library</button></div>}
     {unsaved.filter(d => d.id !== active?.id && !library.discoveries.some(s => s.id === d.id)).length > 0 && <details className="lp-draft-recovery"><summary>Unsaved trees from this session</summary>{unsaved.filter(d => d.id !== active?.id && !library.discoveries.some(s => s.id === d.id)).map(d => <div key={d.id}><button onClick={() => activate(d)}>{d.word} — reopen</button><button onClick={() => download(JSON.stringify(saveDiscovery(emptyLibrary(), d)), 'uberlang-unsaved-discovery.json')}>Download {d.word}</button></div>)}<p>Save or download these trees before closing this page.</p></details>}
-    {choices && <div className="lp-history-choices" aria-label="Choose word history">{choices.choices.map(choice => <button key={choice.id} onClick={() => { activate(newDiscovery({ word: choices.target.term, language: choices.target.language, family: choice, ...(context && { context }) }), true); setStatus('Your chosen etymology is open. Other histories have not been merged.') }}><strong>{choice.label}</strong><span>{choice.summary || choice.reason}</span></button>)}{choices.source && <a href={choices.source} target="_blank" rel="noreferrer">Read the dictionary entry ↗</a>}</div>}
+    {choices && <div className="lp-history-choices" aria-label="Choose word history">{choices.choices.map(choice => <button key={choice.id} onClick={() => { activate(newDiscovery({ word: choices.target.term, language: choices.target.language, family: choice, ...(context && { context }), ...(importedCard && { importedCard }) }), true); setStatus('Your chosen etymology is open. Other histories have not been merged.') }}><strong>{choice.label}</strong><span>{choice.summary || choice.reason}</span></button>)}{choices.source && <a href={choices.source} target="_blank" rel="noreferrer">Read the dictionary entry ↗</a>}</div>}
     <details className="lp-discoveries"><summary>Your discoveries · {library.discoveries.length}</summary>
       <p className="lp-label">Stored in this browser only. Download a backup to keep a copy or move to another device.</p>
       <label>Find a discovery<input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Word or your note" /></label>
@@ -187,7 +188,7 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
         const code = node.lookup?.language ?? Object.entries(historyLanguages).find(([, name]) => name === node.lang)?.[0]
         const target = code ? historyTarget(code, node.lookup?.term ?? node.label) : undefined
         if (!target) { setStatus('This form cannot be looked up directly. Its source entry is linked in the inspector.'); return }
-        setTerm(target.term); setLanguage(target.language); void explore(target)
+        setTerm(target.term); setLanguage(target.language); setContext(''); setImportedCard(undefined); void explore(target, {})
       }} />
       <div className="lp-discovery-notes"><div><h3>Your discovery</h3>{selected && <div className="lp-actions" role="group" aria-label={`Your interest in ${selected.label}`}><span>{selected.label}</span>{(['known', 'curious'] as const).map(mark => <button key={mark} aria-pressed={active.marks[selected.id] === mark} onClick={() => { const marks = { ...active.marks }; if (marks[selected.id] === mark) delete marks[selected.id]; else marks[selected.id] = mark; patch({ marks }) }}>{mark === 'known' ? 'I know this' : 'Explore later'}</button>)}</div>}<label>What caught your attention?<textarea value={active.note} maxLength={4000} rows={3} placeholder="A connection, a question, something to remember…" onChange={e => patch({ note: e.target.value })} /></label><p className="lp-label">{saved && !storageError ? 'Notes and tree changes save on this browser.' : 'Save this discovery to keep your tree and notes after closing the page.'}</p></div><button onClick={() => options.onAnki(active)}>Make an Anki card…</button></div>
       <details className="lp-compare"><summary>Compare with another discovery</summary><label>Saved discovery<select value={compareId} onChange={e => setCompareId(e.target.value)}><option value="">Choose a word</option>{library.discoveries.filter(d => d.id !== active.id).map(d => <option key={d.id} value={d.id}>{d.word} · {historyLanguages[d.language]} · {d.family.label || 'Prepared family'}</option>)}</select></label>

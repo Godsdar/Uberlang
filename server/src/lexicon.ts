@@ -4,7 +4,7 @@ import { ServiceError } from './errors.ts'
 
 export interface LexiconInput { documentId: string; language: 'en'; word: string; selection: { start: number; end: number } }
 export type LookupPages = (titles: string[], signal?: AbortSignal) => Promise<WiktionaryPage[]>
-const attribution = 'English Wiktionary contributors · CC BY-SA 4.0. Definitions and source relationships adapted from the cited revision.'
+const attribution = 'Wiktionary contributors · CC BY-SA 4.0. Definitions and source relationships adapted from the cited revision.'
 const relations: Record<string, string> = { inh: 'inherited', inherited: 'inherited', bor: 'borrowed', borrowed: 'borrowed', lbor: 'borrowed', ubor: 'borrowed', slbor: 'borrowed', der: 'derived', derived: 'derived' }
 const posNames = new Set(['Noun', 'Verb', 'Adjective', 'Adverb', 'Pronoun', 'Determiner', 'Preposition', 'Conjunction', 'Interjection', 'Proper noun', 'Numeral', 'Particle', 'Article'])
 
@@ -51,7 +51,7 @@ function plain(text: string): string | undefined {
 }
 
 interface LexicalNode { lookup?: HistoryTarget; historyState?: 'unavailable'; historyNote?: string; id: string; parent: string | null; label: string; lang: string; source: string; skipped: string[]; edgeSource?: string; reconstructed?: boolean; relation?: string }
-interface SourceTerm { label: string; lang: string; relation: string }
+interface SourceTerm { label: string; lang: string; relation: string; parentIndex?: number; condensed?: boolean }
 function immediateSources(block: string, languageCode = 'en'): SourceTerm[] {
   const clean = block.replace(/<!--[\s\S]*?-->/g, '').replace(/<ref\b[^>]*>[\s\S]*?<\/ref>/gi, '')
   const all = templates(clean)
@@ -99,7 +99,119 @@ function immediateSources(block: string, languageCode = 'en'): SourceTerm[] {
   return []
 }
 
-export function parseLexicalPage(page: WiktionaryPage, languageCode = 'en', includeEmpty = false) {
+/** Balanced modern etymon annotations preserve each explicitly nested stage. */
+function annotatedTerm(value: string): { base: string; modifiers: string[] } | undefined {
+  const first = value.indexOf('<')
+  if (first < 0) return { base: value, modifiers: [] }
+  const modifiers: string[] = []; let depth = 0, start = first
+  for (let i = first; i < value.length; i++) {
+    if (value[i] === '<') { if (!depth) start = i + 1; depth++ }
+    else if (value[i] === '>') { if (!depth) return; if (!--depth) modifiers.push(value.slice(start, i)) }
+    else if (!depth) return
+  }
+  return depth ? undefined : { base: value.slice(0, first), modifiers }
+}
+function structuredSources(block: string, code: string): SourceTerm[] | undefined {
+  const entry = templates(block).find(t => ['ety', 'etymon'].includes(t.args[0]) && t.args[1] === code)
+  if (!entry) return
+  if (/\b(?:not|never|possibly|perhaps|probably|uncertain|unknown|disputed)\b/i.test(block.slice(Math.max(0, entry.index - 120), entry.index))) return []
+  const operation = entry.args.findIndex(a => a.startsWith(':'))
+  if (operation < 0) return []
+  const result: SourceTerm[] = []
+  function add(value: string, relation: string, parentIndex?: number, defaultLanguage = code): boolean {
+    const parsed = annotatedTerm(value)
+    if (!parsed || parsed.modifiers.some(m => !/^(id|t|tr|alt|pos|g|ety):/.test(m))) return false
+    const qualified = /^([a-z][a-z-]*):(.*)$/.exec(parsed.base)
+    const lang = qualified?.[1] ?? defaultLanguage
+    const label = (qualified ? qualified[2] : parsed.base) || parsed.modifiers.find(m => m.startsWith('alt:'))?.slice(4)
+    if (!label || label === '-' || /[{}<>:]/.test(label)) return false
+    const index = result.length
+    if (index >= 7) return false
+    result.push({ label, lang, relation, ...(parentIndex !== undefined && { parentIndex }) })
+    const nested = parsed.modifiers.filter(m => m.startsWith('ety:'))
+    if (nested.length > 1) return false
+    if (nested.length) {
+      const operation = annotatedTerm(nested[0].slice(4))
+      if (!operation || !operation.modifiers.length) return false
+      const mode = operation.base
+      // Generic nested `from` does not establish whether this is inflection or derivation.
+      if (mode === 'from') return true
+      const nextRelation = relations[mode] ?? (['af', 'com', 'compound'].includes(mode) ? 'component' : undefined)
+      if (!nextRelation || (!['af', 'com', 'compound'].includes(mode) && operation.modifiers.length !== 1)) return false
+      for (const term of operation.modifiers) if (!add(term, nextRelation, index, lang)) return false
+    }
+    return true
+  }
+  const mode = entry.args[operation].slice(1)
+  const relation = relations[mode] ?? (['af', 'com', 'compound'].includes(mode) ? 'component' : mode === 'from' && entry.args.includes('nl=1') ? 'form-of' : undefined)
+  if (!relation || entry.args.some(a => /^(?:lang\d*|unc|uncertain|q|qq|qual|qualifier)=/.test(a))) return []
+  const terms = entry.args.slice(operation + 1).filter(a => a && !a.includes('='))
+  if (relation !== 'component' && terms.length !== 1) return []
+  return terms.every(t => add(t, relation)) ? result : []
+}
+
+/** A prose chain is accepted only when each next citation is joined by “from”. */
+function citedChain(block: string, code: string): SourceTerm[] {
+  const structured = structuredSources(block, code)
+  const immediate = structured ?? immediateSources(block, code)
+  if (immediate.length !== 1 || !['inherited', 'borrowed', 'derived'].includes(immediate[0].relation)) return immediate
+  const all = templates(block)
+  let previous = all.find(t => relations[t.args[0].replace(/\+$/, '')] && t.args[1] === code && t.args[2] === immediate[0].lang && t.args[3] === immediate[0].label)
+  if (!previous) return immediate
+  const chain = [...immediate]
+  for (const next of all.filter(t => t.index > previous!.index)) {
+    const join = block.slice(previous.index + previous.raw.length, next.index)
+    if (!/^\s*,?\s*from\s+$/i.test(join)) break
+    const relation = relations[next.args[0].replace(/\+$/, '')]
+    const label = plain(next.args[3] ?? '')
+    if (!relation || next.args[1] !== code || !label || !historyTarget(next.args[2], label) || next.args.some(a => /(?:unc|q|qual)=/.test(a))) break
+    chain.push({ label, lang: next.args[2], relation, parentIndex: chain.length - 1 })
+    previous = next
+    if (chain.length >= 7) break
+  }
+  return chain
+}
+
+const uncertain = /\b(?:not|never|unrelated|possibly|perhaps|probably|uncertain|unknown|disputed)\b|(?:unc|q|qual)=|<q:|\?/i
+function relatives(block: string, _code: string, section: string): SourceTerm[] {
+  const result: SourceTerm[] = []
+  // Keep list nesting. A language-only group is transparent; an unparsed form
+  // blocks its subtree so grandchildren are never promoted to direct children.
+  const stack: { depth: number; index: number | null }[] = []
+  for (const line of block.split('\n')) {
+    const depth = /^(\*+)/.exec(line)?.[1].length ?? 0
+    while (stack.length && stack.at(-1)!.depth >= depth) stack.pop()
+    if (uncertain.test(line)) { if (depth) stack.push({ depth, index: null }); continue }
+    let added: number | undefined
+    for (const t of templates(line)) {
+      const [name, lang, term] = t.args
+      const descendant = ['desc', 'desctree'].includes(name)
+      const linked = ['l', 'link'].includes(name) && ['Derived terms', 'Related terms'].includes(section)
+      const cognate = ['cog', 'cognate'].includes(name) && section === 'Etymology'
+      if (!descendant && !linked && !cognate) continue
+      if (descendant && section !== 'Descendants' && section !== 'Derived terms') continue
+      if (!term || !historyTarget(lang, term)) { if (term && depth) stack.push({ depth, index: null }); continue }
+      if (stack.some(s => s.index === null)) continue
+      const parentIndex = stack.at(-1)?.index ?? undefined
+      added = result.length
+      result.push({ lang, label: term, relation: descendant ? t.args.includes('bor=1') ? 'descendant-borrowed' : t.args.includes('der=1') ? 'derivative' : 'descendant' : cognate ? 'cognate' : section === 'Derived terms' ? 'derivative' : 'related', ...(parentIndex !== undefined && { parentIndex }) })
+      if (result.length >= 10) return result
+    }
+    if (depth && added !== undefined) stack.push({ depth, index: added })
+    // A plain language grouping has no asserted lexical stage.
+    else if (depth && templates(line).some(t => ['l', 'm'].includes(t.args[0]))) stack.push({ depth, index: null })
+  }
+  return result
+}
+
+function termNode(term: SourceTerm, id: string, parent: string, page: WiktionaryPage): LexicalNode {
+  const lookup = historyTarget(term.lang, term.label)
+  return { id, parent, label: term.label, lang: names[term.lang] ?? term.lang, lookup,
+    source: lookup ? `https://en.wiktionary.org/wiki/${encodeURIComponent(historyTitle(lookup))}#${encodeURIComponent(names[term.lang].replaceAll(' ', '_'))}` : page.source,
+    edgeSource: page.source, reconstructed: term.label.startsWith('*'), relation: term.relation, skipped: [] }
+}
+
+export function parseLexicalPage(page: WiktionaryPage, languageCode = 'en', includeEmpty = false, includeFamily = false) {
   const languageName = names[languageCode]
   const language = languageName && [...page.wikitext.matchAll(/^==\s*([^=\n]+?)\s*==\s*$/gm)].find(m => m[1].trim() === languageName)
   if (!language) return { senses: [], families: [], omittedSenses: 0 }
@@ -114,14 +226,29 @@ export function parseLexicalPage(page: WiktionaryPage, languageCode = 'en', incl
     const block = english.slice(heading.index! + heading[0].length, headings[i + 1]?.index ?? english.length)
     if (/^Etymology(?: \d+)?$/.test(title)) {
       etymologyLabel = title; etymologyId = `etymology-${title.match(/\d+/)?.[0] ?? 1}`; pos = ''
-      const terms = immediateSources(block, languageCode)
+      const terms = includeFamily ? citedChain(block, languageCode) : immediateSources(block, languageCode)
       if ((terms.length || includeEmpty) && families.length < 8) {
         const root = `${etymologyId}-word`
         families.push({ id: etymologyId, label: etymologyLabel, direction: 'sources',
-          nodes: [{ id: root, parent: null as string | null, label: page.title, lang: languageName, ...(!terms.length && { historyState: 'unavailable' as const, historyNote: 'No supported, certain continuation was found in this etymology.' }), lookup: historyTarget(languageCode, page.title.replace(/^Reconstruction:[^/]+\//, '*')), source: page.source, skipped: [] as string[] },
-            ...terms.map((term, n) => ({ id: `${etymologyId}-source-${n + 1}`, parent: root, label: term.label, lang: Object.hasOwn(names, term.lang) ? names[term.lang] : term.lang, lookup: historyTarget(term.lang, term.label), source: historyTarget(term.lang, term.label) ? `https://en.wiktionary.org/wiki/${encodeURIComponent(historyTitle(historyTarget(term.lang, term.label)!))}#${encodeURIComponent(names[term.lang].replaceAll(' ', '_'))}` : page.source, edgeSource: page.source, reconstructed: term.label.startsWith('*'), skipped: [] as string[], relation: term.relation }))] as LexicalNode[],
-          note: 'Sources explicitly linked in this Wiktionary etymology. This is a partial evidence graph; intermediate stages, cognates and uncertain proposals may be omitted. This group is not automatically matched to the sentence meaning.',
+          nodes: [{ id: root, parent: null as string | null, label: page.title.replace(/^Reconstruction:[^/]+\//, '*'), lang: languageName, ...(!terms.length && { historyState: 'unavailable' as const, historyNote: 'No supported, certain continuation was found in this etymology.' }), lookup: historyTarget(languageCode, page.title.replace(/^Reconstruction:[^/]+\//, '*')), source: page.source, skipped: [] as string[] },
+            ...terms.map((term, n) => termNode(term, `${etymologyId}-source-${n + 1}`, term.parentIndex === undefined ? root : `${etymologyId}-source-${term.parentIndex + 1}`, page))] as LexicalNode[],
+          note: 'Explicitly cited history and selected relatives. Inheritance points toward an older source; descendant and derivative branches point toward later forms. Cognates and related terms are lateral links, not ancestors. This partial graph omits unsupported or uncertain relationships. This group is not automatically matched to the sentence meaning.',
           attribution, verifiedOn: page.timestamp.slice(0, 10) })
+      }
+      if (includeFamily && families.at(-1)?.id === etymologyId) {
+        const family = families.at(-1)!, root = family.nodes[0].id
+        const related = relatives(block, languageCode, 'Etymology')
+        family.nodes.push(...related.map((t, n) => termNode(t, `${etymologyId}-relative-${n}`, root, page)))
+      }
+    } else if (includeFamily && ['Descendants', 'Derived terms', 'Related terms'].includes(title)) {
+      if (!families.length && includeEmpty) {
+        families.push({ id: etymologyId, label: 'Word family', direction: 'sources', nodes: [{ id: `${etymologyId}-word`, parent: null, label: page.title.replace(/^Reconstruction:[^/]+\//, '*'), lang: languageName, lookup: historyTarget(languageCode, page.title.replace(/^Reconstruction:[^/]+\//, '*')), source: page.source, skipped: [] }], note: 'Explicitly listed relatives; this entry does not establish an earlier ancestor.', attribution, verifiedOn: page.timestamp.slice(0, 10) })
+      }
+      const family = families.find(f => f.id === etymologyId)
+      if (family) {
+        const related = relatives(block, languageCode, title).slice(0, Math.max(0, 18 - family.nodes.length))
+        const prefix = `${etymologyId}-${i}-relative-`
+        family.nodes.push(...related.map((t, n) => termNode(t, prefix + n, t.parentIndex === undefined ? family.nodes[0].id : prefix + t.parentIndex, page)))
       }
     } else if (posNames.has(title)) {
       pos = title
@@ -183,13 +310,17 @@ export function createLexiconLookup(fetchPages: LookupPages = queryWiktionaryPag
 
 
 /** One explicit request loads one fixed-host page, never a recursive crawl. */
-export function createHistoryLookup(load = createPageCache()) {
+export function createHistoryLookup(load = createPageCache(), loadRussian = createPageCache((titles, signal) => queryWiktionaryPages(titles, signal, 'ru'))) {
   return async (input: HistoryTarget, signal: AbortSignal) => {
     const target = historyTarget(input.language, input.term)
     if (!target) throw new ServiceError(400, 'INVALID_TARGET', 'This dictionary language or form is not supported')
-    const page = await load(historyTitle(target), signal)
+    let page = await load(historyTitle(target), signal)
     signal.throwIfAborted()
-    const parsed = page ? parseLexicalPage(page, target.language, true) : { families: [], senses: [] }
+    let parsed = page ? parseLexicalPage(page, target.language, true, true) : { families: [], senses: [] }
+    if ((!parsed.families.length || parsed.families.every(f => f.label === 'Word family')) && target.language === 'ru') {
+      const fallback = await russianHistory(target, loadRussian, signal)
+      if (fallback) { page = fallback.page; parsed = fallback.parsed }
+    }
     const choices = parsed.families.map(family => ({ ...family,
       summary: parsed.senses.find(s => s.etymologyId === family.id)?.definition ?? 'Consult the entry to identify this history.',
       reason: family.nodes.length > 1 ? '' : 'No supported, certain continuation was found in this etymology.'
@@ -198,4 +329,24 @@ export function createHistoryLookup(load = createPageCache()) {
       reason: choices.length ? '' : 'No supported etymology section was found for this language and form. The history may be unknown or use unsupported formatting.',
       source: page?.source ?? null, attribution }
   }
+}
+
+/** Narrow Russian fallback: an explicit etymology template citing Proto-Slavic.
+ * Never infer morphemes from spelling or equate the template name with a lemma. */
+async function russianHistory(target: HistoryTarget, load: ReturnType<typeof createPageCache>, signal: AbortSignal) {
+  const page = await load(target.term, signal)
+  if (!page) return
+  const section = page.wikitext.split(/^=\s*\{\{-ru-\}\}\s*=\s*$/m)[1]?.split(/^=[^=].*?=\s*$/m)[0]
+  const etymology = section?.match(/^=== Этимология ===\s*([\s\S]*?)(?=^===|$(?![\s\S]))/m)?.[1]
+  const reference = etymology?.trim().match(/^Происходит от \{\{(этимология:[а-яё-]+)\|да\}\}\.?$/i)
+  if (!reference) return
+  const template = await load(`Шаблон:${reference[1]}`, signal)
+  const proto = template?.wikitext.match(/^\{\{праслав\|\[\[(\*[^\]|]+)\]\]\}\}/)?.[1]
+  if (!template || !proto || !historyTarget('sla-pro', proto)) return
+  const node = termNode({ label: proto, lang: 'sla-pro', relation: 'derived' }, 'etymology-1-source-1', 'etymology-1-word', template)
+  const parsed = { omittedSenses: 0, senses: [], families: [{ id: 'etymology-1', label: 'Etymology', direction: 'sources',
+    nodes: [{ id: 'etymology-1-word', parent: null, label: target.term, lang: 'Russian', lookup: target, source: page.source, skipped: [] },
+      { ...node, condensed: true, skipped: ['Intermediate word-formation stages not specified by this source'] }],
+    note: 'Russian Wiktionary cites a shared etymology template. The link is a derivational origin with unspecified intermediate stages, not direct inheritance. Word parts are not inferred.', attribution, verifiedOn: page.timestamp.slice(0, 10) }] }
+  return { page, parsed }
 }

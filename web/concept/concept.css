@@ -398,3 +398,8 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp-ancestry .lp-actions{justify-content:space-between;margin:0}
 #lingua-concept .lp-ancestry p{font-size:13px;color:var(--lp-muted);margin:8px 0;max-width:80ch}
 #lingua-concept .lp-ancestry .lp-section-label{color:var(--lp-accent)}
+
+/* Family controls stay compact while the evidence tree grows. */
+#lingua-concept .lp .lp-family-branch-menu { margin: 14px 0 22px; }
+#lingua-concept .lp .lp-family-branch-menu > summary { color: var(--lp-muted); font-size: 13px; cursor: pointer; padding: 8px 0; }
+#lingua-concept .lp .lp-family-branch-menu .lp-branch-picker { max-height: 230px; overflow: auto; }
