@@ -123,6 +123,9 @@ body {margin:0;background:#181b24;color:#e2e6ef;font-family:system-ui,sans-serif
 #lingua-concept .lp-graph-toolbar button {font-size:12px;padding:5px 9px;color:var(--lp-muted);}
 #lingua-concept .lp-graph-toolbar button[aria-pressed="true"] {background:var(--lp-soft);color:var(--lp-accent);}
 #lingua-concept .lp-graph-scroll {overflow:auto;max-width:100%;overscroll-behavior-inline:contain;scrollbar-width:thin;scrollbar-color:var(--lp-line) transparent;}
+/* Keep tree scrolling available without a visible scrollbar. */
+#lingua-concept .lp-graph-scroll.lp-family-canvas{scrollbar-width:none;}
+#lingua-concept .lp-graph-scroll.lp-family-canvas::-webkit-scrollbar{display:none;}
 #lingua-concept .lp-graph-stage {position:relative;}
 #lingua-concept .lp-graph-stage svg {position:absolute;inset:0;}
 #lingua-concept .lp-graph-node {position:absolute;top:0;left:0;}
