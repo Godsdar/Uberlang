@@ -62,6 +62,7 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
   const [pathOnly, setPathOnly] = useState(initialView?.pathOnly ?? false)
   const [zoom, setZoom] = useState(initialView?.zoom ?? 1)
   const scroll = useRef<HTMLDivElement>(null)
+  const readerMoved = useRef(Boolean(initialView))
   const inspector = useRef<HTMLElement>(null)
   const callbacks = useRef({ onSnapshot, onInspect })
   callbacks.current = { onSnapshot, onInspect }
@@ -78,10 +79,16 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
   // A dictionary entry can stand alone when all its cited branches are folded.
   const visibleEndpoints = endpoints.length ? endpoints : [initial.id]
   const layout = useMemo(() => familyLayout(family.nodes, pathOnly ? [selected.id] : visibleEndpoints, family.direction), [family, endpoints, pathOnly, selected.id])
+  useEffect(() => {
+    if (readerMoved.current || !scroll.current) return
+    const point = layout.nodes.find(n => n.id === initial.id)
+    if (point) scroll.current.scrollLeft = Math.max(0, point.x * zoom - scroll.current.clientWidth / 2)
+  }, [layout.width, zoom, initial.id])
   const ancestry = useMemo(() => sourced && selected.parent === null ? new Set(ancestryLeaves(family).flatMap(n => [...ancestorIds(family.nodes, n.id)])) : ancestorIds(family.nodes, selected.id), [family, selected.id])
   const trail = useMemo(() => familyHierarchy(family.nodes).descendants().find(n => n.id === selected.id)!.ancestors().reverse(), [family, selected.id])
   const transition = { duration: reduced ? 0 : .32, ease: [.22, 1, .36, 1] as [number, number, number, number] }
   function selectNode(id: string, navigating = false) {
+    readerMoved.current = true
     if (!navigating && id !== selectedId) {
       visited.current = [...visited.current.slice(0, cursor + 1), id].slice(-100)
       setCursor(visited.current.length - 1)
@@ -148,6 +155,7 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
   const continuationVisible = layout.nodes.some(n => n.parent === selected.id)
   const limit = historyLimit(family, selected.id)
   function reveal(next: string[]) {
+    readerMoved.current = true
     setEndpoints(next)
     setPathOnly(false)
     if (!familyLayout(family.nodes, next.length ? next : [initial.id]).nodes.some(n => n.id === selectedId)) selectNode(initial.id)
@@ -211,7 +219,7 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
           </div>
         </div>
         <button className="lp-mobile-inspect" onClick={() => { inspector.current?.scrollIntoView({ block: 'start', behavior: 'instant' }); inspector.current?.focus({ preventScroll: true }) }}>Selected: {selected.label} · details ↓</button>
-        <div className={`lp-graph-scroll lp-family-canvas ${sourced ? 'is-sourced' : ''}`} ref={scroll} onScroll={event => setPositions({ scrollLeft: event.currentTarget.scrollLeft, scrollTop: event.currentTarget.scrollTop })} tabIndex={0} role="region" aria-label={`${word} ${sourced ? 'sources' : 'family'}. Scroll horizontally to explore branches.`}>
+        <div className={`lp-graph-scroll lp-family-canvas ${sourced ? 'is-sourced' : ''}`} ref={scroll} onWheel={() => { readerMoved.current = true }} onPointerDown={() => { readerMoved.current = true }} onKeyDown={() => { readerMoved.current = true }} onScroll={event => setPositions({ scrollLeft: event.currentTarget.scrollLeft, scrollTop: event.currentTarget.scrollTop })} tabIndex={0} role="region" aria-label={`${word} ${sourced ? 'sources' : 'family'}. Scroll horizontally to explore branches.`}>
           <motion.div className="lp-graph-size" animate={{ width: layout.width * zoom, height: layout.height * zoom }} transition={transition}>
             <div className="lp-graph-stage" style={{ width: layout.width, height: layout.height, transform: `scale(${zoom})`, transformOrigin: 'top left' }}>
               <svg width={layout.width} height={layout.height} aria-hidden="true" className="lp-family-branches">

@@ -12,3 +12,5 @@ server-dist
 .venv
 __pycache__
 **/__pycache__
+
+work
