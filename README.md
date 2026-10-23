@@ -55,81 +55,44 @@ choose Explore to follow its cited roots; the imported passage is not sent. A di
 through the existing editable TXT export. The **Tools** menu remains available,
 and **Appearance** holds the themes and reading layouts.
 
-## A word’s family
+## Screenshots · 4K
 
-Look up a new word to explore its documented sources, or choose the curated
-`water` and `mother` families to explore relatives across languages. Live graphs
-show supported explicit sources/components; they are not complete word families.
-Distinct origins, source links and reconstructed forms remain visible.
+[![Uberlang research workspace: prepared water family](docs/assets/2026-10-23/uberlang-research-4k.jpg)](docs/assets/2026-10-23/uberlang-research-4k.jpg)
 
-Try **Look up sunflower** or **Look up computer**, select a form, then choose
-**Explore deeper**. Each click reads one Wiktionary entry and unfolds its supported
-sources. Separate etymologies require a choice; components and inflected forms
-are labelled separately from ancestry. Expanded histories and their revision links
-travel with exported notes. No paid API is required.
+*Start with a word, choose its language and follow its sourced history.*
 
-[![Uberlang Reading: prepared water family and selected German form](docs/assets/uberlang-reading-radial-desktop-2026-10-18.jpg)](docs/assets/uberlang-reading-radial-desktop-2026-10-18.jpg)
+[![Interactive water tree with a PIE root and source evidence](docs/assets/2026-10-23/uberlang-tree-4k.jpg)](docs/assets/2026-10-23/uberlang-tree-4k.jpg)
 
-*Reading · prepared water family, selected German form and cited evidence.*
+*Prepared water family: rounded selected form, related branches, PIE root and entry evidence.*
+
+Direct browser captures of the published app on 23 October 2026, in Tokyo Night.
+Both files are **3840 × 2160** pixels, captured at a 1920 × 1080 CSS viewport with
+2× device scale. The tree detail uses 75% tree scale. These are real prepared
+examples, labeled in the interface; they are not mockups or live lookup results.
 
 ## Language coverage
 
 | Mode | Coverage |
 |---|---|
-| Initial word lookup and live sentence grammar | English in both Reading and Study |
+| Research word lookup | Modern, historical and reconstructed languages listed in the searchable Language menu, including Spanish, French, Russian, Latin and PIE |
+| Passage lookup and live sentence grammar | English |
 | Live history continuation | Supported forms/language sections, including Spanish, French, Russian and Polish; available evidence and reachable nodes determine each path |
 | Prepared word families | Curated water/mother branches across languages, including German, Dutch, Swedish and Russian; water also includes Polish |
 | Translation | Prepared English → Russian examples |
 
-English Wiktionary names the source edition, not an English-only collection of words.
-The text-language selector declares the input language; only English has an installed
-grammar model. Other languages remain readable but have no initial lookup or grammar.
-After editing or pasting, choose the language explicitly. A conservative script check
-rejects non-Latin/mixed-script input even if English is selected. This is not language
-detection: misdeclared Spanish/French on Latin script can still get incorrect predictions.
-Source coverage varies; reconstructed forms and incomplete histories remain labeled.
-[Detailed coverage and current marketing guidance](docs/MARKETING_POSITIONING.md).
+English Wiktionary is the source edition; its entries cover many languages.
+Research lookup uses the selected supported language. Coverage depends on cited
+evidence, and each branch can stop before PIE. Passage grammar uses an installed
+English model; selecting another passage language does not add a grammar model.
+Reconstructed forms and incomplete histories remain labeled.
+[Detailed coverage](docs/MARKETING_POSITIONING.md).
 
-## A sentence’s structure
+## Read in context
 
-Select a word to inspect its lemma, grammatical features, head, and dependency.
-Explore an expression or a particular occurrence inside longer text, then save
-its explanation and context as a study note.
-
-[![Uberlang Study: prepared English grammar, selected word and dependency arc](docs/assets/uberlang-study-radial-desktop-2026-10-18.jpg)](docs/assets/uberlang-study-radial-desktop-2026-10-18.jpg)
-
-*Study · prepared English grammar example with the selected word, its dependency and grammatical features.*
-
-<details>
-<summary>Mobile tools — Light theme, 390 px</summary>
-
-<p align="center">
-<a href="docs/assets/uberlang-radial-mobile-2026-10-18.jpg"><img src="docs/assets/uberlang-radial-mobile-2026-10-18.jpg" width="320" alt="Uberlang language tools on a 390 px screen in the Light theme"></a>
-</p>
-
-</details>
-
-These four images are direct JPEG browser captures from the local application
-on 18 October 2026: icon-only sector entry at `5bc4d34`, Reading/Study at `cd24559`
-(unchanged by the launcher refinements), 1280 px desktop and 390 px mobile, at 1×.
-Reduced motion was enabled to capture settled states. They are not generated
-mockups or live-analysis demonstrations; the prepared examples remain labeled.
-
-## Notebook design refinement
-
-The notebook keeps its open page, restrained serif headings and plain tree canvas.
-The radial entry uses existing theme colors, plain line icons and short unfolding
-transitions, without decorative sparkles or promotional headings. Appearance, examples and session notes disclose secondary controls.
-Visible keyboard focus, Escape/return behavior and touch-sized tool buttons support
-navigation. Initial lookup/grammar remain English; histories can cross supported
-languages.
-
-Application release, 2026-10-18:
-[`5bc4d34`](https://github.com/Godsdar/Uberlang/commit/5bc4d34)
-at [uberlang.vercel.app](https://uberlang.vercel.app/).
-[Radial tools decision and validation scope](docs/decisions/ADR-022-radial-tools-and-context.md).
-The earlier [visual refinement](docs/decisions/ADR-021-notebook-visual-refinement.md)
-remains the basis for the notebook’s typography, themes and tree presentation.
+Open **Read in context** to work with a passage. Select a word or expression to
+inspect its origins, or explicitly analyze an English sentence for lemmas,
+grammatical features and dependencies. Prepared examples remain labeled.
+Session notes and Anki drafts connect the passage back to the research journey.
 
 ## Save a context card for Anki
 
@@ -149,14 +112,12 @@ Uberlang does not implement direct AnkiWeb sync or APKG export.
 
 See [scope and verification](docs/ANKI_EXPORT_MVP.md).
 
-[![Anki draft on the published notebook base](docs/assets/anki-export/desktop.jpg)](docs/assets/anki-export/desktop.jpg)
-
 ## Explore an Anki deck in Uberlang
 
 Choose **My decks → Import a deck** and select an `.apkg` or UTF-8 Notes in Plain
 Text (`.txt`/`.tsv`). Legacy schema 11 packages and modern schema 18 / Zstandard
 packages are read locally in a cancellable worker. No Anki installation or
-connection is needed. This implementation is awaiting coordinated publication.
+connection is needed. Import is available in the published web app.
 
 Map word/expression, optional example and answer for each note type, then set its
 language. Filter by deck, tag or text; select notes and review the import counts.
@@ -187,10 +148,10 @@ See the [format/safety specification](docs/ANKI_IMPORT_MVP.md),
 |---|---|
 | Analysis | Live English lemmas, features and dependencies; prepared examples available |
 | Meaning | Grammar-based sentence reading and live dictionary sense alternatives |
-| Etymology | Progressive sourced histories for new words; curated `water` and `mother` families |
+| Etymology | Explicit research follows cited roots toward PIE; curated `water` and `mother` families |
 | Translation | Prepared English → Russian examples |
-| Notes | Session notes; downloadable Markdown, JSON, and HTML |
-| Interface | Radial tools; shared Reading/Study layouts; Tokyo Night, Light, Graphite |
+| Notes | Saved discoveries with local autosave and JSON backup; session exports in Markdown, JSON and HTML |
+| Interface | Research workspace, searchable language menu, contextual tools; Tokyo Night, Light, Graphite |
 
 Night notebook is the only published web interface. The old standalone translator,
 language overview and My roots screens have been retired. Existing saved roots
@@ -259,10 +220,10 @@ docker run --rm -p 8080:80 lingua-web
 docker build --target ci -t lingua-ci .
 ```
 
-`vercel.json` tests and builds the web app, Node gateways and private Python worker.
-The Vercel demo is published through the CLI. GitHub Pages remains an automatic
-static mirror with tests and typechecking before publication; live endpoints run
-only on Vercel or a configured local backend.
+`vercel.json` builds the web app and Node gateways and packages the private Python
+worker. The Vercel demo is published through the CLI; GitHub Pages is a static
+mirror. CI runs independently, so deployment does not repeat its tests and
+typechecking (ADR-026). Live endpoints run only on Vercel or a configured local backend.
 [Deployment instructions](docs/DEPLOYMENT.md).
 
 </details>
@@ -335,8 +296,9 @@ does not prove historical kinship. [Data license](https://creativecommons.org/li
 
 ## Roadmap and documentation
 
-Next: linguistically review the statistical parser with pilot readers, expand
-sourced families, and add durable local notes.
+Next: review source coverage with pilot readers, improve incomplete-history
+guidance and expand sourced families. Discovery notes already persist locally;
+passage session notes still need export before reloading.
 Branch disclosure, selected-lineage focus, dependency arcs, and reduced-motion-aware
 transitions are now implemented in the concept.
 
