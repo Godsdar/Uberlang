@@ -5,6 +5,7 @@ import { ancestorIds, familyLayout, familyHierarchy, relationNames, syntaxLayout
 import { extendHistory, foldHistory, historyLimit, parseHistory, type HistoryResult } from '../domain/history'
 import type { Family, FamilyNode, Token } from '../domain/graphs'
 import { historyLanguages } from '../../../src/shared/etymology'
+import { ancestryLeaves, ancestrySummary, canTrace, isPIE, loadHistory, traceAncestry } from '../domain/ancestry'
 import type { ExplorerView } from '../domain/explorations'
 
 export interface FamilyProps {
@@ -14,6 +15,7 @@ export interface FamilyProps {
   onInspect?: (id: string) => void
   onStartFrom?: (node: FamilyNode) => void
   preferredLanguages?: string[]
+  autoTrace?: boolean
 }
 
 // Exiting nodes must not remain keyboard targets while their branch fades out.
@@ -28,17 +30,21 @@ function FamilyPoint({ node, selected, lineage, reduced, onSelect }: {
     exit={{ opacity: 0, scale: reduced ? 1 : .96 }}
     transition={{ duration: reduced ? 0 : .32, ease: [.22, 1, .36, 1] }}>
     <button className={`lp-family-node ${node.parent ? '' : 'is-root'} ${lineage ? 'is-lineage' : ''} ${node.reconstructed ? 'is-reconstructed' : ''}`}
-      aria-pressed={selected} aria-label={`${node.label}, ${node.lang}`} title={`${node.label} · ${node.lang}`} onClick={onSelect}>
+      data-node-id={node.id} aria-pressed={selected} aria-label={`${node.label}, ${node.lang}`} title={`${node.label} · ${node.lang}`} onClick={onSelect}>
       <span className="lp-node-port" aria-hidden="true" />
       <span className="lp-form">{node.label}</span><span className="lp-lang">{node.lang}</span>
     </button>
   </motion.div>
 }
 
-export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, initialView, onSnapshot, onInspect, onStartFrom, preferredLanguages = [] }: FamilyProps) {
+export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, initialView, onSnapshot, onInspect, onStartFrom, preferredLanguages = [], autoTrace = false }: FamilyProps) {
   const [family, setFamily] = useState(initialFamily)
   const request = useRef<AbortController | null>(null)
   const [pending, setPending] = useState(false)
+  const traceRequest = useRef<AbortController | null>(null)
+  const [tracing, setTracing] = useState(false)
+  const [traceMessage, setTraceMessage] = useState('')
+  const [traceChoice, setTraceChoice] = useState<{ nodeId: string; result: HistoryResult } | null>(null)
   const [historyMessage, setHistoryMessage] = useState('')
   const [choice, setChoice] = useState<{ nodeId: string; result: HistoryResult } | null>(null)
   const leaves = useMemo(() => familyHierarchy(family.nodes).leaves().map(n => n.data), [family])
@@ -110,6 +116,29 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
       if (request.current === controller) setHistoryMessage(controller.signal.aborted ? 'Lookup stopped. You can retry when ready.' : error instanceof Error ? error.message : 'The entry could not be read.')
     } finally { clearTimeout(timer); if (request.current === controller) { request.current = null; setPending(false) } }
   }
+  function showTrace(next: Family) {
+    setFamily(next); onFamilyChange?.(next)
+    setEndpoints(ancestryLeaves(next).map(n => n.id)); setPathOnly(false)
+  }
+  async function runTrace(start: Family = family) {
+    request.current?.abort(); request.current = null; setPending(false); setChoice(null)
+    const controller = new AbortController(); traceRequest.current?.abort(); traceRequest.current = controller
+    setTracing(true); setTraceChoice(null)
+    try {
+      const result = await traceAncestry(start, { signal:controller.signal, load:loadHistory, progress:(next, node) => {
+        if (traceRequest.current !== controller || controller.signal.aborted) return
+        showTrace(next); setTraceMessage(`Following ${node.label} · ${node.lang}…`)
+      } })
+      if (traceRequest.current !== controller || controller.signal.aborted) return
+      showTrace(result.family); setTraceMessage(result.message); setTraceChoice(result.choice ?? null)
+    } catch (error) {
+      if (traceRequest.current === controller) setTraceMessage(controller.signal.aborted ? 'Tracing stopped. The forms already found are kept.' : error instanceof Error ? error.message : 'Tracing interrupted. Your tree is kept.')
+    } finally { if (traceRequest.current === controller) { traceRequest.current = null; setTracing(false) } }
+  }
+  useEffect(() => {
+    if (autoTrace && initialFamily.direction === 'sources') void runTrace(initialFamily)
+    return () => { traceRequest.current?.abort(); traceRequest.current = null }
+  }, [])
   const continuation = family.nodes.filter(n => n.parent === selected.id)
   const continuationVisible = layout.nodes.some(n => n.parent === selected.id)
   const limit = historyLimit(family, selected.id)
@@ -130,6 +159,25 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
     reveal(endpoints.includes(id) ? endpoints.filter(n => n !== id) : [...endpoints, id])
   }
   return <div className="lp-family-explorer">
+    {sourced && <section className="lp-ancestry" aria-label="Trace word ancestry">
+      <div className="lp-actions"><span className="lp-section-label">Toward Proto-Indo-European</span>
+        {tracing ? <button onClick={() => { traceRequest.current?.abort() }}>Stop tracing</button> :
+          !traceChoice && ancestryLeaves(family).some(n => canTrace(n) && !historyLimit(family, n.id)) && <button disabled={pending} onClick={() => void runTrace()}>Continue tracing roots</button>}
+      </div>
+      <p role="status" aria-live="polite">{traceMessage || ancestrySummary(family)}</p>
+      {family.nodes.filter(isPIE).map(node => <button key={node.id} onClick={() => {
+        selectNode(node.id); setPathOnly(false); setEndpoints(previous => [...new Set([...previous, node.id])])
+        requestAnimationFrame(() => {
+          const point = Array.from(scroll.current?.querySelectorAll<HTMLButtonElement>('.lp-family-node') ?? []).find(button => button.dataset.nodeId === node.id)
+          point?.scrollIntoView({ block:'nearest', inline:'nearest', behavior:reduced ? 'instant' : 'smooth' }); point?.focus({ preventScroll:true })
+        })
+      }}>View PIE root · {node.label} ↓</button>)}
+      {traceChoice && <div className="lp-history-choices" role="group" aria-label="Choose ancestry to trace">{traceChoice.result.choices.map(option => <button key={option.id} onClick={() => {
+        try { const next = extendHistory(family, traceChoice.nodeId, traceChoice.result, option.id); showTrace(next); void runTrace(next) }
+        catch (error) { setTraceMessage(error instanceof Error ? error.message : 'Cannot add this history.') }
+      }}><strong>{option.label}</strong><span>{option.summary || option.reason}</span></button>)}</div>}
+    </section>}
+
     <div className="lp-branch-picker" role="group" aria-label="Visible family branches">
       <span className="lp-label">{sourced ? 'Cited forms' : 'Branches'}</span>
       {leaves.filter(n => n.id !== (sourced ? initial.id : '')).map(node => <button key={node.id} aria-pressed={endpoints.includes(node.id)}
@@ -187,7 +235,7 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
           </motion.div>
         </div>
         <div className="lp-graph-legend"><span>{sourced ? 'Word above · cited forms below' : 'Ancestors below · relatives above'}</span><span>┄ omitted stages</span><span>* reconstructed</span></div>
-        <p className="lp-explorer-hint">Choose a form to follow its story. {sourced ? 'Select a form, then Explore deeper to follow its cited history.' : 'Unfold branches above; scroll across wider trees.'}</p>
+        <p className="lp-explorer-hint">Choose a form to follow its story. {sourced ? 'Follow the loaded path toward its earliest cited roots; select any form to inspect the evidence.' : 'Unfold branches above; scroll across wider trees.'}</p>
       </div>
       <aside ref={inspector} tabIndex={-1} className="lp-inspector lp-family-inspector">
         <button className="lp-mobile-inspect" onClick={() => { scroll.current?.scrollIntoView({ block: 'start', behavior: 'instant' }); scroll.current?.focus({ preventScroll: true }) }}>↑ Back to tree</button>
@@ -195,9 +243,9 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
         <div aria-live="polite" aria-atomic="true"><p className={`lp-word ${selected.reconstructed ? 'is-reconstructed' : ''}`}>{selected.label}</p><p className="lp-label">{selected.lang}{selected.reconstructed ? ' · reconstructed' : ''}</p></div>
         {sourced && <section className="lp-history-controls" aria-label="Explore word history">
           {continuation.length > 0 ? <button onClick={() => { setPathOnly(false); setEndpoints(previous => continuationVisible ? foldHistory(family, previous, selected.id) : [...new Set([...previous.filter(id => id !== selected.id), ...continuation.map(n => n.id)])]) }}>{continuationVisible ? 'Fold continuation' : 'Unfold continuation'}</button> :
-            selected.lookup && !selected.historyState ? <button className="lp-main" disabled={pending || !!limit} onClick={exploreHistory}>Explore deeper ↘</button> : null}
+            selected.lookup && !selected.historyState && !isPIE(selected) ? <button className="lp-main" disabled={pending || tracing || !!traceChoice || !!limit} onClick={exploreHistory}>Explore deeper ↘</button> : null}
           {pending && <button onClick={() => { request.current?.abort(); request.current = null; setPending(false); setHistoryMessage('Lookup cancelled. Your tree is unchanged.') }}>Cancel</button>}
-          <p className="lp-label">{limit || selected.historyNote || (!selected.lookup ? 'This language or form is not supported for expansion. Read the linked entry.' : 'Loads only this form and language from Wiktionary when you choose Explore deeper.')}</p>
+          <p className="lp-label">{(isPIE(selected) ? 'Proto-Indo-European: the tracing endpoint. This form is reconstructed, not directly attested.' : null) || limit || selected.historyNote || (continuation.length ? 'Cited continuation is loaded. Select a form to inspect its evidence.' : null) || (!selected.lookup ? 'This language or form is not supported for expansion. Read the linked entry.' : 'Loads only this form and language from Wiktionary when you choose Explore deeper.')}</p>
           <p className="lp-history-status" role="status" aria-live="polite">{historyMessage}</p>
           {choice?.nodeId === selected.id && <div className="lp-history-choices" role="group" aria-label="Choose a separate etymology">
             {choice.result.choices.map(option => <button key={option.id} onClick={() => { try { applyHistory(choice.result, option.id) } catch (error) { setHistoryMessage(error instanceof Error ? error.message : 'Cannot add this history.') } }}>

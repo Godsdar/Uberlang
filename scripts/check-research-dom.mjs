@@ -9,7 +9,7 @@ const bundle = await build({ stdin:{contents:`import { mountResearch } from './w
 const wait = () => new Promise(resolve=>setTimeout(resolve,40))
 async function setup(initial) {
  const dom=new JSDOM('<div id="research"></div>',{url:'https://local-test.invalid',runScripts:'outside-only',pretendToBeVisual:true}),w=dom.window,errors=[],calls=[]
- Object.assign(w,{structuredClone,AbortController,TextEncoder}); w.matchMedia=()=>({matches:true,addListener(){},removeListener(){},addEventListener(){},removeEventListener(){}})
+ Object.assign(w,{structuredClone,AbortController,AbortSignal,TextEncoder}); w.matchMedia=()=>({matches:true,addListener(){},removeListener(){},addEventListener(){},removeEventListener(){}})
  w.scrollTo=()=>{};w.HTMLElement.prototype.scrollIntoView=()=>{};Object.defineProperty(w,'crypto',{value:crypto})
  if(initial!==undefined)w.localStorage.setItem(DISCOVERY_KEY,initial)
  w.addEventListener('error',e=>errors.push(e.error));w.fetch=async(...args)=>{calls.push(args);return{ok:false,status:503}}
@@ -47,4 +47,28 @@ const d=()=>({id:'one',word:'water',language:'en',family:structuredClone(concept
  await h.click('mother ↗');finish({ok:true,json:async()=>({schemaVersion:1,target:{language:'es',term:'agua'},source:null,reason:'No result',choices:[]})});await wait()
  assert.equal(h.w.document.querySelector('.lp-discovery-heading h2').textContent,'motherEnglish');assert.deepEqual(h.errors,[]);h.dom.window.close()
 }
-console.log('PASS 5 research controller scenarios: explicit save, full restore without lookup, corrupt storage, stale tab, local Anki prefill and late response cancellation')
+const revision='https://en.wiktionary.org/w/index.php?oldid=123'
+const tracedNode=(id,parent,target)=>({id,parent,label:target.term,lang:target.language==='ine-pro'?'Proto-Indo-European':'English',lookup:target,source:revision,skipped:[],...(parent&&{relation:'inherited',edgeSource:revision})})
+const response=(target,child)=>({schemaVersion:1,target,source:revision,reason:'No supported continuation',choices:[{id:'etymology-1',label:'Etymology',direction:'sources',note:'Partial history',attribution:'Wiktionary CC BY-SA 4.0',verifiedOn:'2026-10-23',summary:'A sourced form',reason:'',nodes:[tracedNode('root',null,target),...(child?[tracedNode('child','root',child)]:[])]}]})
+const start=async h=>{h.bridge.open({word:'water',language:'en'});await wait();h.w.document.querySelector('form').dispatchEvent(new h.w.Event('submit',{bubbles:true,cancelable:true}));await wait();await wait()}
+{
+ const h=await setup();h.w.fetch=async(...args)=>{h.calls.push(args);const t=JSON.parse(args[1].body);return{ok:true,json:async()=>response(t,t.term==='water'?{language:'en',term:'oldwater'}:{language:'ine-pro',term:'*wódr̥'})}}
+ await start(h);assert.equal(h.calls.length,2);assert.match(h.w.document.querySelector('.lp-ancestry').textContent,/every loaded branch/)
+ await h.click('View PIE root · *wódr̥ ↓');assert.equal(h.w.document.querySelector('.lp-family-node[aria-pressed=true]').textContent,'*wódr̥Proto-Indo-European')
+ await h.click('Save discovery');const stored=JSON.parse(h.w.localStorage.getItem(DISCOVERY_KEY));assert.ok(stored.discoveries[0].family.nodes.some(n=>n.lang==='Proto-Indo-European'))
+ assert.deepEqual(h.errors,[]);h.dom.window.close()
+ const restored=await setup(JSON.stringify(stored));assert.equal(restored.calls.length,0);restored.dom.window.close()
+}
+{
+ const h=await setup();h.w.fetch=async(...args)=>{h.calls.push(args);const t=JSON.parse(args[1].body),r=response(t,t.term==='water'?{language:'en',term:'oldwater'}:{language:'ine-pro',term:'*wódr̥'});if(t.term==='oldwater')r.choices.push({...r.choices[0],id:'etymology-2',label:'Alternative'});return{ok:true,json:async()=>r}}
+ await start(h);const choice=h.w.document.querySelector('[aria-label="Choose ancestry to trace"] button');assert.ok(choice);assert.equal(h.calls.length,2)
+ choice.click();await wait();assert.match(h.w.document.querySelector('.lp-ancestry').textContent,/every loaded branch/);assert.equal(h.calls.length,2);assert.deepEqual(h.errors,[]);h.dom.window.close()
+}
+for(const action of ['Stop tracing','mother ↗']) {
+ const h=await setup();let finish;h.w.fetch=async(...args)=>{h.calls.push(args);const t=JSON.parse(args[1].body);if(t.term==='water')return{ok:true,json:async()=>response(t,{language:'en',term:'oldwater'})};return new Promise(resolve=>{finish=()=>resolve({ok:true,json:async()=>response(t,{language:'ine-pro',term:'*wódr̥'})})})}
+ await start(h);assert.equal(h.calls.length,2);await h.click(action);finish();await wait();assert.deepEqual(h.errors,[])
+ if(action==='Stop tracing'){assert.match(h.w.document.querySelector('.lp-ancestry').textContent,/stopped/);assert.equal(h.w.document.querySelectorAll('.lp-family-node').length,2)}
+ else assert.equal(h.w.document.querySelector('.lp-discovery-heading h2').textContent,'motherEnglish')
+ h.dom.window.close()
+}
+console.log('PASS 9 research controller scenarios: explicit save, full restore without lookup, corrupt storage, stale tab, local Anki prefill, tracing to PIE, explicit ambiguity, restored tree without lookup, stop and stale-response cancellation')

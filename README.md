@@ -29,8 +29,12 @@ Built with TypeScript, React, D3, and Motion.
 
 ## Start with a word
 
-Choose a language and **Explore**. Only that word/language is submitted. Select a
-form to inspect its evidence, **Explore deeper**, or **Explore as a new word**.
+Choose a language and **Explore**. The word and its cited forms are looked up
+sequentially toward **Proto-Indo-European (PIE)**. Separate etymologies pause for
+your choice. Other origins, unsupported forms or missing evidence can end a
+branch earlier; the app never invents a PIE connection. **Stop tracing** keeps
+progress, **Continue tracing roots** resumes, and **View PIE root** reveals a
+reached root. Select any form to inspect its evidence or explore it as a new word.
 Back/Forward revisit selected forms without another request. Fold branches,
 focus a path and zoom without shrinking the text into unreadability.
 
@@ -47,7 +51,7 @@ interests star existing branches without inventing new ones.
 
 **Read in context** keeps passages, English grammar and session notes nearby.
 **My decks → Explore this word** prefills the same research workspace locally;
-choose Explore to submit just that word. A discovery can become an Anki card
+choose Explore to follow its cited roots; the imported passage is not sent. A discovery can become an Anki card
 through the existing editable TXT export. The **Tools** menu remains available,
 and **Appearance** holds the themes and reading layouts.
 

@@ -33,6 +33,7 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
   const [active, setActive] = useState<Discovery | null>(() => loaded.library.discoveries.find(d => d.id === loaded.library.activeId) ?? null)
   const activeRef = useRef(active)
   const [generation, setGeneration] = useState(0)
+  const [autoTrace, setAutoTrace] = useState(false)
   const [term, setTerm] = useState(active?.word ?? '')
   const [language, setLanguage] = useState(active?.language ?? 'en')
   const [context, setContext] = useState('')
@@ -65,7 +66,8 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
     try { commit(saveDiscovery(libraryRef.current, current)); setStatus('Saved on this browser. Changes to this discovery will save automatically.') }
     catch (error) { setStorageError(message(error)) }
   }
-  function activate(next: Discovery) {
+  function activate(next: Discovery, trace = false) {
+    setAutoTrace(trace)
     cancel(); setChoices(null)
     const previous = activeRef.current
     // Keep a recoverable draft when a new search replaces an unsaved tree.
@@ -82,7 +84,7 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
   bridge.open = entry => {
     cancel(); setChoices(null); setTerm(entry.word); setLanguage(entry.language); setContext(entry.context ?? '')
     if (entry.family) { activate(newDiscovery({ ...entry, family: entry.family })); setStatus('History opened locally. Save it to keep exploring later.') }
-    else { setStatus('Word ready. Choose Explore to request only this word and language.'); search.current?.focus() }
+    else { setStatus('Word ready. Choose Explore to follow this word and its cited roots.'); search.current?.focus() }
   }
   useEffect(() => () => request.current?.abort(), [])
   useEffect(() => {
@@ -120,8 +122,8 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
       const result = parseHistory(await response.json(), target)
       if (request.current !== controller || controller.signal.aborted) return
       if (result.choices.length === 1) {
-        activate(newDiscovery({ word: target.term, language: target.language, family: result.choices[0], ...(context && { context }) }))
-        setStatus('Choose a form in the tree to follow its history.')
+        activate(newDiscovery({ word: target.term, language: target.language, family: result.choices[0], ...(context && { context }) }), true)
+        setStatus('Following cited roots toward Proto-Indo-European where the evidence allows.')
       } else {
         setChoices(result)
         setStatus(result.choices.length ? 'This word has separate histories. Choose one; they will stay separate.' : result.reason || 'No sourced history was found. This does not prove the word has no history.')
@@ -149,12 +151,12 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
       <button className="lp-main" type="submit" disabled={pending}>Explore →</button>
       {pending && <button type="button" onClick={() => { cancel(); setStatus('Lookup cancelled. Your tree is unchanged.') }}>Cancel</button>}
     </form>
-    <p className="lp-label">Explore sends only this word and language to Wiktionary through Uberlang. Coverage varies; histories may be incomplete.</p>
+    <p className="lp-label">Explore follows this word and its cited roots through Wiktionary toward Proto-Indo-European. Other origins and gaps in the evidence may stop a branch earlier.</p>
     <div className="lp-research-starts"><span>Try a prepared family</span>{['water', 'mother'].filter(word => options.prepared[word]).map(word => <button key={word} onClick={() => { activate(newDiscovery({ word, language: 'en', family: options.prepared[word] })); setStatus('Prepared family opened offline. Each connection includes its source.'); setContext('') }}>{word} ↗</button>)}<button onClick={options.onContext}>Explore a word from a passage ↓</button></div>
     <p className="lp-research-status" role="status" aria-live="polite">{status}</p>
-    {storageError && <div role="alert" className="lp-storage-error"><p>{storageError}</p><button onClick={backupCurrent} disabled={!active}>Download current discovery</button><button onClick={() => { try { download(localStorage.getItem(DISCOVERY_KEY) ?? '', 'uberlang-stored-data.json') } catch { setStatus('The browser is blocking access to stored data.') } }}>Download stored data</button><button onClick={() => { const next = load(); raw.current = next.raw; loaded.error = next.error; libraryRef.current = next.library; setLibrary(next.library); setStorageError(next.error); if (!next.error) { const current = next.library.discoveries.find(d => d.id === next.library.activeId); if (current) { update(current); setGeneration(g => g + 1) } } }}>Reload saved library</button></div>}
+    {storageError && <div role="alert" className="lp-storage-error"><p>{storageError}</p><button onClick={backupCurrent} disabled={!active}>Download current discovery</button><button onClick={() => { try { download(localStorage.getItem(DISCOVERY_KEY) ?? '', 'uberlang-stored-data.json') } catch { setStatus('The browser is blocking access to stored data.') } }}>Download stored data</button><button onClick={() => { const next = load(); raw.current = next.raw; loaded.error = next.error; libraryRef.current = next.library; setLibrary(next.library); setStorageError(next.error); if (!next.error) { const current = next.library.discoveries.find(d => d.id === next.library.activeId); if (current) { setAutoTrace(false); update(current); setGeneration(g => g + 1) } } }}>Reload saved library</button></div>}
     {unsaved.filter(d => d.id !== active?.id && !library.discoveries.some(s => s.id === d.id)).length > 0 && <details className="lp-draft-recovery"><summary>Unsaved trees from this session</summary>{unsaved.filter(d => d.id !== active?.id && !library.discoveries.some(s => s.id === d.id)).map(d => <div key={d.id}><button onClick={() => activate(d)}>{d.word} — reopen</button><button onClick={() => download(JSON.stringify(saveDiscovery(emptyLibrary(), d)), 'uberlang-unsaved-discovery.json')}>Download {d.word}</button></div>)}<p>Save or download these trees before closing this page.</p></details>}
-    {choices && <div className="lp-history-choices" aria-label="Choose word history">{choices.choices.map(choice => <button key={choice.id} onClick={() => { activate(newDiscovery({ word: choices.target.term, language: choices.target.language, family: choice, ...(context && { context }) })); setStatus('Your chosen etymology is open. Other histories have not been merged.') }}><strong>{choice.label}</strong><span>{choice.summary || choice.reason}</span></button>)}{choices.source && <a href={choices.source} target="_blank" rel="noreferrer">Read the dictionary entry ↗</a>}</div>}
+    {choices && <div className="lp-history-choices" aria-label="Choose word history">{choices.choices.map(choice => <button key={choice.id} onClick={() => { activate(newDiscovery({ word: choices.target.term, language: choices.target.language, family: choice, ...(context && { context }) }), true); setStatus('Your chosen etymology is open. Other histories have not been merged.') }}><strong>{choice.label}</strong><span>{choice.summary || choice.reason}</span></button>)}{choices.source && <a href={choices.source} target="_blank" rel="noreferrer">Read the dictionary entry ↗</a>}</div>}
     <details className="lp-discoveries"><summary>Your discoveries · {library.discoveries.length}</summary>
       <p className="lp-label">Stored in this browser only. Download a backup to keep a copy or move to another device.</p>
       <label>Find a discovery<input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Word or your note" /></label>
@@ -180,7 +182,7 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
     {active ? <article className="lp-discovery" aria-label="Current discovery">
       <header className="lp-discovery-heading"><div><p className="lp-eyebrow">{active.family.direction === 'sources' ? 'Sourced history · partial' : 'Prepared family · sourced examples'}</p><h2 ref={resultHeading} tabIndex={-1}>{active.word}<span>{historyLanguages[active.language]}</span></h2></div><div className="lp-actions"><button className="lp-main" onClick={remember}>{saved && !storageError ? 'Saved · save now' : 'Save discovery'}</button><button onClick={backupCurrent}>Download</button></div></header>
       {active.context && <details><summary>Original context</summary><p className="lp-discovery-context">{active.context}</p></details>}
-      <FamilyExplorer key={`${active.id}:${generation}`} family={active.family} word={active.word} initialView={active.view} onSnapshot={snapshot} preferredLanguages={library.languages} onStartFrom={node => {
+      <FamilyExplorer key={`${active.id}:${generation}`} family={active.family} word={active.word} autoTrace={autoTrace} initialView={active.view} onSnapshot={snapshot} preferredLanguages={library.languages} onStartFrom={node => {
         const code = node.lookup?.language ?? Object.entries(historyLanguages).find(([, name]) => name === node.lang)?.[0]
         const target = code ? historyTarget(code, node.lookup?.term ?? node.label) : undefined
         if (!target) { setStatus('This form cannot be looked up directly. Its source entry is linked in the inspector.'); return }

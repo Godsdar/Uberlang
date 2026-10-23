@@ -389,3 +389,9 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp-research.has-discovery .lp-research-intro{margin-bottom:20px}
 #lingua-concept .lp-research.has-discovery h1{font-size:32px}
 #lingua-concept .lp-research.has-discovery .lp-research-intro>p:last-child{display:none}
+
+/* Trace progress belongs with the tree, including pauses for ambiguous sources. */
+#lingua-concept .lp-ancestry{border-block:1px solid var(--lp-line);padding:12px 0;margin:16px 0 22px}
+#lingua-concept .lp-ancestry .lp-actions{justify-content:space-between;margin:0}
+#lingua-concept .lp-ancestry p{font-size:13px;color:var(--lp-muted);margin:8px 0;max-width:80ch}
+#lingua-concept .lp-ancestry .lp-section-label{color:var(--lp-accent)}
