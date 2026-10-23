@@ -1,0 +1,64 @@
+/* Quiet notebook headings: one disclosure language across research and tools. */
+#lingua-concept .lp details > summary {
+  position:relative;
+  display:block;
+  box-sizing:border-box;
+  min-height:44px;
+  padding:11px 12px 11px 28px;
+  list-style:none;
+  cursor:pointer;
+  line-height:1.5;
+  border-radius:6px;
+  transition:color 180ms ease, background-color 180ms ease;
+}
+#lingua-concept .lp details > summary::-webkit-details-marker { display:none; }
+#lingua-concept .lp details > summary::marker { content:''; }
+#lingua-concept .lp details > summary::before {
+  content:'';
+  position:absolute;
+  left:8px;
+  top:19px;
+  width:6px;
+  height:6px;
+  border-top:1.5px solid currentColor;
+  border-right:1.5px solid currentColor;
+  transform:rotate(45deg);
+  opacity:.65;
+  transition:transform 220ms ease, opacity 180ms ease;
+}
+#lingua-concept .lp details[open] > summary { color:var(--lp-fg); }
+#lingua-concept .lp details[open] > summary::before { transform:rotate(135deg);opacity:1; }
+#lingua-concept .lp details > summary:focus-visible { outline:2px solid var(--lp-accent);outline-offset:3px; }
+@media(hover:hover) {
+  #lingua-concept .lp details > summary:hover { color:var(--lp-fg);background:color-mix(in srgb,var(--lp-surface) 65%,transparent); }
+}
+#lingua-concept .lp .lp-discoveries { padding:6px 0; }
+#lingua-concept .lp .lp-discoveries > summary { font:20px/1.5 Georgia,'Times New Roman',serif;padding-block:14px; }
+#lingua-concept .lp .lp-discoveries > summary::before { top:25px; }
+#lingua-concept .lp .lp-context > summary { font:22px/1.5 Georgia,'Times New Roman',serif; }
+#lingua-concept .lp .lp-context > summary::before { top:24px; }
+#lingua-concept .lp .lp-context > summary span { font:12px/1.6 system-ui,sans-serif;margin-top:3px; }
+#lingua-concept .lp .lp-appearance > summary { padding-right:0; }
+#lingua-concept .lp .lp-tool-guide > summary { width:max-content;max-width:100%;margin-inline:auto; }
+@media(max-width:480px) {
+  #lingua-concept .lp-header { flex-wrap:wrap; }
+  #lingua-concept .lp-header .lp-brand { flex-basis:100%; }
+  #lingua-concept .lp-header .lp-appearance { margin-left:auto; }
+}
+
+/* Native details remains operable without animation support or JavaScript. */
+@supports (interpolate-size:allow-keywords) and (content-visibility:hidden) {
+  #lingua-concept .lp details:not(.lp-appearance)::details-content {
+    interpolate-size:allow-keywords;
+    block-size:0;
+    overflow:clip;
+    opacity:0;
+    transition:block-size 240ms ease, opacity 180ms ease, content-visibility 240ms allow-discrete;
+  }
+  #lingua-concept .lp details[open]:not(.lp-appearance)::details-content { block-size:auto;opacity:1; }
+}
+@media(prefers-reduced-motion:reduce) {
+  #lingua-concept .lp details > summary,
+  #lingua-concept .lp details > summary::before,
+  #lingua-concept .lp details:not(.lp-appearance)::details-content { transition:none; }
+}

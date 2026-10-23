@@ -75,8 +75,6 @@
 
 #lingua-concept .lp-tool-guide{max-width:440px;margin:8px auto 0;text-align:left;}
 #lingua-concept .lp-tool-guide>summary{min-height:44px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:14px;color:var(--lp-muted);cursor:pointer;}
-#lingua-concept .lp-tool-guide>summary::after{content:'+';color:var(--lp-accent);}
-#lingua-concept .lp-tool-guide[open]>summary::after{content:'−';}
 #lingua-concept .lp-tool-guide ul{list-style:none;padding:0;margin:4px 0 12px;}
 #lingua-concept .lp .lp-guide-option{width:100%;display:flex;align-items:center;gap:16px;padding:12px;border-radius:10px;text-align:left;font-size:16px;}
 #lingua-concept .lp-guide-option .lp-tool-icon{width:28px;height:28px;flex:none;}
