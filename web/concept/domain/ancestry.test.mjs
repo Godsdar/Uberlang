@@ -69,3 +69,61 @@ test('a network failure preserves previous progress for an explicit retry',async
   const resumed=await run(latest,async t=>{assert.ok(['gem-pro','ine-pro'].includes(t.language));return result(t,t.language==='ine-pro'?[]:[pie])})
   assert.ok(resumed.family.nodes.some(isPIE))
 })
+
+const relativeResult = (t, terms) => {
+  const value = result(t, terms)
+  value.choices[0].nodes.slice(1).forEach(n => { n.relation = 'descendant' })
+  return value
+}
+const runFamily = async (f, load, extra = {}) => {
+  const { traceWordFamily } = await import('./ancestry.ts')
+  return traceWordFamily(f, {signal:new AbortController().signal, progress(){}, load, ...extra})
+}
+
+test('family lookup visits skipped intermediate stages, previews two relatives and never crawls them', async () => {
+  const { stageEndpoints } = await import('./ancestry.ts')
+  const f=family(en,[old]); f.nodes.push(node('gem','n0',gem), node('pie','gem',pie))
+  const calls=[]
+  const outcome=await runFamily(f,async t=>{
+    calls.push(t)
+    return t.language==='ine-pro' ? result(t) : relativeResult(t,[target('de',`a${t.language}`),target('nl',`b${t.language}`),target('sv',`c${t.language}`)])
+  })
+  assert.deepEqual(calls,[pie,en,old,gem])
+  for(const id of ['root','n0','gem']) {
+    const relatives=outcome.family.nodes.filter(n=>n.parent===id&&n.relation==='descendant')
+    assert.equal(relatives.length,2)
+    assert.ok(relatives.every(n=>stageEndpoints(outcome.family).includes(n.id)))
+  }
+  assert.ok(!calls.some(t=>['de','nl','sv'].includes(t.language)))
+})
+
+test('intermediate alternative histories pause without silently merging relatives', async () => {
+  const f=family(en,[old]); f.nodes.push(node('pie','n0',pie)); f.nodes[0].historyChoice={id:f.id,source,readerSelected:true}
+  const outcome=await runFamily(f,async t=>{
+    if(t.language==='ine-pro')return result(t)
+    const value=relativeResult(t,[target('nl','one')]);value.choices.push({...relativeResult(t,[target('nl','two')]).choices[0],id:'etymology-2'})
+    return value
+  })
+  assert.equal(outcome.choice.nodeId,'n0'); assert.equal(outcome.choice.relatives,true)
+  assert.equal(outcome.family.nodes.length,3)
+})
+
+test('family preview shares the ancestry budget, caches repeated targets, and respects cancellation',async()=>{
+  const f=family(en,Array.from({length:30},(_,i)=>target('en',`stage${i}`)));let calls=0
+  const bounded=await runFamily(f,async t=>{calls++;return result(t)})
+  assert.equal(calls,24);assert.match(bounded.message,/24 entries/)
+  const repeated=family(en,[old,old]);repeated.nodes.push(node('pie0','n0',pie),node('pie1','n1',pie));calls=0
+  await runFamily(repeated,async t=>{calls++;return result(t)})
+  assert.equal(calls,3)
+  const controller=new AbortController(); const updates=[]
+  await assert.rejects(runFamily(family(en),async t=>{controller.abort();return relativeResult(t,[old])},{signal:controller.signal,progress:f=>updates.push(f)}),{name:'AbortError'})
+  assert.ok(updates.every(f=>f.nodes.length===1))
+})
+
+test('PIE overview distinguishes roots, forms and affixes and excludes lateral ancestry',async()=>{
+  const {pieOverview,pieKind,originLabel}=await import('./ancestry.ts')
+  const f=family(en,[pie]);f.nodes.push(node('root-pie','n0',target('ine-pro','*bʰer-')),node('affix','n0',target('ine-pro','*-eti')))
+  f.nodes.push({...node('relative','root',target('ine-pro','*other-')),relation:'cognate'})
+  assert.deepEqual(pieOverview(f).map(pieKind),['PIE root','PIE form','PIE affix'])
+  assert.equal(originLabel('Etymology 2'),'Origin 2')
+})

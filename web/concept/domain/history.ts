@@ -65,7 +65,7 @@ export function foldHistory(family: Family, endpoints: string[], nodeId: string)
 export const isRelative = (node: Family['nodes'][number]) => ['cognate', 'descendant', 'descendant-borrowed', 'related', 'derivative'].includes(node.relation ?? '')
 
 /** Add only the explicitly listed family branches of a chosen entry. */
-export function extendRelatives(family: Family, nodeId: string, result: HistoryResult, choiceId?: string): Family {
+export function extendRelatives(family: Family, nodeId: string, result: HistoryResult, choiceId?: string, maxNewForms = HISTORY_NODE_LIMIT): Family {
   const node = family.nodes.find(n => n.id === nodeId)
   if (!node?.lookup || historyKey(node.lookup) !== historyKey(result.target)) throw new Error('This result belongs to a different form.')
   if (result.choices.length > 1 && !choiceId) throw new Error('Choose a separate etymology before loading relatives.')
@@ -81,6 +81,7 @@ export function extendRelatives(family: Family, nodeId: string, result: HistoryR
     const parent = ids.get(n.parent!)
     if (!parent) continue
     const existing = family.nodes.find(e => e.parent === parent && e.relation === n.relation && e.label === n.label && e.lang === n.lang)
+    if (!existing && added.length >= maxNewForms) continue
     const id = existing?.id ?? `${nodeId}.r${family.nodes.length + added.length}`
     ids.set(n.id, id)
     if (!existing) added.push({ ...n, id, parent })

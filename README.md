@@ -339,3 +339,9 @@ mapping suggestions. Search works without accents. Open a note, edit its lookup
 word if needed, then explore with the original context. Exporting the original
 form retains its imported answer and deck suggestion for review. Historical forms
 start with an empty answer. Storage belongs to this browser and site address.
+
+Word-family exploration checks skipped intermediate entries for relatives within
+the same bounded run, showing a small branch preview at each sourced stage. The
+PIE overview above the tree distinguishes roots, forms and affixes; Origin 1/2
+denotes separate dictionary histories. See
+[ADR-029](docs/decisions/ADR-029-branches-at-each-stage.md).

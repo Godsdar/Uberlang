@@ -1,17 +1,20 @@
 import { historyKey, type HistoryTarget } from '../../../src/shared/etymology.ts'
 import type { Family, FamilyNode } from './graphs.ts'
-import { extendHistory, historyLimit, isRelative, parseHistory, type HistoryResult } from './history.ts'
+import { extendHistory, extendRelatives, HISTORY_NODE_LIMIT, historyLimit, isRelative, parseHistory, type HistoryResult } from './history.ts'
 
 export const ANCESTRY_REQUEST_LIMIT = 24
 export const isPIE = (node: FamilyNode) => node.lookup?.language === 'ine-pro' || node.lang === 'Proto-Indo-European'
-export const ancestryLeaves = (family: Family) => {
+export const ancestryNodes = (family: Family) => {
   const byId = new Map(family.nodes.map(n => [n.id, n]))
-  const primary = family.nodes.filter(n => {
+  return family.nodes.filter(n => {
     let current: FamilyNode | undefined = n
     const seen = new Set<string>()
     while (current) { if (isRelative(current) || seen.has(current.id)) return false; seen.add(current.id); current = current.parent ? byId.get(current.parent) : undefined }
     return true
   })
+}
+export const ancestryLeaves = (family: Family) => {
+  const primary = ancestryNodes(family)
   const parents = new Set(primary.map(n => n.parent))
   return primary.filter(n => !parents.has(n.id))
 }
@@ -30,7 +33,7 @@ export async function loadHistory(target: HistoryTarget, signal: AbortSignal): P
   return parseHistory(await response.json(), target)
 }
 
-type TraceResult = { family: Family; message: string; choice?: { nodeId: string; result: HistoryResult } }
+type TraceResult = { family: Family; message: string; choice?: { nodeId: string; result: HistoryResult; relatives?: boolean } }
 /** Sequential, cancellable traversal of cited edges only; alternatives need the reader. */
 export async function traceAncestry(initial: Family, options: {
   signal: AbortSignal
@@ -59,4 +62,56 @@ export async function traceAncestry(initial: Family, options: {
     family = extendHistory(family, node.id, result)
     options.progress(family, node)
   }
+}
+
+/** Show a small preview at every sourced stage, never recursively crawl relatives. */
+export function stageEndpoints(family: Family): string[] {
+  const primary = ancestryNodes(family)
+  const primaryKeys = new Set(primary.filter(n => n.lookup).map(n => historyKey(n.lookup!)))
+  return [...new Set([...ancestryLeaves(family).map(n => n.id), ...primary.flatMap(parent =>
+    family.nodes.filter(n => n.parent === parent.id && isRelative(n) && (!n.lookup || !primaryKeys.has(historyKey(n.lookup)))).slice(0, 2).map(n => n.id))])]
+}
+
+export const originLabel = (label: string) => label.replace(/^Etymology(?: (\d+))?$/, (_, number) => number ? `Origin ${number}` : 'Word origin')
+export const ORIGIN_HELP = 'Separate dictionary histories for the same spelling, often with different meanings. These numbers are not steps in time or confidence rankings. Choose the meaning you want to explore.'
+export const pieKind = (node: FamilyNode) => /^\*?-/.test(node.label) ? 'PIE affix' : node.label.endsWith('-') ? 'PIE root' : 'PIE form'
+export const pieOverview = (family: Family) => ancestryNodes(family).filter(isPIE).filter((node, index, nodes) =>
+  nodes.findIndex(other => other.label === node.label) === index).sort((a, b) => Number(pieKind(b) === 'PIE root') - Number(pieKind(a) === 'PIE root'))
+
+/** Ancestry has priority; remaining budget fills skipped intermediate entries. */
+export async function traceWordFamily(initial: Family, options: Parameters<typeof traceAncestry>[1]): Promise<TraceResult> {
+  const cache = new Map<string, HistoryResult>()
+  let requests = 0
+  const load = async (target: HistoryTarget, signal: AbortSignal) => {
+    const key = historyKey(target)
+    if (!cache.has(key)) {
+      requests++
+      const result = await options.load(target, signal)
+      signal.throwIfAborted()
+      cache.set(key, result)
+    }
+    return cache.get(key)!
+  }
+  const traced = await traceAncestry(initial, { ...options, load })
+  if (traced.choice || initial.direction !== 'sources') return traced
+  let family = traced.family
+  let limited = false
+  for (const candidate of ancestryNodes(family)) {
+    options.signal.throwIfAborted()
+    // A traced entry already supplied its relatives; only condensed stages need a lookup.
+    if (!candidate.lookup || candidate.historyChoice || candidate.historyState === 'cycle') continue
+    if (historyLimit(family, candidate.id)) { limited = true; continue }
+    if (!cache.has(historyKey(candidate.lookup)) && requests >= ANCESTRY_REQUEST_LIMIT) return { family, message: 'Family lookup paused after 24 entries. Continue to check the remaining stages.' }
+    options.progress(family, candidate)
+    const result = await load(candidate.lookup, options.signal)
+    options.signal.throwIfAborted()
+    const chosen = candidate.parent === null ? family.id : undefined
+    if (result.choices.length > 1 && !result.choices.some(c => c.id === chosen)) return { family,
+      message: `${candidate.label} has separate histories. Choose one before adding its relatives.`, choice: { nodeId: candidate.id, result, relatives: true } }
+    const primaryKeys = new Set(ancestryNodes(family).filter(n => n.lookup).map(n => historyKey(n.lookup!)))
+    const preview = { ...result, choices: result.choices.map(c => ({ ...c, nodes: c.nodes.filter(n => !isRelative(n) || !n.lookup || !primaryKeys.has(historyKey(n.lookup))) })) }
+    family = extendRelatives(family, candidate.id, preview, chosen, Math.min(2, HISTORY_NODE_LIMIT - family.nodes.length))
+    options.progress(family, candidate)
+  }
+  return { family, message: `${ancestrySummary(family)} ${limited ? 'Some stages could not be checked within this tree’s size or depth limit.' : 'Related branches are shown at each stage where the entry provides them.'}` }
 }

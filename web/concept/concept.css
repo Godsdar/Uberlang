@@ -403,3 +403,10 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp .lp-family-branch-menu { margin: 14px 0 22px; }
 #lingua-concept .lp .lp-family-branch-menu > summary { color: var(--lp-muted); font-size: 13px; cursor: pointer; padding: 8px 0; }
 #lingua-concept .lp .lp-family-branch-menu .lp-branch-picker { max-height: 230px; overflow: auto; }
+
+/* The oldest evidenced forms remain readable above the scrollable tree. */
+#lingua-concept .lp-pie-overview{display:flex;flex-wrap:wrap;gap:14px 28px;margin:16px 0 8px}
+#lingua-concept .lp-pie-summary{display:flex;flex-direction:column;gap:6px;flex:1 1 210px;max-width:100%;border-left:2px solid var(--lp-accent);padding:4px 14px}
+#lingua-concept .lp-pie-summary strong{font-family:Georgia,"Times New Roman",serif;font-size:27px;font-weight:500;overflow-wrap:anywhere;color:var(--lp-fg)}
+#lingua-concept .lp-pie-summary .lp-actions{justify-content:flex-start;gap:12px;font-size:12px;flex-wrap:wrap}
+#lingua-concept .lp-history-choices>p{flex-basis:100%;font-size:13px;color:var(--lp-muted);max-width:75ch}
