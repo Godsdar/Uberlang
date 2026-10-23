@@ -3,9 +3,18 @@ import { createRoot, type Root } from 'react-dom/client'
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from 'motion/react'
 import { ancestorIds, familyLayout, familyHierarchy, relationNames, syntaxLayout } from '../domain/graphs'
 import { extendHistory, foldHistory, historyLimit, parseHistory, type HistoryResult } from '../domain/history'
-import type { Family, Token } from '../domain/graphs'
+import type { Family, FamilyNode, Token } from '../domain/graphs'
+import { historyLanguages } from '../../../src/shared/etymology'
+import type { ExplorerView } from '../domain/explorations'
 
-interface FamilyProps { family: Family; word: string; onFamilyChange?: (family: Family) => void }
+export interface FamilyProps {
+  family: Family; word: string; onFamilyChange?: (family: Family) => void
+  initialView?: ExplorerView
+  onSnapshot?: (family: Family, view: ExplorerView) => void
+  onInspect?: (id: string) => void
+  onStartFrom?: (node: FamilyNode) => void
+  preferredLanguages?: string[]
+}
 
 // Exiting nodes must not remain keyboard targets while their branch fades out.
 function FamilyPoint({ node, selected, lineage, reduced, onSelect }: {
@@ -26,7 +35,7 @@ function FamilyPoint({ node, selected, lineage, reduced, onSelect }: {
   </motion.div>
 }
 
-function FamilyExplorer({ family: initialFamily, word, onFamilyChange }: FamilyProps) {
+export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, initialView, onSnapshot, onInspect, onStartFrom, preferredLanguages = [] }: FamilyProps) {
   const [family, setFamily] = useState(initialFamily)
   const request = useRef<AbortController | null>(null)
   const [pending, setPending] = useState(false)
@@ -40,10 +49,22 @@ function FamilyExplorer({ family: initialFamily, word, onFamilyChange }: FamilyP
     const others = leaves.filter(n => n.id !== anchor.id)
     return [...new Set([anchor.id, ...[others[0], others.at(-1)].filter(n => n !== undefined).map(n => n.id)])]
   }, [anchor, leaves])
-  const [selectedId, setSelected] = useState(initial.id)
-  const [endpoints, setEndpoints] = useState(defaults)
-  const [pathOnly, setPathOnly] = useState(false)
-  const [zoom, setZoom] = useState(1)
+  const [selectedId, setSelected] = useState(initialView?.selectedId ?? initial.id)
+  const [endpoints, setEndpoints] = useState(initialView?.endpoints ?? defaults)
+  const [pathOnly, setPathOnly] = useState(initialView?.pathOnly ?? false)
+  const [zoom, setZoom] = useState(initialView?.zoom ?? 1)
+  const scroll = useRef<HTMLDivElement>(null)
+  const inspector = useRef<HTMLElement>(null)
+  const callbacks = useRef({ onSnapshot, onInspect })
+  callbacks.current = { onSnapshot, onInspect }
+  const [positions, setPositions] = useState({ scrollLeft: initialView?.scrollLeft ?? 0, scrollTop: initialView?.scrollTop ?? 0 })
+  const visited = useRef<string[]>(initialView?.visited ?? [initialView?.selectedId ?? initial.id])
+  const [cursor, setCursor] = useState(initialView?.cursor ?? 0)
+  useEffect(() => { if (scroll.current) { scroll.current.scrollLeft = initialView?.scrollLeft ?? 0; scroll.current.scrollTop = initialView?.scrollTop ?? 0 } }, [])
+  useEffect(() => {
+    callbacks.current.onSnapshot?.(family, { selectedId, endpoints, pathOnly, zoom, ...positions, visited: visited.current, cursor })
+    callbacks.current.onInspect?.(selectedId)
+  }, [family, selectedId, endpoints, pathOnly, zoom, positions, cursor])
   const reduced = useReducedMotion()
   const selected = family.nodes.find(n => n.id === selectedId) ?? initial
   // A dictionary entry can stand alone when all its cited branches are folded.
@@ -52,7 +73,11 @@ function FamilyExplorer({ family: initialFamily, word, onFamilyChange }: FamilyP
   const ancestry = useMemo(() => ancestorIds(family.nodes, selected.id), [family, selected.id])
   const trail = useMemo(() => familyHierarchy(family.nodes).descendants().find(n => n.id === selected.id)!.ancestors().reverse(), [family, selected.id])
   const transition = { duration: reduced ? 0 : .32, ease: [.22, 1, .36, 1] as [number, number, number, number] }
-  function selectNode(id: string) {
+  function selectNode(id: string, navigating = false) {
+    if (!navigating && id !== selectedId) {
+      visited.current = [...visited.current.slice(0, cursor + 1), id].slice(-100)
+      setCursor(visited.current.length - 1)
+    }
     request.current?.abort(); request.current = null
     setPending(false); setChoice(null); setHistoryMessage(''); setSelected(id)
   }
@@ -93,6 +118,13 @@ function FamilyExplorer({ family: initialFamily, word, onFamilyChange }: FamilyP
     setPathOnly(false)
     if (!familyLayout(family.nodes, next.length ? next : [initial.id]).nodes.some(n => n.id === selectedId)) selectNode(initial.id)
   }
+  function navigate(delta: number) {
+    const next = cursor + delta, id = visited.current[next]
+    if (!id) return
+    setCursor(next); selectNode(id, true)
+    // Revisiting a folded form reveals its existing path; it never requests data.
+    setEndpoints(previous => [...new Set([...previous, id])])
+  }
   function toggle(id: string) {
     if (!sourced && id === anchor.id) return
     reveal(endpoints.includes(id) ? endpoints.filter(n => n !== id) : [...endpoints, id])
@@ -102,7 +134,7 @@ function FamilyExplorer({ family: initialFamily, word, onFamilyChange }: FamilyP
       <span className="lp-label">{sourced ? 'Cited forms' : 'Branches'}</span>
       {leaves.filter(n => n.id !== (sourced ? initial.id : '')).map(node => <button key={node.id} aria-pressed={endpoints.includes(node.id)}
         disabled={!sourced && node.id === anchor.id} onClick={() => toggle(node.id)}>
-        <span className="lp-branch-mark" aria-hidden="true">{endpoints.includes(node.id) ? '−' : '+'}</span> {sourced ? `${node.label} · ${node.lang}` : node.lang}
+        <span className="lp-branch-mark" aria-hidden="true">{endpoints.includes(node.id) ? '−' : '+'}</span> {sourced ? `${node.label} · ${node.lang}` : node.lang}{preferredLanguages.includes(node.lookup?.language ?? Object.entries(historyLanguages).find(([, name]) => name === node.lang)?.[0] ?? '') ? ' ★' : ''}
       </button>)}
       {leaves.length > 3 && <button className="lp-reveal-all" onClick={() => reveal(endpoints.length === leaves.length ? defaults : leaves.map(n => n.id))}>
         {endpoints.length === leaves.length ? 'Fewer branches' : 'Reveal all'}
@@ -111,6 +143,10 @@ function FamilyExplorer({ family: initialFamily, word, onFamilyChange }: FamilyP
     <div className="lp-explorer-grid">
       <div className="lp-graph-panel">
         <div className="lp-graph-toolbar">
+          <div role="group" aria-label="Exploration navigation">
+            <button aria-label="Previous form" disabled={cursor === 0} onClick={() => navigate(-1)}>← Back</button>
+            <button aria-label="Next form" disabled={cursor >= visited.current.length - 1} onClick={() => navigate(1)}>Forward →</button>
+          </div>
           <div role="group" aria-label="Family detail">
             <button aria-pressed={!pathOnly} onClick={() => setPathOnly(false)}>{sourced ? 'Sources' : 'Family'}</button>
             <button aria-pressed={pathOnly} disabled={sourced && selected.parent === null} onClick={() => setPathOnly(true)}>Selected path</button>
@@ -121,7 +157,8 @@ function FamilyExplorer({ family: initialFamily, word, onFamilyChange }: FamilyP
             <button aria-label="Zoom in" disabled={zoom >= 1.5} onClick={() => setZoom(z => Math.min(1.5, z + .25))}>+</button>
           </div>
         </div>
-        <div className={`lp-graph-scroll lp-family-canvas ${sourced ? 'is-sourced' : ''}`} tabIndex={0} role="region" aria-label={`${word} ${sourced ? 'sources' : 'family'}. Scroll horizontally to explore branches.`}>
+        <button className="lp-mobile-inspect" onClick={() => { inspector.current?.scrollIntoView({ block: 'start', behavior: 'instant' }); inspector.current?.focus({ preventScroll: true }) }}>Selected: {selected.label} · details ↓</button>
+        <div className={`lp-graph-scroll lp-family-canvas ${sourced ? 'is-sourced' : ''}`} ref={scroll} onScroll={event => setPositions({ scrollLeft: event.currentTarget.scrollLeft, scrollTop: event.currentTarget.scrollTop })} tabIndex={0} role="region" aria-label={`${word} ${sourced ? 'sources' : 'family'}. Scroll horizontally to explore branches.`}>
           <motion.div className="lp-graph-size" animate={{ width: layout.width * zoom, height: layout.height * zoom }} transition={transition}>
             <div className="lp-graph-stage" style={{ width: layout.width, height: layout.height, transform: `scale(${zoom})`, transformOrigin: 'top left' }}>
               <svg width={layout.width} height={layout.height} aria-hidden="true" className="lp-family-branches">
@@ -152,7 +189,8 @@ function FamilyExplorer({ family: initialFamily, word, onFamilyChange }: FamilyP
         <div className="lp-graph-legend"><span>{sourced ? 'Word above · cited forms below' : 'Ancestors below · relatives above'}</span><span>┄ omitted stages</span><span>* reconstructed</span></div>
         <p className="lp-explorer-hint">Choose a form to follow its story. {sourced ? 'Select a form, then Explore deeper to follow its cited history.' : 'Unfold branches above; scroll across wider trees.'}</p>
       </div>
-      <aside className="lp-inspector lp-family-inspector">
+      <aside ref={inspector} tabIndex={-1} className="lp-inspector lp-family-inspector">
+        <button className="lp-mobile-inspect" onClick={() => { scroll.current?.scrollIntoView({ block: 'start', behavior: 'instant' }); scroll.current?.focus({ preventScroll: true }) }}>↑ Back to tree</button>
         <div className="lp-section-label">Selected form</div>
         <div aria-live="polite" aria-atomic="true"><p className={`lp-word ${selected.reconstructed ? 'is-reconstructed' : ''}`}>{selected.label}</p><p className="lp-label">{selected.lang}{selected.reconstructed ? ' · reconstructed' : ''}</p></div>
         {sourced && <section className="lp-history-controls" aria-label="Explore word history">
@@ -167,6 +205,7 @@ function FamilyExplorer({ family: initialFamily, word, onFamilyChange }: FamilyP
             </button>)}
           </div>}
         </section>}
+        {onStartFrom && <button className="lp-new-origin" onClick={() => onStartFrom(selected)}>Explore as a new word ↗</button>}
         <p className="lp-word-gloss">{selected.gloss || family.note}</p>
         <nav className="lp-lineage-trail" aria-label="Selected lineage">
           {trail.map(n => <button key={n.id} aria-current={n.id === selected.id ? 'true' : undefined} onClick={() => selectNode(n.data.id)}>{n.data.label}</button>)}

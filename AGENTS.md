@@ -18,6 +18,15 @@ project **lingua** (same project ID). The former lingua-lac domain is a compatib
 alias. Package/API/storage identifiers remain Lingua/lingua; do not migrate them
 for branding. See the owner brief and [current marketing/language coverage](docs/MARKETING_POSITIONING.md); multilingual histories do not imply multilingual initial lookup or grammar.
 
+## Current research entry (ADR-025)
+
+Etymology research is the primary `/` experience. `web/concept/components/research-workspace.tsx`
+uses the existing etymology endpoint for explicit word/language lookup. Context
+reading, English grammar and Anki support that journey. Saved discovery storage
+is `uberlang.explorations.v1`; never clear or overwrite corrupt/unknown data.
+Keep the separate session-note, imported-deck and old roots contracts intact.
+Vercel/Pages build without duplicate CI checks (ADR-026); CI remains independent.
+
 ## Current web entry (ADR-017)
 
 Night notebook is the sole published web UI at `/` (`web/index.html`). The old

@@ -326,3 +326,73 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 /* The declared language remains usable at the narrow notebook width. */
 .lp-analysis-language{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:12px}
 .lp-analysis-language select{max-width:100%}
+
+/* Etymology is the entry point; reading tools support an ongoing discovery. */
+#lingua-concept .lp-shell{max-width:1100px}
+#lingua-concept .lp-research-intro{max-width:700px;margin:24px 0 30px}
+#lingua-concept .lp .lp-eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1.7px;color:var(--lp-gold);margin:0 0 12px}
+#lingua-concept .lp-research h1{font:clamp(32px,5vw,52px)/1.12 Georgia,serif;letter-spacing:-1.2px;margin:0 0 18px}
+#lingua-concept .lp-research-intro>p:last-child{color:var(--lp-muted);font-size:17px}
+#lingua-concept .lp-research-search{display:flex;align-items:end;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+#lingua-concept .lp-research label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--lp-muted)}
+#lingua-concept .lp-research :is(input:not([type=checkbox]),textarea,select){min-width:0;max-width:100%;border:1px solid var(--lp-line);background:var(--lp-surface);color:var(--lp-fg);padding:12px;font:16px/1.5 system-ui,sans-serif;border-radius:6px;box-sizing:border-box}
+#lingua-concept .lp-research :is(input,textarea,select):focus-visible{outline:2px solid var(--lp-accent);outline-offset:3px}
+#lingua-concept .lp-search-word{flex:1;min-width:180px}
+#lingua-concept .lp-search-word input{font:24px/1.25 Georgia,serif!important}
+#lingua-concept .lp-research-search>button{min-height:50px;padding-inline:22px;border:1px solid var(--lp-line)}
+#lingua-concept .lp-research-starts{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--lp-muted);margin:16px 0}
+#lingua-concept .lp-research-starts button{color:var(--lp-accent);text-underline-offset:4px}
+#lingua-concept .lp .lp-research-status{font-size:13px;color:var(--lp-accent);min-height:20px;margin:10px 0}
+#lingua-concept .lp-discoveries{border-block:1px solid var(--lp-line);padding:14px 0;margin:22px 0 30px}
+#lingua-concept .lp-discoveries>summary{color:var(--lp-fg);font-size:15px;cursor:pointer}
+#lingua-concept .lp-discoveries[open]>summary{margin-bottom:18px}
+#lingua-concept .lp-discovery-list{list-style:none;padding:0;max-height:340px;overflow:auto}
+#lingua-concept .lp-discovery-list li{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--lp-line);gap:16px;padding:8px 0}
+#lingua-concept .lp-discovery-list li>button{text-align:left;font:22px/1.4 Georgia,serif;flex:1}
+#lingua-concept .lp-discovery-list small{display:block;color:var(--lp-muted);font:12px/1.8 system-ui,sans-serif}
+#lingua-concept .lp-language-interests>div{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0}
+#lingua-concept .lp-language-interests label{flex-direction:row;align-items:center}
+#lingua-concept .lp-language-interests input{accent-color:var(--lp-accent)}
+#lingua-concept .lp-discovery-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+#lingua-concept .lp .lp-discovery-heading h2{font:40px/1.2 Georgia,serif;overflow-wrap:anywhere}
+#lingua-concept .lp-discovery-heading h2 span{display:block;font:12px/2 system-ui,sans-serif;color:var(--lp-muted);margin-top:6px}
+#lingua-concept .lp-discovery-heading button{border:1px solid var(--lp-line)}
+#lingua-concept .lp-discovery-notes{display:flex;align-items:start;gap:24px;border-top:1px solid var(--lp-line);padding-top:24px;margin-top:26px}
+#lingua-concept .lp-discovery-notes>div{flex:1;min-width:0}
+#lingua-concept .lp-discovery-notes textarea{width:100%;resize:vertical}
+#lingua-concept .lp-discovery-notes [aria-pressed=true]{background:var(--lp-soft);color:var(--lp-accent);box-shadow:inset 0 -1px var(--lp-accent)}
+#lingua-concept .lp-compare{margin:22px 0}
+#lingua-concept .lp-compare label{max-width:400px;margin:14px 0}
+#lingua-concept .lp-compare li{padding:8px 0;font-size:14px;overflow-wrap:anywhere}
+#lingua-concept .lp-context{border-top:1px solid var(--lp-line);margin-top:46px;padding-top:20px}
+#lingua-concept .lp-context>summary{font-size:18px;color:var(--lp-fg);cursor:pointer}
+#lingua-concept .lp-context>summary span{display:block;font-size:12px;color:var(--lp-muted);margin-top:4px}
+#lingua-concept .lp-context[open]>.lp-main-area{margin-top:28px}
+#lingua-concept .lp-research-empty{padding:40px 0 22px;text-align:center;color:var(--lp-muted);font-size:14px;line-height:1.8}
+#lingua-concept .lp .lp-empty-form{font:clamp(20px,4vw,32px)/1.5 Georgia,serif;color:var(--lp-fg);margin-bottom:20px}
+#lingua-concept .lp-storage-error{border:1px solid var(--lp-gold);padding:16px;font-size:14px}
+#lingua-concept .lp-draft-recovery{font-size:12px;color:var(--lp-muted)}
+#lingua-concept .lp .lp-discovery-context{white-space:pre-wrap;overflow-wrap:anywhere;padding:16px 0}
+#lingua-concept .lp .lp-research .lp-graph-toolbar{flex-wrap:wrap;gap:10px}
+#lingua-concept .lp .lp-research .lp-explorer-grid{grid-template-columns:minmax(0,1fr) 260px}
+@media(max-width:760px){
+ #lingua-concept .lp .lp-research .lp-explorer-grid{grid-template-columns:minmax(0,1fr)}
+ #lingua-concept .lp-research-search{gap:12px}
+ #lingua-concept .lp-search-word{flex-basis:100%}
+ #lingua-concept .lp-research-search>label:not(.lp-search-word){flex:1;min-width:0}
+ #lingua-concept .lp-discovery-notes{flex-direction:column}
+ #lingua-concept .lp-discovery-notes>div{width:100%}
+ #lingua-concept .lp-research button{min-height:40px}
+ #lingua-concept .lp-discovery-list li{align-items:start}
+ #lingua-concept .lp-research-intro{margin-top:14px}
+}
+#lingua-concept .lp-research .lp-graph-scroll{max-height:560px}
+#lingua-concept .lp-mobile-inspect{display:none}
+#lingua-concept .lp-new-origin{border:1px solid var(--lp-line);font-size:12px;margin:4px 0 16px}
+@media(max-width:760px){
+ #lingua-concept .lp-mobile-inspect{display:block;color:var(--lp-accent);margin-bottom:12px}
+ #lingua-concept .lp-research .lp-graph-scroll{max-height:400px}
+}
+#lingua-concept .lp-research.has-discovery .lp-research-intro{margin-bottom:20px}
+#lingua-concept .lp-research.has-discovery h1{font-size:32px}
+#lingua-concept .lp-research.has-discovery .lp-research-intro>p:last-child{display:none}

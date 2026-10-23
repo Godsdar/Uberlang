@@ -1,3 +1,5 @@
+import { discoveryCard } from '../web/concept/domain/explorations.ts'
+import { historyTarget } from '../src/shared/etymology.ts'
 import { analysisLimits, languageChoices, languageIssue, wordCount } from '../src/shared/analysis-policy.ts'
 import { analysisExamples } from '../web/concept/domain/analysis-examples.ts'
 import { analysisError } from '../web/concept/domain/analysis-errors.ts'
@@ -35,7 +37,7 @@ function setup(search = '') {
   w.HTMLElement.prototype.scrollIntoView=()=>{}
   w.scrollTo=()=>{}
   w.HTMLElement.prototype.animate=()=>{}
-  Object.assign(w, {analysisLimits,languageChoices,languageIssue,wordCount,analysisExamples,analysisError,NotebookPanels,passageFromLink,lexicalMatches,parseLexicon,selectedLexicalWord,familyLayout,AnalysisRequestGate,parseAnalysis,readingRanges,sentenceRequest,exportDocuments,resolveSelection,conceptData,structuredClone,AbortController,TextEncoder,ankiFields,createAnkiDraft,serializeAnki,ankiIdentity,
+  Object.assign(w, {discoveryCard,historyTarget,mountResearch:()=>({open(){}}),analysisLimits,languageChoices,languageIssue,wordCount,analysisExamples,analysisError,NotebookPanels,passageFromLink,lexicalMatches,parseLexicon,selectedLexicalWord,familyLayout,AnalysisRequestGate,parseAnalysis,readingRanges,sentenceRequest,exportDocuments,resolveSelection,conceptData,structuredClone,AbortController,TextEncoder,ankiFields,createAnkiDraft,serializeAnki,ankiIdentity,
     mountDeckLibrary:(_app,open)=>{w.openImportedEntry=open;return {open(){}}},mountRootsBackup:()=>{},ResizeObserver:class {observe(){}},requestAnimationFrame:f=>f(),
     mountFamily:(el,props)=>{if(!mounts.has(el))mounts.set(el,{kind:'family',props,localState:{}})},
     mountSyntax:(el,props)=>{if(!mounts.has(el))mounts.set(el,{kind:'syntax',props,localState:{}})},

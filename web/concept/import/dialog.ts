@@ -1,3 +1,4 @@
+import type { ResearchEntry } from '../components/research-workspace'
 import { readDeck } from './client'
 import { defaultMapping, listLibrary, mappedNotes, planImport, removeLibrary, saveLibrary, type ImportPlan } from './library'
 import { historyLanguages, historyTarget } from '../../../src/shared/etymology'
@@ -11,7 +12,7 @@ const snippet = (text: string, length = 120) => text.length > length ? text.slic
 const deckPaths = (notes: ImportNote[]) => unique(notes.flatMap(n => n.decks.flatMap(d => { const parts = d.split('::'); return parts.map((_, i) => parts.slice(0, i + 1).join('::')) }))).sort()
 export interface DeckNotebookEntry { text: string; word: string; language: 'en'; source: { filename: string; guid: string; decks: string[]; tags: string[] } }
 
-export function mountDeckLibrary(app: HTMLElement, openNotebook: (entry: DeckNotebookEntry) => void) {
+export function mountDeckLibrary(app: HTMLElement, openNotebook: (entry: DeckNotebookEntry) => void, openResearch?: (entry: ResearchEntry) => void) {
   const dialog = document.createElement('dialog'); dialog.className = 'lp-anki lp-import'
   dialog.setAttribute('aria-labelledby', `${app.id}-decks-title`)
   dialog.innerHTML = `<div class="lp-anki-heading"><h2 id="${app.id}-decks-title">My decks</h2><button type="button" data-deck-close>Close</button></div>
@@ -182,8 +183,16 @@ export function mountDeckLibrary(app: HTMLElement, openNotebook: (entry: DeckNot
     const text = note.example || note.word
     const open = element('button', 'Open example in notebook'); open.disabled = note.language !== 'en' || text.length > 6000
     open.addEventListener('click', () => { returnFocus = null; dialog.close(); openNotebook({ text, word: note.word, language: 'en', source: { filename: note.filename, guid: note.guid, decks: note.decks, tags: note.tags } }) })
-    const scope = element('p', note.language === 'en' ? text.length > 6000 ? 'This example exceeds the notebook’s 6,000-character limit. Choose a shorter example field when importing; the full text is preserved here.' : 'Opening is local. In the notebook, explicitly choose a word lookup or sentence analysis to send that selection.' : 'Notebook grammar and initial meanings are English-only. This note keeps its selected language; supported word histories are available below.')
+    const scope = element('p', note.language === 'en' ? text.length > 6000 ? 'This example exceeds the notebook’s 6,000-character limit. Choose a shorter example field when importing; the full text is preserved here.' : 'Opening is local. In the notebook, explicitly choose a word lookup or sentence analysis to send that selection.' : 'Notebook grammar and initial meanings are English-only. This note keeps its selected language; use Explore this word for supported word histories.')
     scope.className = 'lp-label'; host.append(open, scope)
+    if (openResearch) {
+      const explore = element('button', 'Explore this word →'); explore.className = 'lp-main';
+      explore.disabled = !historyTarget(note.language, note.word.trim());
+      explore.addEventListener('click', () => { returnFocus = null; dialog.close(); openResearch({ word: note.word.trim(), language: note.language, context: (note.example || note.word).slice(0, 6000) }) });
+      host.insertBefore(explore, open);
+      const hint = element('p', 'Open the word in your research workspace, then choose Explore. No lookup is sent when opening. Save its tree there to return later.'); hint.className = 'lp-label'; host.insertBefore(hint, open);
+    }
+    if (!openResearch) {
     const history = element('details'); history.append(element('summary', 'Explore word history'))
     const label = element('label', 'Word to look up'); const word = element('input'); word.value = note.word; word.maxLength = 80; label.append(word)
     const request = element('button', 'Look up word history'), stop = element('button', 'Cancel lookup'); stop.hidden = true
@@ -216,6 +225,7 @@ export function mountDeckLibrary(app: HTMLElement, openNotebook: (entry: DeckNot
       } catch (error) { if (generation === revision) message.textContent = signal.aborted ? 'Lookup timed out or was cancelled. Choose Look up to retry.' : (error as Error).message }
       finally { clearTimeout(timer); if (generation === revision) { request.disabled = false; stop.hidden = true } }
     })
+    }
     const removal = element('details'); removal.append(element('summary', 'Remove from this browser'))
     const remove = element('button', 'Remove this imported note'); remove.addEventListener('click', async () => {
       remove.disabled = true

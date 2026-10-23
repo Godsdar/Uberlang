@@ -2,6 +2,20 @@
 
 Current marketing guidance, 18 October 2026. Use this document for new product descriptions and drafts. Earlier launch drafts, screenshots and published posts record their own dates; they are not a current feature checklist.
 
+## Current research entry — 23 October 2026
+
+ADR-025 supersedes the entry/storage restrictions in the historical coverage
+matrix below. The primary screen is now direct word-history search with a
+supported-language picker; `/api/etymology` still requires evidence in that
+language section. A missing branch is a valid result. Grammar/meaning remain
+English-only. Saved discoveries retain loaded trees, view state, notes and marks
+in this browser, with JSON backup/restore. Context notes remain session-only.
+
+Passage selections and imported Anki words lead into this same research journey.
+Comparison shows common loaded forms, never automatically claims ancestry.
+Language interests star available branches. No learning benefit, complete
+coverage, account sync or automatic recommendations is claimed.
+
 ## Name and promise
 
 The visible name is **Uberlang**, with only U uppercase and lowercase l, following the owner's latest instruction. Keep the L logo. The repository remains `Godsdar/Uberlang`, the demo is https://uberlang.vercel.app/, and existing package, API, DOM and storage identifiers stay compatible. This spelling update supersedes the intermediate uppercase-L branding instruction; historical ADRs and published material retain their original wording.

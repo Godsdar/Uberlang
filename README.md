@@ -7,44 +7,49 @@
 **Explore words, their origins, and connections across languages.**
 
 A space for independent language learners and curious readers to follow sourced word histories.
-Start with an English word or passage; explore supported forms across languages.
+Start with a word and its language; follow evidence and save a personal trail of discoveries.
 Built with TypeScript, React, D3, and Motion.
 
 [![CI](https://github.com/Godsdar/Uberlang/actions/workflows/ci.yml/badge.svg)](https://github.com/Godsdar/Uberlang/actions/workflows/ci.yml)
 [![Vercel demo](https://img.shields.io/badge/demo-Vercel-111111?logo=vercel&logoColor=white)](https://uberlang.vercel.app/)
 [![MIT](https://img.shields.io/badge/code-MIT-blue.svg)](LICENSE)
 
-**[Open Night notebook](https://uberlang.vercel.app/)** ·
+**[Explore word histories](https://uberlang.vercel.app/)** ·
 [Quick start](#quick-start) · [Product specification](docs/PRODUCT_SPEC.md)
 
 </div>
 
 > [!NOTE]
-> Uberlang is an early personal project. Reading and Study share the same capabilities.
-> Initial word lookup and sentence analysis are English; **Explore deeper** can follow
-> supported forms in other languages through the English-language edition of Wiktionary.
-> A prepared language branch is not proof of live coverage. The workspace offers **live English grammar analysis**
-> alongside three prepared examples. It uses spaCy, a statistical model that can
-> make mistakes. New sentences receive a grammar-based reading; an explicit word
-> lookup retrieves dictionary senses and supported etymological sources from
-> Wiktionary. Coverage is partial, and senses are not automatically disambiguated.
+> Uberlang is an early personal project. Word histories use supported language
+> sections of English Wiktionary; coverage is partial. Multiple etymologies stay
+> separate, and a component or inflection is not presented as an ancestor.
+> Grammar and dictionary meanings for passages remain English-only. Prepared
+> families are labeled and work offline. No live translation or automatic sense
+> selection is offered.
 
-## Choose a direction
+## Start with a word
 
-Open the translucent **Tools** wheel to choose Word histories, Understand,
-Sentence structure or Study notes. Each action uses a plain outline icon in a full circular sector;
-the selected word stays at the center. The same circle adapts to mobile widths.
-Hover slightly enlarges and rotates one sector. Names and limits appear on
-hover or keyboard focus; **Tool guide** offers labeled choices on touch screens.
-Reduced motion removes movement. Tool selection opens a view without submitting text.
+Choose a language and **Explore**. Only that word/language is submitted. Select a
+form to inspect its evidence, **Explore deeper**, or **Explore as a new word**.
+Back/Forward revisit selected forms without another request. Fold branches,
+focus a path and zoom without shrinking the text into unreadability.
 
-[![Uberlang radial entry with four language tools](docs/assets/uberlang-radial-desktop-2026-10-18.jpg)](docs/assets/uberlang-radial-desktop-2026-10-18.jpg)
+**Save discovery** keeps the loaded graph, selected form, branches, zoom, scroll,
+notes and personal marks on this browser. Further changes to a saved discovery
+autosave. **Your discoveries** reopens it without network requests. JSON download
+and a previewed restore provide a portable backup; clearing browser data removes
+local copies. Limits: 30 discoveries / 2 million UTF-16 units. Write errors are
+visible; another tab's newer library is not silently overwritten.
 
-Use **Use your own text** to open the editor, or **Open notebook** to go straight
-to the workspace. **Appearance** holds themes and Reading/Study layouts. Both
-layouts now share the draft, selected occurrence and session notes. Switching
-tools preserves the selected tree form, branches and zoom for unchanged context.
-Examples and notes open on demand; source evidence remains beside the results.
+Compare two saved explorations to find common **forms**, with separate source
+links. This is a lead to research, not proof of a common ancestor. Language
+interests star existing branches without inventing new ones.
+
+**Read in context** keeps passages, English grammar and session notes nearby.
+**My decks → Explore this word** prefills the same research workspace locally;
+choose Explore to submit just that word. A discovery can become an Anki card
+through the existing editable TXT export. The **Tools** menu remains available,
+and **Appearance** holds the themes and reading layouts.
 
 ## A word’s family
 
