@@ -107,3 +107,37 @@ test('initial lookup keeps an unsupported homonym beside a supported history', a
   assert.equal(layer.data.families.length,2)
   assert.equal(layer.data.families[0].nodes[0].historyState,'unavailable')
 })
+
+test('expression history preserves cited prose and uncertainty without inventing word ancestry', async () => {
+  const source = page('kick the bucket', `==English==
+===Etymology===
+The origin is uncertain. Possibly a reference to a [[bucket]].
+===Idiom===
+# To die.`, 345)
+  const lookup = createHistoryLookup(createPageCache(async () => [source]))
+  const result = await lookup({language:'en',term:'kick the bucket'}, new AbortController().signal)
+  assert.equal(result.choices[0].historyText, 'The origin is uncertain. Possibly a reference to a bucket.')
+  assert.equal(result.choices[0].nodes.length, 1, 'prose is not a source edge')
+  assert.equal(result.choices[0].nodes[0].source, source.source)
+  assert.equal(result.choices[0].summary, 'To die.')
+})
+
+test('unsupported expression prose stays unavailable and alternative histories stay separate', async () => {
+  const source = page('test phrase', `==English==
+===Etymology 1===
+Possibly {{unsupported|a story}}.
+====Phrase====
+# First meaning.
+===Etymology 2===
+A later expression with a different origin.
+====Phrase====
+# Second meaning.`)
+  const lookup = createHistoryLookup(createPageCache(async () => [source]))
+  const result = await lookup({language:'en',term:'test phrase'}, new AbortController().signal)
+  assert.equal(result.choices.length, 2)
+  assert.equal(result.choices[0].historyText, undefined)
+  assert.equal(result.choices[1].historyText, 'A later expression with a different origin.')
+  const absent = await createHistoryLookup(createPageCache(async()=>[]))({language:'en',term:'Birds sing near my window'},new AbortController().signal)
+  assert.equal(absent.choices.length, 0)
+  assert.equal(absent.source, null)
+})

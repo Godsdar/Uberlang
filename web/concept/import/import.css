@@ -7,7 +7,7 @@
 #lingua-concept .lp .lp-import input:not([type=checkbox]){box-sizing:border-box;width:100%;padding:10px;border:1px solid var(--lp-line);background:var(--lp-surface);color:var(--lp-fg);border-radius:6px;font:inherit;}
 #lingua-concept .lp .lp-import-file{display:grid;gap:8px;margin:18px 0;font-size:1rem;}
 #lingua-concept .lp .lp-import :is(p,li,blockquote){overflow-wrap:anywhere;}
-#lingua-concept .lp .lp-import-row{border-top:1px solid var(--lp-line);padding:10px 0;}
+#lingua-concept .lp .lp-import-row{padding:10px 0;}
 #lingua-concept .lp .lp-import-note{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;}
 #lingua-concept .lp .lp-import-note span{min-width:0;overflow-wrap:anywhere;}
 #lingua-concept .lp .lp-import-note strong{font:1.1rem/1.5 Georgia,serif;}
@@ -15,7 +15,7 @@
 #lingua-concept .lp .lp-import-note input{flex:none;accent-color:var(--lp-accent);width:18px;height:18px;}
 #lingua-concept .lp .lp-import-row details{font-size:.85rem;margin:4px 0 0 30px;}
 #lingua-concept .lp .lp-import blockquote{white-space:pre-wrap;border-left:1px solid var(--lp-line);padding:8px 16px;margin:12px 0;max-height:14rem;overflow:auto;}
-#lingua-concept .lp .lp-import [data-deck-confirm]{border-top:1px solid var(--lp-line);padding-top:12px;}
+#lingua-concept .lp .lp-import [data-deck-confirm]{padding-top:12px;}
 #lingua-concept .lp .lp-import-choice{display:block;text-align:left;margin:8px 0;border:1px solid var(--lp-line);width:100%;white-space:normal;}
 #lingua-concept .lp .lp-import-history{max-width:100%;overflow:hidden;}
 #lingua-concept .lp .lp-import .lp-actions{flex-wrap:wrap;}

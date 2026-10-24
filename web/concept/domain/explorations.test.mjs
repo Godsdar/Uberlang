@@ -60,3 +60,14 @@ test('imported card answer is retained only for its original form', async () => 
   const historical=discoveryCard({...d,view:{selectedId:'other'}})
   assert.equal(createAnkiDraft(historical.note,historical.document).answer,'')
 })
+
+test('expression history and original passage survive library round-trip; old libraries remain valid', () => {
+ const item = {...prepared(), word:'spill the beans', context:'Please spill the beans.', family:{...live(), historyText:'Possibly a later expression; origin uncertain.', nodes:[node('root',null,'spill the beans')]}}
+ const restored = parseLibrary(JSON.stringify(saveDiscovery(emptyLibrary(),item))).discoveries[0]
+ assert.equal(restored.family.historyText,item.family.historyText)
+ assert.equal(restored.context,item.context)
+ assert.equal(restored.family.nodes[0].source,source(1))
+ assert.equal(parseLibrary(JSON.stringify(saveDiscovery(emptyLibrary(),prepared()))).discoveries.length,1)
+ item.family.historyText = {untrusted:'not text'}
+ assert.throws(()=>validateDiscovery(item))
+})

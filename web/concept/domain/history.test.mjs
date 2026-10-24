@@ -55,3 +55,13 @@ test('stale or malformed history responses cannot be attached to a different wor
   }
   assert.throws(()=>extendHistory(family(),'root',parseHistory(raw(),raw().target)))
 })
+
+test('expression prose survives the network adapter without losing its revision', () => {
+  const response = raw()
+  response.choices[0].historyText = 'Possibly a later expression; the origin is uncertain.'
+  const parsed = parseHistory(response, response.target)
+  assert.equal(parsed.choices[0].historyText, response.choices[0].historyText)
+  assert.equal(parsed.choices[0].nodes[0].source, source(2))
+  response.choices[0].historyText = 'x'.repeat(3001)
+  assert.throws(() => parseHistory(response, response.target))
+})

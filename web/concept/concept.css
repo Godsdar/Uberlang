@@ -22,7 +22,7 @@
 #lingua-concept .lp-shell{max-width:900px;margin:34px auto 0;}
 #lingua-concept .lp-intro{margin:0 0 12px;font-size:26px;line-height:1.3;font-weight:400;letter-spacing:-.6px;}
 #lingua-concept .lp-sub{margin:0 0 24px;color:var(--lp-muted);}
-#lingua-concept .lp-editor{width:100%;min-height:98px;resize:vertical;background:transparent;color:var(--lp-fg);border:0;border-bottom:1px solid var(--lp-line);border-radius:0;padding:10px 0;font-size:21px;line-height:1.6;}
+#lingua-concept .lp-editor{width:100%;min-height:98px;resize:vertical;background:transparent;color:var(--lp-fg);border:0;border-radius:0;padding:10px 0;font-size:21px;line-height:1.6;}
 #lingua-concept .lp-editor::placeholder{color:var(--lp-muted);}
 #lingua-concept .lp-editor-top{display:flex;justify-content:space-between;gap:10px;margin-bottom:4px;flex-wrap:wrap;}
 #lingua-concept .lp-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0;}
@@ -31,11 +31,11 @@
 #lingua-concept .lp-status{min-height:22px;margin:6px 0 18px;color:var(--lp-muted);font-size:12px;}
 #lingua-concept .lp-source{font-size:20px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere;}
 #lingua-concept .lp-source button{padding:2px 3px;border-radius:3px;font:inherit;line-height:inherit;display:inline;}
-#lingua-concept .lp-source button[aria-pressed="true"]{color:var(--lp-accent);background:var(--lp-soft);box-shadow:inset 0 -1px var(--lp-accent);}
+#lingua-concept .lp-source button[aria-pressed="true"]{color:var(--lp-accent);background:var(--lp-soft);box-shadow:none;}
 #lingua-concept .lp-section-label{color:var(--lp-muted);font-size:11px;letter-spacing:1.1px;text-transform:uppercase;margin:24px 0 8px;}
 #lingua-concept .lp-tabs{display:flex;gap:20px;margin:25px 0 22px;flex-wrap:wrap;}
 #lingua-concept .lp-tabs button{border-radius:0;padding:8px 0;position:relative;color:var(--lp-muted);}
-#lingua-concept .lp-tabs button[aria-pressed="true"]{color:var(--lp-fg);box-shadow:inset 0 -2px var(--lp-accent);}
+#lingua-concept .lp-tabs button[aria-pressed="true"]{color:var(--lp-fg);box-shadow:none;}
 #lingua-concept .lp-panels{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:32px;align-items:start;}
 #lingua-concept .lp[data-layout="study"] .lp-main-area{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:32px;align-items:start;}
 #lingua-concept .lp[data-layout="study"] .lp-panels{grid-template-columns:minmax(0,1fr);gap:18px;}
@@ -55,7 +55,7 @@
 #lingua-concept .lp-phrase-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
 #lingua-concept .lp-phrase-row button{border:1px solid var(--lp-line);font-size:12px;}
 #lingua-concept .lp-dependencies{display:flex;flex-direction:column;gap:3px;}
-#lingua-concept .lp-dep{display:grid;grid-template-columns:minmax(0,1fr) 95px minmax(0,1fr);align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--lp-line);}
+#lingua-concept .lp-dep{display:grid;grid-template-columns:minmax(0,1fr) 95px minmax(0,1fr);align-items:center;gap:12px;padding:8px 0;}
 #lingua-concept .lp-dep span:first-child{text-align:right;}
 #lingua-concept .lp-relation{text-align:center;color:var(--lp-accent);font-size:12px;}
 #lingua-concept .lp-dep.is-current{background:var(--lp-soft);border-radius:5px;}
@@ -75,11 +75,11 @@
 #lingua-concept .lp-export{margin-top:20px;padding-top:20px;}
 #lingua-concept .lp-export textarea{width:100%;min-height:210px;background:var(--lp-surface);color:var(--lp-fg);border:1px solid var(--lp-line);border-radius:6px;padding:12px;font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;resize:vertical;}
 #lingua-concept .lp-report-preview{margin:18px 0;overflow-wrap:anywhere;}
-#lingua-concept .lp-report-preview article{border-top:1px solid var(--lp-line);padding:18px 0;}
+#lingua-concept .lp-report-preview article{padding:18px 0;}
 #lingua-concept .lp-report-preview h2{font-size:21px;font-weight:500;margin:0 0 8px;}
 #lingua-concept .lp-report-preview blockquote{margin:12px 0;padding-left:14px;border-left:2px solid var(--lp-line);}
 #lingua-concept .lp-report-preview table{width:100%;border-collapse:collapse;font-size:12px;}
-#lingua-concept .lp-report-preview td,#lingua-concept .lp-report-preview th{text-align:left;padding:7px 4px;border-bottom:1px solid var(--lp-line);overflow-wrap:anywhere;}
+#lingua-concept .lp-report-preview td,#lingua-concept .lp-report-preview th{text-align:left;padding:7px 4px;overflow-wrap:anywhere;}
 #lingua-concept .lp-report-preview svg{display:block;width:100%;height:auto;}
 #lingua-concept .lp-report-preview small{color:var(--lp-muted);}
 #lingua-concept .lp-source[aria-disabled="true"]{opacity:.55;}
@@ -116,7 +116,7 @@ body {margin:0;background:#181b24;color:#e2e6ef;font-family:system-ui,sans-serif
 #lingua-concept .lp-branch-picker {display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
 #lingua-concept .lp-branch-picker .lp-label {margin-right:8px;}
 #lingua-concept .lp-branch-picker button {border:1px solid var(--lp-line);font-size:12px;border-radius:20px;padding:5px 11px;}
-#lingua-concept .lp-branch-picker button[aria-pressed="true"]{background:none;color:var(--lp-fg);border-bottom-color:var(--lp-accent);}
+#lingua-concept .lp-branch-picker button[aria-pressed="true"]{background:none;color:var(--lp-fg);font-weight:600;}
 #lingua-concept .lp-explorer-grid {display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:26px;align-items:start;}
 #lingua-concept .lp-graph-panel {min-width:0;}
 #lingua-concept .lp-graph-toolbar {display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding-bottom:9px;}
@@ -155,7 +155,7 @@ body {margin:0;background:#181b24;color:#e2e6ef;font-family:system-ui,sans-serif
 #lingua-concept .lp-model-notes p{margin:6px 0;}
 #lingua-concept .lp-model-notes ul{padding-left:18px;margin:6px 0;}
 
-#lingua-concept .lp-lexical-actions{border-top:1px solid var(--lp-line);margin-top:14px;padding-top:2px;}
+#lingua-concept .lp-lexical-actions{margin-top:14px;padding-top:2px;}
 #lingua-concept .lp-lexical-actions button[data-action="lexicon"]{border:1px solid var(--lp-line);color:var(--lp-accent);}
 #lingua-concept .lp-dictionary{margin-top:22px;padding-top:2px;}
 #lingua-concept .lp-dictionary ol{padding-left:22px;}
@@ -182,7 +182,7 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp-brand img{width:28px;height:28px;}
 #lingua-concept .lp-theme{border:0;background:none;border-radius:0;padding:0;gap:14px;}
 #lingua-concept .lp .lp-theme button{border-radius:0;padding:7px 0;min-height:32px;}
-#lingua-concept .lp .lp-theme button[aria-pressed="true"]{background:none;box-shadow:inset 0 -1px var(--lp-accent);color:var(--lp-fg);}
+#lingua-concept .lp .lp-theme button[aria-pressed="true"]{background:none;box-shadow:none;color:var(--lp-fg);}
 #lingua-concept .lp-notebook-label{font:11px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.6px;color:var(--lp-muted);margin-bottom:10px;}
 #lingua-concept .lp-notebook-label span{color:var(--lp-gold);padding:0 8px;}
 #lingua-concept .lp-intro{font-family:Georgia,'Times New Roman',serif;font-size:32px;line-height:1.2;letter-spacing:-.6px;margin:0 0 10px;font-weight:400;text-wrap:balance;}
@@ -206,7 +206,7 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp h2.lp-tree-title{font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:1.25;letter-spacing:-.4px;font-weight:400;margin:4px 0 20px;}
 #lingua-concept .lp-family-explorer{margin-top:0;}
 #lingua-concept .lp-branch-picker{gap:4px 10px;margin-bottom:18px;}
-#lingua-concept .lp-branch-picker button{padding:6px 3px;border:0;border-bottom:1px solid transparent;border-radius:0;min-height:30px;overflow-wrap:anywhere;}
+#lingua-concept .lp-branch-picker button{padding:6px 3px;border:0;border-radius:0;min-height:30px;overflow-wrap:anywhere;}
 #lingua-concept .lp-branch-picker button:disabled{opacity:1;}
 #lingua-concept .lp-branch-mark{font-family:ui-monospace,monospace;margin-right:4px;}
 #lingua-concept .lp-branch-picker button.lp-reveal-all{border-color:transparent;text-decoration:underline;text-underline-offset:4px;}
@@ -267,7 +267,7 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 
 /* Small supporting elements use the same reading rhythm. */
 .lp-layout-picker button{border-radius:0;min-height:36px;color:inherit;}
-.lp-layout-picker button[aria-pressed="true"]{background:none;color:inherit;box-shadow:inset 0 -2px currentColor;}
+.lp-layout-picker button[aria-pressed="true"]{background:none;color:inherit;box-shadow:none;}
 .lp-layout-picker button:focus-visible,.lp-skip-link:focus-visible{outline:2px solid currentColor;outline-offset:3px;}
 .lp-skip-link{position:absolute;left:20px;top:-100px;z-index:2;padding:10px 14px;background:#181b24;color:#e2e6ef;border:1px solid currentColor;}
 .lp-skip-link:focus{position:fixed;top:12px;}
@@ -304,8 +304,8 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp .lp-anki summary{cursor:pointer;color:var(--lp-muted);}
 #lingua-concept .lp .lp-anki :is(pre,[data-anki-front],[data-anki-back]){white-space:pre-wrap;overflow-wrap:anywhere;font:1rem/1.65 system-ui,sans-serif;}
 #lingua-concept .lp .lp-anki pre{max-height:16rem;overflow:auto;}
-#lingua-concept .lp .lp-anki-preview{border-block:1px solid var(--lp-line);margin-top:10px;padding:12px 0;}
-#lingua-concept .lp .lp-anki-preview>div+div{border-top:1px solid var(--lp-line);padding-top:10px;}
+#lingua-concept .lp .lp-anki-preview{margin-top:10px;padding:12px 0;}
+#lingua-concept .lp .lp-anki-preview>div+div{padding-top:10px;}
 #lingua-concept .lp .lp-anki-preview [data-anki-front]{font:1.3rem/1.6 Georgia,'Times New Roman',serif;}
 #lingua-concept .lp .lp-anki-preview [data-anki-back]{max-height:14rem;overflow:auto;}
 #lingua-concept .lp .lp-anki :focus-visible{outline:2px solid var(--lp-accent);outline-offset:3px;}
@@ -314,7 +314,7 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
  #lingua-concept .lp dialog.lp-anki{padding:18px;}
  #lingua-concept .lp .lp-anki-fields{grid-template-columns:minmax(0,1fr);}
 }
-#lingua-concept .lp .lp-anki-footer{background:var(--lp-bg);border-top:1px solid var(--lp-line);padding:8px 0 0;margin-top:12px;}
+#lingua-concept .lp .lp-anki-footer{background:var(--lp-bg);padding:8px 0 0;margin-top:12px;}
 
 
 #lingua-concept .lp .lp-anki .lp-label{margin:8px 0;}
@@ -340,10 +340,10 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp-research-starts{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--lp-muted);margin:16px 0}
 #lingua-concept .lp-research-starts button{color:var(--lp-accent);text-underline-offset:4px}
 #lingua-concept .lp .lp-research-status{font-size:13px;color:var(--lp-accent);min-height:20px;margin:10px 0}
-#lingua-concept .lp-discoveries{border-block:1px solid var(--lp-line);padding:14px 0;margin:22px 0 30px}
+#lingua-concept .lp-discoveries{padding:14px 0;margin:22px 0 30px}
 #lingua-concept .lp-discoveries>summary{color:var(--lp-fg);font-size:15px;cursor:pointer}
 #lingua-concept .lp-discovery-list{list-style:none;padding:0;max-height:340px;overflow:auto}
-#lingua-concept .lp-discovery-list li{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--lp-line);gap:16px;padding:8px 0}
+#lingua-concept .lp-discovery-list li{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:8px 0}
 #lingua-concept .lp-discovery-list li>button{text-align:left;font:22px/1.4 Georgia,serif;flex:1}
 #lingua-concept .lp-discovery-list small{display:block;color:var(--lp-muted);font:12px/1.8 system-ui,sans-serif}
 #lingua-concept .lp-language-interests>div{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0}
@@ -353,14 +353,14 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp .lp-discovery-heading h2{font:40px/1.2 Georgia,serif;overflow-wrap:anywhere}
 #lingua-concept .lp-discovery-heading h2 span{display:block;font:12px/2 system-ui,sans-serif;color:var(--lp-muted);margin-top:6px}
 #lingua-concept .lp-discovery-heading button{border:1px solid var(--lp-line)}
-#lingua-concept .lp-discovery-notes{display:flex;align-items:start;gap:24px;border-top:1px solid var(--lp-line);padding-top:24px;margin-top:26px}
+#lingua-concept .lp-discovery-notes{display:flex;align-items:start;gap:24px;padding-top:24px;margin-top:26px}
 #lingua-concept .lp-discovery-notes>div{flex:1;min-width:0}
 #lingua-concept .lp-discovery-notes textarea{width:100%;resize:vertical}
-#lingua-concept .lp-discovery-notes [aria-pressed=true]{background:var(--lp-soft);color:var(--lp-accent);box-shadow:inset 0 -1px var(--lp-accent)}
+#lingua-concept .lp-discovery-notes [aria-pressed=true]{background:var(--lp-soft);color:var(--lp-accent);box-shadow:none;}
 #lingua-concept .lp-compare{margin:22px 0}
 #lingua-concept .lp-compare label{max-width:400px;margin:14px 0}
 #lingua-concept .lp-compare li{padding:8px 0;font-size:14px;overflow-wrap:anywhere}
-#lingua-concept .lp-context{border-top:1px solid var(--lp-line);margin-top:46px;padding-top:20px}
+#lingua-concept .lp-context{margin-top:46px;padding-top:20px}
 #lingua-concept .lp-context>summary{font-size:18px;color:var(--lp-fg);cursor:pointer}
 #lingua-concept .lp-context>summary span{display:block;font-size:12px;color:var(--lp-muted);margin-top:4px}
 #lingua-concept .lp-context[open]>.lp-main-area{margin-top:28px}
@@ -394,7 +394,7 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp-research.has-discovery .lp-research-intro>p:last-child{display:none}
 
 /* Trace progress belongs with the tree, including pauses for ambiguous sources. */
-#lingua-concept .lp-ancestry{border-block:1px solid var(--lp-line);padding:12px 0;margin:16px 0 22px}
+#lingua-concept .lp-ancestry{padding:12px 0;margin:16px 0 22px}
 #lingua-concept .lp-ancestry .lp-actions{justify-content:space-between;margin:0}
 #lingua-concept .lp-ancestry p{font-size:13px;color:var(--lp-muted);margin:8px 0;max-width:80ch}
 #lingua-concept .lp-ancestry .lp-section-label{color:var(--lp-accent)}
@@ -410,3 +410,26 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp-pie-summary strong{font-family:Georgia,"Times New Roman",serif;font-size:27px;font-weight:500;overflow-wrap:anywhere;color:var(--lp-fg)}
 #lingua-concept .lp-pie-summary .lp-actions{justify-content:flex-start;gap:12px;font-size:12px;flex-wrap:wrap}
 #lingua-concept .lp-history-choices>p{flex-basis:100%;font-size:13px;color:var(--lp-muted);max-width:75ch}
+
+/* Primary entry modes and occurrence reading use spacing, not divider rules. */
+#lingua-concept .lp-entry-modes{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0 30px}
+#lingua-concept .lp-entry-modes button{font-size:16px;padding:10px 14px;color:var(--lp-muted)}
+#lingua-concept .lp-entry-modes button[aria-pressed=true]{color:var(--lp-accent);background:var(--lp-soft)}
+#lingua-concept .lp-context{margin-top:0;padding-top:0}
+#lingua-concept .lp-context-title{font:clamp(30px,4vw,46px)/1.2 Georgia,serif;margin:0 0 16px}
+#lingua-concept .lp-context>.lp-main-area{margin-top:20px}
+#lingua-concept .lp-sentence-picker{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
+#lingua-concept .lp-sentence-picker:empty{display:none}
+#lingua-concept .lp-sentence-picker button[aria-pressed=true]{background:var(--lp-soft);color:var(--lp-accent)}
+#lingua-concept .lp-occurrences{margin-top:28px}
+#lingua-concept .lp .lp-occurrence{display:grid;grid-template-columns:minmax(80px,.6fr) minmax(0,1fr);gap:4px 18px;width:100%;text-align:left;padding:12px 8px;margin:6px 0;overflow-wrap:anywhere}
+#lingua-concept .lp-occurrence small{color:var(--lp-muted)}
+#lingua-concept .lp-occurrence[aria-pressed=true]{background:var(--lp-soft);color:var(--lp-accent)}
+#lingua-concept .lp-expression-history{margin:24px 0;max-width:76ch}
+#lingua-concept .lp-expression-history p{white-space:pre-wrap}
+#lingua-concept .lp-entry-context{max-width:76ch;margin:18px 0}
+#lingua-concept .lp-entry-context p{white-space:pre-wrap;overflow-wrap:anywhere}
+#lingua-concept .lp-editor:focus-visible{outline:2px solid var(--lp-accent);outline-offset:4px}
+
+#lingua-concept .lp-tabs button[aria-pressed="true"],#lingua-concept .lp .lp-theme button[aria-pressed="true"]{background:var(--lp-soft);border-radius:6px;padding-inline:10px}
+.lp-layout-picker button[aria-pressed="true"]{background:var(--lp-soft);border-radius:6px;font-weight:600}

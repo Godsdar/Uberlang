@@ -6,7 +6,7 @@ export interface LexiconInput { documentId: string; language: 'en'; word: string
 export type LookupPages = (titles: string[], signal?: AbortSignal) => Promise<WiktionaryPage[]>
 const attribution = 'Wiktionary contributors · CC BY-SA 4.0. Definitions and source relationships adapted from the cited revision.'
 const relations: Record<string, string> = { inh: 'inherited', inherited: 'inherited', bor: 'borrowed', borrowed: 'borrowed', lbor: 'borrowed', ubor: 'borrowed', slbor: 'borrowed', der: 'derived', derived: 'derived' }
-const posNames = new Set(['Noun', 'Verb', 'Adjective', 'Adverb', 'Pronoun', 'Determiner', 'Preposition', 'Conjunction', 'Interjection', 'Proper noun', 'Numeral', 'Particle', 'Article'])
+const posNames = new Set(['Phrase', 'Proverb', 'Idiom', 'Noun', 'Verb', 'Adjective', 'Adverb', 'Pronoun', 'Determiner', 'Preposition', 'Conjunction', 'Interjection', 'Proper noun', 'Numeral', 'Particle', 'Article'])
 
 function templates(text: string): { raw: string; args: string[]; index: number }[] {
   const out = []; let depth = 0; let start = 0
@@ -229,7 +229,9 @@ export function parseLexicalPage(page: WiktionaryPage, languageCode = 'en', incl
       const terms = includeFamily ? citedChain(block, languageCode) : immediateSources(block, languageCode)
       if ((terms.length || includeEmpty) && families.length < 8) {
         const root = `${etymologyId}-word`
-        families.push({ id: etymologyId, label: etymologyLabel, direction: 'sources',
+        // Preserve the complete supported prose, including uncertainty. Never turn it into edges.
+        const historyText = includeEmpty && /\s/u.test(page.title) && block.length <= 5000 ? plain(block) : undefined
+        families.push({ id: etymologyId, label: etymologyLabel, direction: 'sources', ...(historyText && historyText.length <= 3000 ? { historyText } : {}),
           nodes: [{ id: root, parent: null as string | null, label: page.title.replace(/^Reconstruction:[^/]+\//, '*'), lang: languageName, ...(!terms.length && { historyState: 'unavailable' as const, historyNote: 'No supported, certain continuation was found in this etymology.' }), lookup: historyTarget(languageCode, page.title.replace(/^Reconstruction:[^/]+\//, '*')), source: page.source, skipped: [] as string[] },
             ...terms.map((term, n) => termNode(term, `${etymologyId}-source-${n + 1}`, term.parentIndex === undefined ? root : `${etymologyId}-source-${term.parentIndex + 1}`, page))] as LexicalNode[],
           note: 'Explicitly cited history and selected relatives. Inheritance points toward an older source; descendant and derivative branches point toward later forms. Cognates and related terms are lateral links, not ancestors. This partial graph omits unsupported or uncertain relationships. This group is not automatically matched to the sentence meaning.',

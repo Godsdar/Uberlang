@@ -49,7 +49,7 @@ function provenance(value: unknown): LexicalProvenance {
 }
 
 export function parseSourcedFamily(value: unknown): SourcedFamily {
-  if (!object(value) || !required(value.id, 100) || !required(value.label, 200) || value.direction !== 'sources' || !text(value.note) || !required(value.attribution, 1000) || !required(value.verifiedOn, 100) || !Array.isArray(value.nodes) || !value.nodes.length || value.nodes.length > 40) throw invalid()
+  if (!object(value) || !required(value.id, 100) || !required(value.label, 200) || value.direction !== 'sources' || !text(value.note) || (value.historyText !== undefined && !text(value.historyText, 3000)) || !required(value.attribution, 1000) || !required(value.verifiedOn, 100) || !Array.isArray(value.nodes) || !value.nodes.length || value.nodes.length > 40) throw invalid()
   const nodes: FamilyNode[] = value.nodes.map((n: unknown) => {
     if (!object(n) || !required(n.id, 200) || !(n.parent === null || required(n.parent, 200)) || !required(n.label, 200) || !required(n.lang, 100) || !source(n.source) || (n.edgeSource !== undefined && !source(n.edgeSource)) || !Array.isArray(n.skipped) || n.skipped.length > 20 || n.skipped.some(v => !text(v, 200)) || (n.reconstructed !== undefined && typeof n.reconstructed !== 'boolean') || (n.condensed !== undefined && typeof n.condensed !== 'boolean') || (n.gloss !== undefined && !text(n.gloss)) || (n.parent !== null && !['inherited', 'borrowed', 'derived', 'component', 'form-of', 'cognate', 'descendant', 'descendant-borrowed', 'related', 'derivative'].includes(String(n.relation)))) throw invalid()
     const lookup = n.lookup === undefined ? undefined : object(n.lookup) && typeof n.lookup.language === 'string' && typeof n.lookup.term === 'string' ? historyTarget(n.lookup.language, n.lookup.term) : undefined
@@ -68,7 +68,7 @@ export function parseSourcedFamily(value: unknown): SourcedFamily {
       current = current.parent ? byId.get(current.parent) : undefined
     }
   }
-  return { id: value.id, label: value.label, direction: 'sources', nodes, note: value.note, attribution: value.attribution, verifiedOn: value.verifiedOn }
+  return { id: value.id, label: value.label, direction: 'sources', nodes, note: value.note, ...(typeof value.historyText === 'string' && { historyText: value.historyText }), attribution: value.attribution, verifiedOn: value.verifiedOn }
 }
 
 export function parseLexicon(value: unknown, request: LexiconRequest): LexicalResult {

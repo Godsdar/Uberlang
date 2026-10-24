@@ -26,7 +26,7 @@ const bad = () => new Error('This exploration file is invalid or unsupported. Yo
 /** Saved graphs can contain continuations; the network parser intentionally accepts only immediate sources. */
 export function validateFamily(value: unknown): Family {
   if (!object(value) || !Array.isArray(value.nodes) || !value.nodes.length || value.nodes.length > 64 ||
-    !string(value.note, 5000) || !string(value.attribution, 1000) || !string(value.verifiedOn, 100) ||
+    !string(value.note, 5000) || (value.historyText !== undefined && !string(value.historyText, 3000)) || !string(value.attribution, 1000) || !string(value.verifiedOn, 100) ||
     (value.id !== undefined && !string(value.id, 100)) || (value.label !== undefined && !string(value.label, 200)) ||
     (value.direction !== undefined && value.direction !== 'sources')) throw bad()
   for (const n of value.nodes) {

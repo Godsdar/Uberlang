@@ -20,6 +20,7 @@ export interface FamilyNode {
 }
 
 export interface Family {
+  historyText?: string
   id?: string
   label?: string
   direction?: 'sources'

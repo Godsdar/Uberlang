@@ -49,7 +49,7 @@ Compare two saved explorations to find common **forms**, with separate source
 links. This is a lead to research, not proof of a common ancestor. Language
 interests star existing branches without inventing new ones.
 
-**Read in context** keeps passages, English grammar and session notes nearby.
+**Sentence or text** opens passage input, English grammar and session notes directly beside the **Word or expression** mode.
 **My decks → Explore this word** prefills the same research workspace locally;
 choose Explore to follow its cited roots; the imported passage is not sent. A discovery can become an Anki card
 through the existing editable TXT export. The **Tools** menu remains available,
@@ -89,10 +89,17 @@ Reconstructed forms and incomplete histories remain labeled.
 
 ## Read in context
 
-Open **Read in context** to work with a passage. Select a word or expression to
+Open **Sentence or text** to work with a passage. Select a word or expression to
 inspect its origins, or explicitly analyze an English sentence for lemmas,
 grammatical features and dependencies. Prepared examples remain labeled.
 Session notes and Anki drafts connect the passage back to the research journey.
+
+Every word has an occurrence row with its lemma, part of speech, morphology and
+dependency head position. Longer passages have sentence navigation; analysis still
+sends one explicitly selected English sentence at a time. Highlight an expression
+and choose **Explore selection → Find expression history** to research the whole
+dictionary entry. Supported historical prose retains uncertainty and a revision
+link; missing entries do not become a combined etymology of the words. See ADR-030.
 
 ## Save a context card for Anki
 
