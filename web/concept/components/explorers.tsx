@@ -170,57 +170,8 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
     reveal(endpoints.includes(id) ? endpoints.filter(n => n !== id) : [...endpoints, id])
   }
   return <div className="lp-family-explorer">
-    {sourced && <section className="lp-ancestry" aria-label="Trace word ancestry">
-      <div className="lp-actions"><span className="lp-section-label">Roots & relatives</span>
-        {tracing ? <button onClick={() => { traceRequest.current?.abort() }}>Stop tracing</button> :
-          !traceChoice && <button disabled={pending} onClick={() => void runTrace()}>Continue roots & relatives</button>}
-      </div>
-      <p role="status" aria-live="polite">{traceChoice ? 'The loaded tree is ready. An intermediate form has more than one history; you can explore those below.' : traceMessage || ancestrySummary(family)}</p>
-      <div className="lp-pie-overview" aria-label="Proto-Indo-European overview">
-        {pieOverview(family).map(node => <div className="lp-pie-summary" key={node.id}>
-          <span className="lp-section-label">{pieKind(node)}</span><strong>{node.label}</strong>
-          <span className="lp-label">Reconstructed{node.gloss ? ` · ${node.gloss}` : ''}</span>
-          <div className="lp-actions"><a href={node.edgeSource || node.source} target="_blank" rel="noreferrer">Source ↗</a>
-            <button onClick={() => {
-              selectNode(node.id); setPathOnly(false); setEndpoints(previous => [...new Set([...previous, node.id])])
-              requestAnimationFrame(() => {
-                const point = Array.from(scroll.current?.querySelectorAll<HTMLButtonElement>('.lp-family-node') ?? []).find(button => button.dataset.nodeId === node.id)
-                point?.scrollIntoView({ block:'nearest', inline:'nearest', behavior:reduced ? 'instant' : 'smooth' }); point?.focus({ preventScroll:true })
-              })
-            }}>Locate {node.label} in tree ↓</button></div>
-        </div>)}
-      </div>
-
-    </section>}
-
-    <details className="lp-family-branch-menu"><summary>Choose branches · {leaves.length} available</summary><div className="lp-branch-picker" role="group" aria-label="Visible family branches">
-      <span className="lp-label">{sourced ? 'Branches · choose what to show' : 'Branches'}</span>
-      {leaves.filter(n => n.id !== (sourced ? initial.id : '')).map(node => <button key={node.id} aria-pressed={endpoints.includes(node.id)}
-        disabled={!sourced && node.id === anchor.id} onClick={() => toggle(node.id)}>
-        <span className="lp-branch-mark" aria-hidden="true">{endpoints.includes(node.id) ? '−' : '+'}</span> {sourced ? `${node.label} · ${node.lang}${isRelative(node) ? ' · ' + node.relation : ''}` : node.lang}{preferredLanguages.includes(node.lookup?.language ?? Object.entries(historyLanguages).find(([, name]) => name === node.lang)?.[0] ?? '') ? ' ★' : ''}
-      </button>)}
-      {leaves.length > 3 && <button className="lp-reveal-all" onClick={() => reveal(endpoints.length === leaves.length ? defaults : leaves.map(n => n.id))}>
-        {endpoints.length === leaves.length ? 'Fewer branches' : 'Reveal all'}
-      </button>}
-    </div></details>
     <div className="lp-explorer-grid">
       <div className="lp-graph-panel">
-        <div className="lp-graph-toolbar">
-          <div role="group" aria-label="Exploration navigation">
-            <button aria-label="Previous form" disabled={cursor === 0} onClick={() => navigate(-1)}>← Back</button>
-            <button aria-label="Next form" disabled={cursor >= visited.current.length - 1} onClick={() => navigate(1)}>Forward →</button>
-          </div>
-          <div role="group" aria-label="Family detail">
-            <button aria-pressed={!pathOnly} onClick={() => setPathOnly(false)}>Family</button>
-            <button aria-pressed={pathOnly} disabled={sourced && selected.parent === null} onClick={() => setPathOnly(true)}>Selected path</button>
-          </div>
-          <div role="group" aria-label="Tree scale">
-            <button aria-label="Zoom out" disabled={zoom <= .75} onClick={() => setZoom(z => Math.max(.75, z - .25))}>−</button>
-            <button aria-label="Reset tree scale" onClick={() => setZoom(1)}>{Math.round(zoom * 100)}%</button>
-            <button aria-label="Zoom in" disabled={zoom >= 1.5} onClick={() => setZoom(z => Math.min(1.5, z + .25))}>+</button>
-          </div>
-        </div>
-        <button className="lp-mobile-inspect" onClick={() => { inspector.current?.scrollIntoView({ block: 'start', behavior: 'instant' }); inspector.current?.focus({ preventScroll: true }) }}>Selected: {selected.label} · details ↓</button>
         <div className={`lp-graph-scroll lp-family-canvas ${sourced ? 'is-sourced' : ''}`} ref={scroll} onWheel={() => { readerMoved.current = true }} onPointerDown={() => { readerMoved.current = true }} onKeyDown={() => { readerMoved.current = true }} onScroll={event => setPositions({ scrollLeft: event.currentTarget.scrollLeft, scrollTop: event.currentTarget.scrollTop })} tabIndex={0} role="region" aria-label={`${word} ${sourced ? 'sources' : 'family'}. Scroll horizontally to explore branches.`}>
           <motion.div className="lp-graph-size" animate={{ width: layout.width * zoom, height: layout.height * zoom }} transition={transition}>
             <div className="lp-graph-stage" style={{ width: layout.width, height: layout.height, transform: `scale(${zoom})`, transformOrigin: 'top left' }}>
@@ -249,8 +200,57 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
             </div>
           </motion.div>
         </div>
+        <div className="lp-graph-toolbar">
+          <div role="group" aria-label="Exploration navigation">
+            <button aria-label="Previous form" disabled={cursor === 0} onClick={() => navigate(-1)}>← Back</button>
+            <button aria-label="Next form" disabled={cursor >= visited.current.length - 1} onClick={() => navigate(1)}>Forward →</button>
+          </div>
+          <div role="group" aria-label="Family detail">
+            <button aria-pressed={!pathOnly} onClick={() => setPathOnly(false)}>Family</button>
+            <button aria-pressed={pathOnly} disabled={sourced && selected.parent === null} onClick={() => setPathOnly(true)}>Selected path</button>
+          </div>
+          <div role="group" aria-label="Tree scale">
+            <button aria-label="Zoom out" disabled={zoom <= .75} onClick={() => setZoom(z => Math.max(.75, z - .25))}>−</button>
+            <button aria-label="Reset tree scale" onClick={() => setZoom(1)}>{Math.round(zoom * 100)}%</button>
+            <button aria-label="Zoom in" disabled={zoom >= 1.5} onClick={() => setZoom(z => Math.min(1.5, z + .25))}>+</button>
+          </div>
+        </div>
+        <button className="lp-mobile-inspect" onClick={() => { inspector.current?.scrollIntoView({ block: 'start', behavior: 'instant' }); inspector.current?.focus({ preventScroll: true }) }}>Selected: {selected.label} · details ↓</button>
         <div className="lp-graph-legend"><span>{sourced ? 'Solid: sources · dashed: relatives' : 'Ancestors below · relatives above'}</span><span>┄ omitted stages</span><span>* reconstructed</span></div>
         <p className="lp-explorer-hint">Choose a form to follow its story. {sourced ? 'The word’s source path and lateral relatives have separate labels. Select an older form and load its relatives to explore other language branches.' : 'Unfold branches above; scroll across wider trees.'}</p>
+        {sourced && <section className="lp-ancestry" aria-label="Trace word ancestry">
+          <div className="lp-actions"><span className="lp-section-label">Roots & relatives</span>
+            {tracing ? <button onClick={() => { traceRequest.current?.abort() }}>Stop tracing</button> :
+              !traceChoice && <button disabled={pending} onClick={() => void runTrace()}>Continue roots & relatives</button>}
+          </div>
+          <p role="status" aria-live="polite">{traceChoice ? 'The loaded tree is ready. An intermediate form has more than one history; you can explore those below.' : traceMessage || ancestrySummary(family)}</p>
+          <div className="lp-pie-overview" aria-label="Proto-Indo-European overview">
+            {pieOverview(family).map(node => <div className="lp-pie-summary" key={node.id}>
+              <span className="lp-section-label">{pieKind(node)}</span><strong>{node.label}</strong>
+              <span className="lp-label">Reconstructed{node.gloss ? ` · ${node.gloss}` : ''}</span>
+              <div className="lp-actions"><a href={node.edgeSource || node.source} target="_blank" rel="noreferrer">Source ↗</a>
+                <button onClick={() => {
+                  selectNode(node.id); setPathOnly(false); setEndpoints(previous => [...new Set([...previous, node.id])])
+                  requestAnimationFrame(() => {
+                    const point = Array.from(scroll.current?.querySelectorAll<HTMLButtonElement>('.lp-family-node') ?? []).find(button => button.dataset.nodeId === node.id)
+                    point?.scrollIntoView({ block:'nearest', inline:'nearest', behavior:reduced ? 'instant' : 'smooth' }); point?.focus({ preventScroll:true })
+                  })
+                }}>Locate {node.label} in tree ↓</button></div>
+            </div>)}
+          </div>
+
+        </section>}
+
+        <details className="lp-family-branch-menu"><summary>Choose branches · {leaves.length} available</summary><div className="lp-branch-picker" role="group" aria-label="Visible family branches">
+          <span className="lp-label">{sourced ? 'Branches · choose what to show' : 'Branches'}</span>
+          {leaves.filter(n => n.id !== (sourced ? initial.id : '')).map(node => <button key={node.id} aria-pressed={endpoints.includes(node.id)}
+            disabled={!sourced && node.id === anchor.id} onClick={() => toggle(node.id)}>
+            <span className="lp-branch-mark" aria-hidden="true">{endpoints.includes(node.id) ? '−' : '+'}</span> {sourced ? `${node.label} · ${node.lang}${isRelative(node) ? ' · ' + node.relation : ''}` : node.lang}{preferredLanguages.includes(node.lookup?.language ?? Object.entries(historyLanguages).find(([, name]) => name === node.lang)?.[0] ?? '') ? ' ★' : ''}
+          </button>)}
+          {leaves.length > 3 && <button className="lp-reveal-all" onClick={() => reveal(endpoints.length === leaves.length ? defaults : leaves.map(n => n.id))}>
+            {endpoints.length === leaves.length ? 'Fewer branches' : 'Reveal all'}
+          </button>}
+        </div></details>
       </div>
       <aside ref={inspector} tabIndex={-1} className="lp-inspector lp-family-inspector">
         <button className="lp-mobile-inspect" onClick={() => { scroll.current?.scrollIntoView({ block: 'start', behavior: 'instant' }); scroll.current?.focus({ preventScroll: true }) }}>↑ Back to tree</button>

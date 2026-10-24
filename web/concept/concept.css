@@ -404,7 +404,7 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp .lp-family-branch-menu > summary { color: var(--lp-muted); font-size: 13px; cursor: pointer; padding: 8px 0; }
 #lingua-concept .lp .lp-family-branch-menu .lp-branch-picker { max-height: 230px; overflow: auto; }
 
-/* The oldest evidenced forms remain readable above the scrollable tree. */
+/* The oldest evidenced forms remain available below the tree. */
 #lingua-concept .lp-pie-overview{display:flex;flex-wrap:wrap;gap:14px 28px;margin:16px 0 8px}
 #lingua-concept .lp-pie-summary{display:flex;flex-direction:column;gap:6px;flex:1 1 210px;max-width:100%;border-left:2px solid var(--lp-accent);padding:4px 14px}
 #lingua-concept .lp-pie-summary strong{font-family:Georgia,"Times New Roman",serif;font-size:27px;font-weight:500;overflow-wrap:anywhere;color:var(--lp-fg)}
@@ -436,4 +436,20 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 
 #lingua-concept .lp-other-histories{margin:26px 0;font-size:14px}
 #lingua-concept .lp-other-histories>summary{cursor:pointer;color:var(--lp-muted)}
-#lingua-concept .lp .lp-discovery-meaning{max-width:70ch;color:var(--lp-muted);margin:0 0 20px}
+/* Results lead with the tree; secondary controls follow it in reading order. */
+#lingua-concept .lp-discovery-heading{margin:0 0 4px;gap:8px}
+#lingua-concept .lp .lp-discovery-heading h2{font-size:28px;line-height:1.25;margin:0;scroll-margin-top:12px}
+#lingua-concept .lp-discovery-heading h2 span{display:inline;font-size:12px;line-height:1.5;margin:0 0 0 12px;vertical-align:middle}
+#lingua-concept .lp .lp-research-status:empty{display:none}
+#lingua-concept .lp-research.has-discovery .lp-research-intro{display:none}
+#lingua-concept .lp-discovery-tools{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:12px 0}
+#lingua-concept .lp-discovery-tools .lp-actions{margin:0}
+#lingua-concept .lp .lp-family-branch-menu{margin:8px 0}
+#lingua-concept .lp-ancestry{padding:0;margin:12px 0}
+#lingua-concept .lp-ancestry .lp-section-label{margin:0}
+#lingua-concept .lp-pie-overview:empty{display:none}
+@media(max-width:760px){
+ #lingua-concept .lp-research .lp-family-canvas{max-height:min(400px,65svh)}
+ #lingua-concept .lp-family-explorer .lp-graph-toolbar{padding:4px 0;gap:4px}
+ #lingua-concept .lp-family-explorer .lp-mobile-inspect{margin:0}
+}

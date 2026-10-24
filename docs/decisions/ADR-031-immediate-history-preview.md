@@ -20,6 +20,13 @@ opened graph and its provenance under the existing version-1 library contract.
 No extra lookup is needed to display an already returned alternative. Restored
 saved trees remain local; this change does not refresh them automatically.
 
+The result starts with a compact word/language heading followed directly by the
+tree. Navigation, branch selection, tracing status, PIE summaries and save/export
+actions follow the graph. Meaning and source evidence remain in the inspector.
+Opening a result focuses its heading and brings it into view; the initial mobile
+tree viewport fits below it without a manual page scroll. Larger trees retain
+their internal scrolling and zoom controls.
+
 Intermediate entries with ambiguous continuations still stop that continuation
 rather than inventing a relation. Keep their optional alternatives below the tree
 and describe the already loaded tree as ready. A mandatory numbered chooser must
