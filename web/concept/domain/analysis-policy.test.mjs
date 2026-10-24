@@ -31,7 +31,7 @@ test('new text examples contain no prepared answers and do not match offline fix
 })
 test('unavailable results and stable input errors are honest and do not echo upstream content',()=>{
   const request=sentenceRequest('doc','Birds sing.',0,0,'en')
-  assert.match(analysisError(422,{error:{code:'UNSUPPORTED_LANGUAGE',message:'private'}}),/Only the English model/)
+  assert.match(analysisError(422,{error:{code:'UNSUPPORTED_LANGUAGE',message:'private'}}),/English text only/)
   assert.ok(!analysisError(503,{error:{code:'private',message:'private'}}).includes('private'))
   assert.throws(()=>parseAnalysis({schemaVersion:1,language:'ru'},request),/invalid result/)
 })

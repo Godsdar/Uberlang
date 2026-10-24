@@ -1,18 +1,14 @@
-# Next: complete Sentence / Text / Phrase redesign
+# Sentence / Text redesign — implemented 2026-10-24
 
-Owner note, 2026-10-24: the current sentence/text/phrase experience is overloaded,
-including an untidy input field, and needs a complete redesign rather than small
-spacing changes. The current implementation task remains the chosen word-tree
-mechanic. This document records the next separate stage; it does not claim that
-the sentence redesign has shipped.
+The owner requested removal of visual overload, technical paragraphs and the
+untidy input. ADR-035 implements the full reading flow redesign. ADR-034 already
+removed manual language selection.
 
-Proposed direction: one well-composed text input and primary action, then the
-passage with selectable occurrences. Show grammatical features, dictionary
-meanings, syntax and history on demand. Preserve exact text, occurrence offsets,
-original context, evidence and the distinction between live and prepared results.
-Keep expression history distinct from individual words' origins. Avoid exposing
-all panels, technical explanations and controls simultaneously.
+The entry now has a blank, bounded composer and one Analyze action. Ready results
+collapse the composer and show one sentence of the original passage. Reading
+opens a short explanation or selected-word card; Structure opens the dependency
+diagram. Morphology, full word details, evidence, translation, phrase tools and
+export are disclosed on demand. Edits hide stale results immediately. Existing
+source, occurrence and saved-note contracts remain intact.
 
-The immediate owner correction is implemented separately in ADR-034: remove the
-Text language selector, identify sentence language locally, and never require a
-manual language choice to start. The full visual redesign remains next.
+Language/era grouping of etymology trees remains a separate proposal.

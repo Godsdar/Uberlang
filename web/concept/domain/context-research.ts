@@ -33,3 +33,17 @@ export function occurrenceRows(context: { example: Sentence; offset: number }) {
       headText: head?.text ?? 'sentence root', headStart: head ? context.offset + head.start : null }
   })
 }
+
+/** One visible sentence, with absolute offsets into the untouched passage. */
+export function readingSentence(document: string, offset: number) {
+  const ranges = sentenceRanges(document)
+  return ranges.find(range => offset >= range.start && offset < range.end)
+    ?? ranges.find(range => range.start >= offset) ?? ranges.at(-1)
+}
+
+/** DOM selection offsets are relative to the currently visible sentence. */
+export function readingSelection(document: string, offset: number, start: number, end: number) {
+  const sentence = readingSentence(document, offset)
+  if (!sentence || !Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end <= start || end > sentence.text.length) return null
+  return { start: sentence.start + start, end: sentence.start + end }
+}

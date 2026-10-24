@@ -484,3 +484,77 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp-curiosity-queue>button span{font-size:12px;color:var(--lp-muted)}
 #lingua-concept .lp-curiosity-queue>button span:last-child{margin-left:auto}
 #lingua-concept .lp-keep-later{color:var(--lp-accent);background:var(--lp-soft);margin:0 0 12px}
+
+/* Sentence/Text: a composer, then one focused reading surface. */
+#lingua-concept .lp-context{max-width:760px;margin:0 auto;}
+#lingua-concept .lp-context-title{font:400 clamp(26px,4vw,36px)/1.25 Georgia,serif;margin:12px 0 24px;letter-spacing:-.5px;}
+#lingua-concept .lp-context.has-result .lp-context-title{display:none;}
+#lingua-concept .lp .lp-context>.lp-main-area{display:block;margin-top:0;}
+#lingua-concept .lp-context .lp-composer{margin:0;}
+#lingua-concept .lp-context .lp-composer[open]>summary{display:none;}
+#lingua-concept .lp-context .lp-composer>summary{padding:8px 0;min-height:44px;color:var(--lp-accent);list-style:none;}
+#lingua-concept .lp-context .lp-composer>summary::-webkit-details-marker{display:none;}
+#lingua-concept .lp-context .lp-composer>summary span{margin-left:6px;}
+#lingua-concept .lp-context .lp-composer-body{border:1px solid var(--lp-line);border-radius:14px;background:var(--lp-surface);padding:18px 20px 12px;}
+#lingua-concept .lp-context .lp-composer-body:focus-within{border-color:var(--lp-accent);box-shadow:0 0 0 2px var(--lp-soft);}
+#lingua-concept .lp-editor-label{display:block;font-size:12px;color:var(--lp-muted);margin-bottom:6px;}
+#lingua-concept .lp .lp-context .lp-editor{display:block;resize:none;border:0;outline:none;box-shadow:none;background:transparent;padding:4px 0 12px;font-size:19px;line-height:1.65;min-height:130px;max-height:260px;}
+#lingua-concept .lp-compose-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--lp-line);padding-top:10px;}
+#lingua-concept .lp-compose-bottom .lp-actions{margin:0;}
+#lingua-concept .lp .lp-compose-bottom .lp-main{min-height:44px;padding:10px 20px;border-radius:9px;}
+#lingua-concept .lp-compose-bottom .lp-main span{margin-left:14px;}
+#lingua-concept .lp-input-foot{display:flex;justify-content:space-between;align-items:start;gap:12px;margin:10px 0 18px;font-size:12px;}
+#lingua-concept .lp-context .lp-example-set{margin:0;}
+#lingua-concept .lp-input-foot summary{cursor:pointer;padding:7px 0;}
+#lingua-concept .lp-input-foot .lp-privacy{max-width:60%;margin:0;}
+#lingua-concept .lp-input-foot details[open]{flex:1;}
+#lingua-concept .lp-context .lp-examples{display:flex;flex-direction:column;align-items:stretch;}
+#lingua-concept .lp-context .lp-examples button{text-align:left;min-height:44px;}
+#lingua-concept .lp-context.has-result .lp-input-foot{display:none;}
+#lingua-concept .lp-context:has(.lp-composer[open]) .lp-input-foot{display:flex;}
+#lingua-concept .lp-context .lp-live-status:empty{display:none;}
+#lingua-concept .lp-sentence-result{scroll-margin-top:16px;outline:none;}
+#lingua-concept .lp-reading-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:12px 0;}
+#lingua-concept .lp-context .lp-status{margin:0;min-height:0;font-size:12px;}
+#lingua-concept .lp-reading-top .lp-reading-hint{font-size:12px;color:var(--lp-muted);}
+#lingua-concept .lp-context .lp-source{font:clamp(21px,3vw,27px)/1.9 Georgia,serif;padding:8px 0 18px;}
+#lingua-concept .lp-context .lp-source button{min-height:44px;padding:2px 5px;}
+#lingua-concept .lp-context .lp-tabs{gap:20px;margin:0 0 22px;border-bottom:1px solid var(--lp-line);flex-wrap:nowrap;}
+#lingua-concept .lp-context .lp-tabs button{font-size:14px;min-height:44px;white-space:nowrap;}
+#lingua-concept .lp-context .lp-tabs button[aria-pressed=true]{color:var(--lp-accent);border-bottom:2px solid var(--lp-accent);}
+#lingua-concept .lp-context h2{font:400 22px/1.3 Georgia,serif;margin:0 0 10px;}
+#lingua-concept .lp-word-card{padding:0;}
+#lingua-concept .lp-word-card-title{display:flex;gap:12px;align-items:baseline;}
+#lingua-concept .lp-word-card-title span{font-size:12px;color:var(--lp-muted);}
+#lingua-concept .lp-word-card>p{margin:0 0 12px;}
+#lingua-concept .lp-word-card>p:first-of-type{color:var(--lp-accent);}
+#lingua-concept .lp-word-card dl{max-width:380px;}
+#lingua-concept .lp-word-card dl div{display:flex;justify-content:space-between;gap:12px;padding:3px 0;}
+#lingua-concept .lp-word-card dt{color:var(--lp-muted);}
+#lingua-concept .lp-word-card dd{margin:0;}
+#lingua-concept .lp-context details>summary{cursor:pointer;}
+#lingua-concept .lp-context .lp-translation,#lingua-concept .lp-reading-caveat{margin:12px 0;padding:0;font-size:12px;}
+#lingua-concept .lp-context .lp-lexical-actions{margin:14px 0;}
+#lingua-concept .lp-context .lp-lexical-actions button{border:1px solid var(--lp-line);min-height:44px;padding:8px 14px;border-radius:8px;}
+#lingua-concept .lp-context .lp-result-tools{display:flex;gap:8px 22px;flex-wrap:wrap;border-top:1px solid var(--lp-line);margin-top:22px;padding-top:10px;font-size:12px;color:var(--lp-muted);}
+#lingua-concept .lp-result-tools>details[open]{flex-basis:100%;}
+#lingua-concept .lp-result-tools summary{min-height:44px;display:flex;align-items:center;}
+#lingua-concept .lp-context .lp-occurrences{margin:18px 0;font-size:13px;}
+#lingua-concept .lp-context .lp-syntax-explorer .lp-graph-legend{font-size:11px;}
+#lingua-concept .lp-context .lp-notes-disclosure{margin-top:16px;font-size:12px;}
+#lingua-concept .lp[data-mode=text] .lp-footer{display:none;}
+#lingua-concept .lp-sentence-picker:empty,#lingua-concept .lp-phrase-row:empty{display:none;}
+#lingua-concept .lp-context .lp-sentence-picker{flex-wrap:nowrap;overflow-x:auto;max-width:100%;padding-bottom:6px;}
+#lingua-concept .lp-context .lp-sentence-picker button{flex-shrink:0;min-height:44px;}
+@media(max-width:760px){
+ #lingua-concept .lp-context-title{margin:4px 0 20px;font-size:28px;}
+ #lingua-concept .lp-context .lp-composer-body{padding:14px 14px 10px;}
+ #lingua-concept .lp .lp-context .lp-editor{font-size:18px;}
+ #lingua-concept .lp-context .lp-source{font-size:23px;}
+ #lingua-concept .lp-context .lp-tabs{gap:18px;}
+ #lingua-concept .lp-context .lp-result-tools{gap:0 18px;}
+}
+
+#lingua-concept .lp .lp-context textarea.lp-editor:focus-visible{outline:none;}
+#lingua-concept .lp .lp-sentence-result:focus{outline:none;}
+#lingua-concept .lp-context .lp-analyze-current{margin:0 0 16px;min-height:44px;}

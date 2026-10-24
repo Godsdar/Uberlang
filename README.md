@@ -356,3 +356,8 @@ histories stay separate, but no numbered choice blocks the initial tree. See
 [ADR-031](docs/decisions/ADR-031-immediate-history-preview.md).
 
 Word trees open on a readable **Main history**. Stage buttons reveal loaded relatives; a mini-map preserves the whole-tree context. Drag to pan, pinch or use buttons to zoom, and choose **Whole tree** to fit all loaded forms. **Explore later** saves a form with its source graph; **Continue exploring** resumes it locally. See [ADR-033](docs/decisions/ADR-033-guided-history-and-gestures.md). The requested [sentence/text redesign](docs/NEXT_SENTENCE_REDESIGN.md) is a separate next stage.
+
+Sentence/Text uses a focused composer and one-sentence reading surface (ADR-035).
+Tap a word for its role; open Structure for connections. Grammar details, sources,
+examples and exports remain available on demand. Editing clears the displayed
+analysis while saved session notes retain their original context.

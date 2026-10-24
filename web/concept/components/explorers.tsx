@@ -362,8 +362,8 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
   </div>
 }
 
-interface SyntaxProps { tokens: Token[]; selectedStart: number; selectedEnd: number; offset: number; onSelect: (start: number, end: number) => void }
-function SyntaxExplorer({ tokens, selectedStart, selectedEnd, offset, onSelect }: SyntaxProps) {
+interface SyntaxProps { compact?: boolean; tokens: Token[]; selectedStart: number; selectedEnd: number; offset: number; onSelect: (start: number, end: number) => void }
+function SyntaxExplorer({ tokens, selectedStart, selectedEnd, offset, onSelect, compact = false }: SyntaxProps) {
   const markerId = useId().replace(/:/g, '')
   const graph = useMemo(() => syntaxLayout(tokens), [tokens])
   const reduced = useReducedMotion()
@@ -371,11 +371,16 @@ function SyntaxExplorer({ tokens, selectedStart, selectedEnd, offset, onSelect }
   const selection = new Set(tokens.flatMap((t, i) => t.start + offset < selectedEnd && t.end + offset > selectedStart ? [i + 1] : []))
   const [all, setAll] = useState(false)
   const selected = tokens[selectedId - 1]
+  const syntaxScroll = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    if (!compact || !syntaxScroll.current || selection.size !== 1) return
+    syntaxScroll.current.scrollLeft = Math.max(0, (selectedId - 1) * 112 + 70 - syntaxScroll.current.clientWidth / 2)
+  }, [selectedStart, selectedEnd, tokens, compact])
   return <div className="lp-syntax-explorer">
     <div className="lp-graph-toolbar"><span className="lp-label">Sentence structure</span>
       <button aria-pressed={all} onClick={() => setAll(v => !v)}>{all ? 'Focus on selected word' : 'Show all connections'}</button>
     </div>
-    <div className="lp-graph-scroll" tabIndex={0} role="region" aria-label="Sentence dependencies. Scroll to read all words.">
+    <div className="lp-graph-scroll" ref={syntaxScroll} tabIndex={0} role="region" aria-label="Sentence dependencies. Scroll to read all words.">
       <div className="lp-syntax-stage" style={{ width: graph.width, height: graph.baseline + 80 }}>
         <svg width={graph.width} height={graph.baseline + 20} aria-hidden="true">
           <defs><marker id={`arrow-${markerId}`} markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="var(--lp-accent)" /></marker></defs>
@@ -396,8 +401,8 @@ function SyntaxExplorer({ tokens, selectedStart, selectedEnd, offset, onSelect }
         </button>)}
       </div>
     </div>
-    <p className="lp-graph-legend">Dependent → head. Click a word to follow its connections; scroll horizontally for the full sentence.</p>
-    {selection.size > 1 ? <p className="lp-syntax-reading">Selected expression · {selection.size} tokens. Highlighted connections include the surrounding sentence.</p> : selected && <p className="lp-syntax-reading"><strong>{selected.text}</strong> · {relationNames[selected.relation] || selected.relation}{selected.head ? <> → <strong>{tokens[selected.head - 1].text}</strong></> : ''}. {selected.explanation}</p>}
+    <p className="lp-graph-legend">{compact ? 'Scroll to explore connections.' : 'Dependent → head. Click a word to follow its connections; scroll horizontally for the full sentence.'}</p>
+    {!compact && (selection.size > 1 ? <p className="lp-syntax-reading">Selected expression · {selection.size} tokens. Highlighted connections include the surrounding sentence.</p> : selected && <p className="lp-syntax-reading"><strong>{selected.text}</strong> · {relationNames[selected.relation] || selected.relation}{selected.head ? <> → <strong>{tokens[selected.head - 1].text}</strong></> : ''}. {selected.explanation}</p>)}
   </div>
 }
 

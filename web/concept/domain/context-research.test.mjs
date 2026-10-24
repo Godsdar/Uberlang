@@ -40,3 +40,19 @@ test('occurrences retain repeated words, morphology and exact dependency head po
   assert.equal(rows[0].features.Number, 'Plur')
   assert.equal(rows[2].relation, 'dobj')
 })
+
+test('reading window preserves repeated sentence offsets and surrounding whitespace', async () => {
+  const { readingSentence } = await import('./context-research.ts')
+  const text = '  Water flows.  Water flows.  '
+  assert.deepEqual(readingSentence(text, 0), { text: 'Water flows.', start: 2, end: 14 })
+  assert.deepEqual(readingSentence(text, 16), { text: 'Water flows.', start: 16, end: 28 })
+  assert.equal(readingSentence(text, text.length).start, 16)
+  assert.equal(readingSentence('', 0), undefined)
+})
+
+test('phrase selection in the second visible sentence maps back to its original occurrence', async () => {
+  const { readingSelection } = await import('./context-research.ts')
+  const text = 'Water flows.  Water flows.'
+  assert.deepEqual(readingSelection(text, 14, 0, 5), { start: 14, end: 19 })
+  assert.equal(readingSelection(text, 14, 0, 99), null)
+})
