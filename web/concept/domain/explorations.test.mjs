@@ -71,3 +71,16 @@ test('expression history and original passage survive library round-trip; old li
  item.family.historyText = {untrusted:'not text'}
  assert.throws(()=>validateDiscovery(item))
 })
+
+test('saved curiosities resume the exact form without changing notes or source evidence', async()=>{
+ const {savedCuriosities,resumeDiscovery}=await import('./explorations.ts')
+ const item=prepared(), target=item.family.nodes.at(-1)
+ item.marks[target.id]='curious'; const before=structuredClone(item)
+ const queue=savedCuriosities(parseLibrary(JSON.stringify(saveDiscovery(emptyLibrary(),item))))
+ assert.equal(queue.length,1); assert.equal(queue[0].node.id,target.id)
+ const resumed=resumeDiscovery(queue[0].discovery,target.id)
+ assert.equal(resumed.view.selectedId,target.id); assert.deepEqual(resumed.view.visited,[target.id])
+ assert.ok(resumed.view.endpoints.includes(target.id)); assert.deepEqual(resumed.family,before.family)
+ assert.equal(resumed.note,before.note); assert.deepEqual(item,before)
+ assert.doesNotThrow(()=>validateDiscovery(resumed)); assert.throws(()=>resumeDiscovery(item,'missing'))
+})

@@ -59,7 +59,8 @@
     "fzstd": "0.1.1",
     "htmlparser2": "12.0.0",
     "motion": "^13.5.0",
-    "sql.js": "1.15.1"
+    "sql.js": "1.15.1",
+    "tinyld": "1.3.4"
   },
   "overrides": {
     "light-my-request": "6.6.0"

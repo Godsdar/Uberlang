@@ -119,3 +119,20 @@ export function discoveryCard(discovery: Discovery) {
       origin: discovery.family }
   }
 }
+
+/** Resume the exact saved form, preserving its source graph and unrelated notes. */
+export function resumeDiscovery(discovery: Discovery, nodeId: string): Discovery {
+  const next = validateDiscovery(discovery)
+  if (!next.family.nodes.some(node => node.id === nodeId)) throw new Error('This form is no longer in the saved tree.')
+  next.view = {
+    selectedId: nodeId, endpoints: [...new Set([...(next.view?.endpoints ?? []), nodeId])],
+    pathOnly: false, zoom: 1, scrollLeft: 0, scrollTop: 0, visited: [nodeId], cursor: 0,
+  }
+  return next
+}
+
+export function savedCuriosities(library: DiscoveryLibrary) {
+  return library.discoveries.flatMap(discovery => discovery.family.nodes
+    .filter(node => discovery.marks[node.id] === 'curious')
+    .map(node => ({ discovery, node })))
+}

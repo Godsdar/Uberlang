@@ -5,7 +5,7 @@ import { createRoot } from 'react-dom/client'
 import { FamilyExplorer } from './explorers'
 import { historyLanguages, historyTarget, type HistoryTarget } from '../../../src/shared/etymology'
 import { openHistory, parseHistory, type HistoryResult } from '../domain/history'
-import { DISCOVERY_KEY, MAX_BACKUP, emptyLibrary, parseLibrary, saveDiscovery, sharedForms, validateDiscovery, writeLibrary, type Discovery, type DiscoveryLibrary, type ExplorerView } from '../domain/explorations'
+import { DISCOVERY_KEY, MAX_BACKUP, emptyLibrary, parseLibrary, resumeDiscovery, savedCuriosities, saveDiscovery, sharedForms, validateDiscovery, writeLibrary, type Discovery, type DiscoveryLibrary, type ExplorerView } from '../domain/explorations'
 import type { Family } from '../domain/graphs'
 
 export interface ResearchEntry { word: string; language: string; family?: Family; context?: string; importedCard?: Discovery['importedCard'] }
@@ -62,6 +62,15 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
   function update(next: Discovery) { activeRef.current = next; setActive(next) }
   function patch(delta: Partial<Discovery>) {
     if (activeRef.current) update({ ...activeRef.current, ...delta, updatedAt: new Date().toISOString() })
+  }
+  function keepForLater(nodeId: string) {
+    const current = activeRef.current
+    if (!current) return
+    const marks = { ...current.marks }
+    if (marks[nodeId] === 'curious') delete marks[nodeId]; else marks[nodeId] = 'curious'
+    const next = { ...current, marks, updatedAt: new Date().toISOString() }
+    try { commit(saveDiscovery(libraryRef.current, next)); update(next); setStatus(marks[nodeId] ? 'Saved for later on this browser. Continue exploring will bring you back to this form.' : 'Removed from your later list. The discovery is still saved.') }
+    catch (error) { setStorageError(message(error)) }
   }
   function remember() {
     const current = activeRef.current
@@ -143,8 +152,11 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
   const visible = library.discoveries.filter(d => `${d.word} ${d.note} ${historyLanguages[d.language]}`.toLowerCase().includes(filter.toLowerCase()))
   function backupCurrent() { if (activeRef.current) download(JSON.stringify(saveDiscovery(emptyLibrary(), activeRef.current)), 'uberlang-discovery.json') }
 
+  const curiosities = savedCuriosities(library)
+
   return <section className={`lp-research${active ? ' has-discovery' : ''}`} aria-label="Etymology research">
     <div className="lp-research-intro"><p className="lp-eyebrow">Follow your curiosity</p><h1>Every word has a story.</h1><p>Explore a word or an expression. Follow the evidence. Keep what you discover.</p></div>
+    {curiosities.length > 0 && <details className="lp-curiosity-queue" open={!active}><summary>Continue exploring · {curiosities.length}</summary><p className="lp-label">Your saved questions · on this browser</p>{curiosities.slice(0, 5).map(({ discovery, node }) => <button key={`${discovery.id}:${node.id}`} onClick={() => { activate(resumeDiscovery(discovery, node.id)); setStatus('Back at your saved form. No lookup was sent.') }}><strong>{node.label}</strong><span>{node.lang} · from {discovery.word}</span><span aria-hidden="true">→</span></button>)}{curiosities.length > 5 && <details><summary>{curiosities.length - 5} more saved forms</summary>{curiosities.slice(5).map(({ discovery, node }) => <button key={`${discovery.id}:${node.id}`} onClick={() => activate(resumeDiscovery(discovery, node.id))}>{node.label} · {node.lang} · from {discovery.word}</button>)}</details>}</details>}
     <form className="lp-research-search" onSubmit={event => {
       event.preventDefault(); const target = historyTarget(language, term.trim())
       if (!target) { setStatus('Enter a supported word or dictionary expression, up to 80 characters. Reconstructed forms need an asterisk (*).'); return }
@@ -186,7 +198,7 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
     </details>
     {active ? <article className="lp-discovery" aria-label="Current discovery">
       <header className="lp-discovery-heading"><h2 ref={resultHeading} tabIndex={-1}>{active.word}{' '}<span>{historyLanguages[active.language]}</span></h2></header>
-      {(!active.word.includes(' ') || active.family.nodes.length > 1) && <FamilyExplorer key={`${active.id}:${generation}`} family={active.family} word={active.word} autoTrace={autoTrace} initialView={active.view} onSnapshot={snapshot} preferredLanguages={library.languages} onStartFrom={node => {
+      {(!active.word.includes(' ') || active.family.nodes.length > 1) && <FamilyExplorer key={`${active.id}:${generation}`} family={active.family} word={active.word} autoTrace={autoTrace} initialView={active.view} onSnapshot={snapshot} preferredLanguages={library.languages} onKeepLater={keepForLater} laterIds={Object.keys(active.marks).filter(id => active.marks[id] === 'curious')} onStartFrom={node => {
         const code = node.lookup?.language ?? Object.entries(historyLanguages).find(([, name]) => name === node.lang)?.[0]
         const target = code ? historyTarget(code, node.lookup?.term ?? node.label) : undefined
         if (!target) { setStatus('This form cannot be looked up directly. Its source entry is linked in the inspector.'); return }
@@ -200,7 +212,7 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
         activate(newDiscovery({ word: choices.target.term, language: choices.target.language, family, ...(context && { context }), ...(importedCard && { importedCard }) }), !choices.target.term.includes(' '), choices)
         setStatus('History opened. Your previous tree is kept separately.')
       }}><strong>{choice.summary || originLabel(choice.label)}</strong><span>{choice.id === active.family.id ? 'Showing this history' : 'Open this history →'}</span></button>)}</div></details>}
-      <div className="lp-discovery-notes"><div><h3>Your discovery</h3>{selected && <div className="lp-actions" role="group" aria-label={`Your interest in ${selected.label}`}><span>{selected.label}</span>{(['known', 'curious'] as const).map(mark => <button key={mark} aria-pressed={active.marks[selected.id] === mark} onClick={() => { const marks = { ...active.marks }; if (marks[selected.id] === mark) delete marks[selected.id]; else marks[selected.id] = mark; patch({ marks }) }}>{mark === 'known' ? 'I know this' : 'Explore later'}</button>)}</div>}<label>What caught your attention?<textarea value={active.note} maxLength={4000} rows={3} placeholder="A connection, a question, something to remember…" onChange={e => patch({ note: e.target.value })} /></label><p className="lp-label">{saved && !storageError ? 'Notes and tree changes save on this browser.' : 'Save this discovery to keep your tree and notes after closing the page.'}</p></div><button onClick={() => options.onAnki(active)}>Make an Anki card…</button></div>
+      <div className="lp-discovery-notes"><div><h3>Your discovery</h3>{selected && <div className="lp-actions" role="group" aria-label={`Your interest in ${selected.label}`}><span>{selected.label}</span>{(['known', 'curious'] as const).map(mark => <button key={mark} aria-pressed={active.marks[selected.id] === mark} onClick={() => { if (mark === 'curious') { keepForLater(selected.id); return } const marks = { ...active.marks }; if (marks[selected.id] === mark) delete marks[selected.id]; else marks[selected.id] = mark; patch({ marks }) }}>{mark === 'known' ? 'I know this' : 'Explore later'}</button>)}</div>}<label>What caught your attention?<textarea value={active.note} maxLength={4000} rows={3} placeholder="A connection, a question, something to remember…" onChange={e => patch({ note: e.target.value })} /></label><p className="lp-label">{saved && !storageError ? 'Notes and tree changes save on this browser.' : 'Save this discovery to keep your tree and notes after closing the page.'}</p></div><button onClick={() => options.onAnki(active)}>Make an Anki card…</button></div>
       <details className="lp-compare"><summary>Compare with another discovery</summary><label>Saved discovery<select value={compareId} onChange={e => setCompareId(e.target.value)}><option value="">Choose a word</option>{library.discoveries.filter(d => d.id !== active.id).map(d => <option key={d.id} value={d.id}>{d.word} · {historyLanguages[d.language]} · {originLabel(d.family.label || 'Prepared family')}</option>)}</select></label>
         {comparison && <div><h3>{active.word} & {comparison.word}</h3><p>{shared.length ? 'Forms found in both loaded histories:' : 'No shared form appears in the loaded histories. The trees may be incomplete; this is not proof that the words are unrelated.'}</p><ul>{shared.map(({ left, right }) => <li key={`${left.id}:${right.id}`}><strong>{left.label}</strong> · {left.lang}<br /><a href={left.edgeSource || left.source} target="_blank" rel="noreferrer">{active.word}: {left.relation || 'family evidence'} ↗</a>{' · '}<a href={right.edgeSource || right.source} target="_blank" rel="noreferrer">{comparison.word}: {right.relation || 'family evidence'} ↗</a></li>)}</ul><p className="lp-label">A shared form is a lead to investigate, not proof of a shared ancestor. Homonyms, components, inflections and separate etymologies need their own evidence. No connecting edge has been invented.</p></div>}
       </details>

@@ -28,7 +28,7 @@ Keep the separate session-note, imported-deck and old roots contracts intact.
 Vercel/Pages build without duplicate CI checks (ADR-026); CI remains independent.
 Explicit research Explore immediately opens the first dictionary history (ADR-031),
 then traces cited roots and shows typed relatives (ADR-027/028). Other entry histories
-are optional below the tree. Families open with all loaded branches fitted in an overview (ADR-032); selecting a form opens the preserved detailed view. Intermediate ambiguity preserves partial evidence. Saved trees stay local
+are optional below the tree. Families open on a readable primary history with stage-relative disclosure and a whole-tree minimap (ADR-033). Whole tree remains available with pinch/pan; Explore later saves a selected form for the return queue. Intermediate ambiguity preserves partial evidence. Saved trees stay local
 until Continue tracing roots; never fabricate a PIE connection.
 
 ## Current web entry (ADR-017)

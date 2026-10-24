@@ -2,10 +2,11 @@ import { useEffect, useLayoutEffect, useId, useMemo, useRef, useState } from 're
 import { createRoot, type Root } from 'react-dom/client'
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from 'motion/react'
 import { ancestorIds, familyLayout, familyHierarchy, fitFamilyScale, relationNames, syntaxLayout } from '../domain/graphs'
+import { useTreeGestures } from './use-tree-gestures'
 import { extendHistory, extendRelatives, isRelative, foldHistory, historyLimit, parseHistory, type HistoryResult } from '../domain/history'
 import type { Family, FamilyNode, Token } from '../domain/graphs'
 import { historyLanguages } from '../../../src/shared/etymology'
-import { ancestryLeaves, ancestrySummary, isPIE, loadHistory, traceWordFamily, stageEndpoints, pieOverview, pieKind, originLabel, ORIGIN_HELP } from '../domain/ancestry'
+import { ancestryLeaves, ancestrySummary, isPIE, loadHistory, traceWordFamily, pieOverview, pieKind, originLabel, ORIGIN_HELP } from '../domain/ancestry'
 import type { ExplorerView } from '../domain/explorations'
 
 export interface FamilyProps {
@@ -15,13 +16,16 @@ export interface FamilyProps {
   onInspect?: (id: string) => void
   onStartFrom?: (node: FamilyNode) => void
   preferredLanguages?: string[]
+  onKeepLater?: (nodeId: string) => void
+  laterIds?: string[]
   autoTrace?: boolean
 }
 
 // Exiting nodes must not remain keyboard targets while their branch fades out.
-function FamilyPoint({ node, selected, lineage, reduced, onSelect }: {
+function FamilyPoint({ node, selected, lineage, reduced, onSelect, branchCount = 0, onBranches }: {
   node: ReturnType<typeof familyLayout>['nodes'][number]; selected: boolean;
   lineage: boolean; reduced: boolean | null; onSelect: () => void
+  branchCount?: number; onBranches?: () => void
 }) {
   const present = useIsPresent()
   return <motion.div className="lp-graph-node" inert={!present}
@@ -34,10 +38,11 @@ function FamilyPoint({ node, selected, lineage, reduced, onSelect }: {
       <span className="lp-node-port" aria-hidden="true" />
       <span className="lp-form">{node.label}</span><span className="lp-lang">{node.lang}</span>
     </button>
+    {branchCount > 0 && <button className="lp-stage-relatives" aria-label={`Explore ${branchCount} branches at ${node.label}`} onClick={onBranches}>+{branchCount}</button>}
   </motion.div>
 }
 
-export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, initialView, onSnapshot, onInspect, onStartFrom, preferredLanguages = [], autoTrace = false }: FamilyProps) {
+export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, initialView, onSnapshot, onInspect, onStartFrom, preferredLanguages = [], autoTrace = false, onKeepLater, laterIds = [] }: FamilyProps) {
   const [family, setFamily] = useState(initialFamily)
   const request = useRef<AbortController | null>(null)
   const [pending, setPending] = useState(false)
@@ -53,26 +58,32 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
   const anchor = leaves.find(n => n.lang === 'English') ?? leaves[0]
   const initial = sourced ? family.nodes.find(n => n.parent === null)! : anchor
   const defaults = useMemo(() => {
-    const others = leaves.filter(n => n.id !== anchor.id)
-    if (sourced) return stageEndpoints(family)
-    return [...new Set([anchor.id, ...[others[0], others.at(-1)].filter(n => n !== undefined).map(n => n.id)])]
+    if (sourced) return ancestryLeaves(family).map(n => n.id)
+    return [anchor.id]
   }, [anchor, leaves, sourced, family])
   const [selectedId, setSelected] = useState(initialView?.selectedId ?? initial.id)
-  const [endpoints, setEndpoints] = useState(initialView?.endpoints ?? defaults)
+  const [endpoints, setEndpoints] = useState([...new Set([...defaults, ...(initialView?.selectedId ? [initialView.selectedId] : [])])])
   const [pathOnly, setPathOnly] = useState(initialView?.pathOnly ?? false)
-  const [zoom, setZoom] = useState(initialView?.zoom ?? 1)
-  const [overview, setOverview] = useState(true)
+  const [zoom] = useState(initialView?.zoom ?? 1)
+  const [overview, setOverview] = useState(false)
+  const [branchParent, setBranchParent] = useState<string | null>(null)
+  const branchPanel = useRef<HTMLElement>(null)
+  useEffect(() => {
+    if (!branchParent) return
+    branchPanel.current?.scrollIntoView({ block: 'nearest', behavior: 'instant' })
+    branchPanel.current?.focus({ preventScroll: true })
+  }, [branchParent])
   const [viewport, setViewport] = useState({ width: 0, height: 0 })
-  const centerOn = useRef<string | null>(null)
+  const centerOn = useRef<string | null>(initialView?.selectedId ?? null)
   const scroll = useRef<HTMLDivElement>(null)
   const readerMoved = useRef(Boolean(initialView))
   const inspector = useRef<HTMLElement>(null)
   const callbacks = useRef({ onSnapshot, onInspect })
   callbacks.current = { onSnapshot, onInspect }
   const [positions, setPositions] = useState({ scrollLeft: initialView?.scrollLeft ?? 0, scrollTop: initialView?.scrollTop ?? 0 })
+  const [screenPosition, setScreenPosition] = useState({ scrollLeft: 0, scrollTop: 0 })
   const visited = useRef<string[]>(initialView?.visited ?? [initialView?.selectedId ?? initial.id])
   const [cursor, setCursor] = useState(initialView?.cursor ?? 0)
-  useEffect(() => { if (scroll.current) { scroll.current.scrollLeft = initialView?.scrollLeft ?? 0; scroll.current.scrollTop = initialView?.scrollTop ?? 0 } }, [])
   useEffect(() => {
     callbacks.current.onSnapshot?.(family, { selectedId, endpoints, pathOnly, zoom, ...positions, visited: visited.current, cursor })
     callbacks.current.onInspect?.(selectedId)
@@ -82,7 +93,14 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
   // A dictionary entry can stand alone when all its cited branches are folded.
   const visibleEndpoints = endpoints.length ? endpoints : [initial.id]
   const layout = useMemo(() => familyLayout(family.nodes, overview ? leaves.map(n => n.id) : pathOnly ? [selected.id] : visibleEndpoints, family.direction), [family, endpoints, pathOnly, selected.id, overview, leaves])
-  const scale = overview ? fitFamilyScale(layout, viewport) : zoom
+  const gestures = useTreeGestures(scroll, layout, overview ? fitFamilyScale(layout, viewport) : zoom, `${overview}:${zoom}`)
+  const scale = gestures.scale
+  const wholeLayout = useMemo(() => familyLayout(family.nodes, leaves.map(n => n.id), family.direction), [family, leaves])
+  const onScreen = new Set(layout.nodes.filter(node => {
+    const x = node.x * scale + Math.max(0, ((scroll.current?.clientWidth ?? viewport.width) - layout.width * scale) / 2) - screenPosition.scrollLeft
+    const y = node.y * scale - screenPosition.scrollTop
+    return x >= 0 && x <= (scroll.current?.clientWidth ?? viewport.width) && y >= 0 && y <= (scroll.current?.clientHeight ?? viewport.height)
+  }).map(n => n.id))
   useLayoutEffect(() => {
     const element = scroll.current
     if (!element) return
@@ -99,7 +117,7 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
   useLayoutEffect(() => {
     const element = scroll.current
     if (!element) return
-    if (overview) { element.scrollLeft = 0; element.scrollTop = 0; return }
+    if (overview) return
     const point = layout.nodes.find(n => n.id === centerOn.current)
     if (!point) return
     element.scrollLeft = Math.max(0, point.x * zoom - element.clientWidth / 2)
@@ -117,6 +135,7 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
   const transition = { duration: reduced ? 0 : .32, ease: [.22, 1, .36, 1] as [number, number, number, number] }
   function selectNode(id: string, navigating = false) {
     if (overview) {
+      gestures.reset()
       centerOn.current = id; setOverview(false); setPathOnly(false)
       setEndpoints(previous => [...new Set([...previous, id])])
     }
@@ -129,6 +148,7 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
     setPending(false); setChoice(null); setHistoryMessage(''); setSelected(id)
   }
   function exploreForm(id = selected.id) {
+    gestures.reset()
     centerOn.current = id
     setOverview(false); setPathOnly(false)
     setEndpoints(previous => [...new Set([...previous, id])])
@@ -166,7 +186,7 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
   }
   function showTrace(next: Family) {
     setFamily(next); onFamilyChange?.(next)
-    setEndpoints(stageEndpoints(next)); setPathOnly(false)
+    setEndpoints(previous => [...new Set([...ancestryLeaves(next).map(n => n.id), ...previous.filter(id => next.nodes.some(n => n.id === id))])]); setPathOnly(false)
   }
   async function runTrace(start: Family = family) {
     request.current?.abort(); request.current = null; setPending(false); setChoice(null)
@@ -212,11 +232,12 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
     <div className="lp-explorer-grid">
       <div className="lp-graph-panel">
         <div className="lp-tree-view" role="group" aria-label="Tree view">
-          <button aria-pressed={overview} onClick={() => setOverview(true)}>Whole tree</button>
-          <button aria-pressed={!overview} onClick={() => exploreForm()}>Explore details</button>
+          <button aria-pressed={!overview} onClick={() => { setOverview(false); setEndpoints(defaults); setPathOnly(false); setBranchParent(null); selectNode(initial.id); centerOn.current = initial.id; gestures.reset() }}>Main history</button>
+          <button aria-pressed={overview} onClick={() => { setOverview(true); setBranchParent(null); gestures.reset() }}>Whole tree</button>
         </div>
-        <div className={`lp-graph-scroll lp-family-canvas ${overview ? 'is-overview' : ''} ${sourced ? 'is-sourced' : ''}`} style={{ height: overview ? layout.height * scale + 16 : undefined }} ref={scroll} onWheel={() => { readerMoved.current = true }} onPointerDown={() => { readerMoved.current = true }} onKeyDown={() => { readerMoved.current = true }} onScroll={event => { if (!overview) setPositions({ scrollLeft: event.currentTarget.scrollLeft, scrollTop: event.currentTarget.scrollTop }) }} tabIndex={0} role="region" aria-label={`${word} ${sourced ? 'sources' : 'family'}. ${overview ? 'All loaded branches. Select a form to zoom in.' : 'Scroll horizontally to explore branches.'}`}>
-          <div className="lp-graph-size" style={{ width: layout.width * scale, height: layout.height * scale, visibility: overview && !viewport.width ? 'hidden' : undefined }}>
+        <div className="lp-tree-viewport">
+        <div className={`lp-graph-scroll lp-family-canvas is-gestural ${overview ? 'is-overview' : ''} ${sourced ? 'is-sourced' : ''}`} ref={scroll} {...gestures.bind} onPointerDown={event => { readerMoved.current = true; gestures.bind.onPointerDown(event) }} onWheel={() => { readerMoved.current = true }} onKeyDown={() => { readerMoved.current = true }} onScroll={event => { const next = { scrollLeft: event.currentTarget.scrollLeft, scrollTop: event.currentTarget.scrollTop }; setScreenPosition(next); if (!overview) setPositions(next) }} tabIndex={0} role="region" aria-label={`${word} ${sourced ? 'sources' : 'family'}. Pinch to zoom; drag to move.`}>
+          <div className="lp-graph-size" style={{ width: layout.width * scale, height: layout.height * scale }}>
             <div key={overview ? 'overview' : 'detail'} className="lp-graph-stage" style={{ width: layout.width, height: layout.height, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
               <svg width={layout.width} height={layout.height} aria-hidden="true" className="lp-family-branches">
                 <AnimatePresence initial={false}>
@@ -238,11 +259,22 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
               </svg>
               <AnimatePresence initial={false}>
                 {layout.nodes.map(node => <FamilyPoint key={node.id} node={node} selected={selected.id === node.id}
-                  lineage={ancestry.has(node.id)} reduced={reduced || overview} onSelect={() => overview ? exploreForm(node.id) : selectNode(node.id)} />)}
+                  lineage={ancestry.has(node.id)} reduced={reduced || overview} onSelect={() => overview ? exploreForm(node.id) : selectNode(node.id)}
+                  branchCount={overview ? 0 : family.nodes.filter(n => n.parent === node.id && !layout.nodes.some(visible => visible.id === n.id)).length}
+                  onBranches={() => { setBranchParent(node.id); selectNode(node.id) }} />)}
               </AnimatePresence>
             </div>
           </div>
         </div>
+        <button className="lp-tree-minimap" aria-label="Show whole tree; highlighted forms are currently on screen" onClick={() => { setOverview(true); gestures.reset() }}>
+          <svg viewBox={`0 0 ${wholeLayout.width} ${wholeLayout.height}`} aria-hidden="true">
+            {wholeLayout.links.map(link => <path key={link.id} d={`M${link.from.x},${link.from.y} L${link.to.x},${link.to.y}`} stroke="var(--lp-muted)" vectorEffect="non-scaling-stroke" strokeWidth="1" fill="none" opacity=".5" />)}
+            {wholeLayout.nodes.map(node => <circle key={node.id} cx={node.x} cy={node.y} r={Math.max(12, wholeLayout.width / 65)} fill={node.id === selected.id ? 'var(--lp-gold)' : onScreen.has(node.id) ? 'var(--lp-accent)' : 'var(--lp-muted)'} opacity={onScreen.has(node.id) ? 1 : .45} />)}
+          </svg><span>Whole tree</span>
+        </button>
+        </div>
+        <div className="lp-camera-controls" role="group" aria-label="Map controls"><span>Drag to move · pinch to zoom</span><button aria-label="Zoom tree out" onClick={() => gestures.zoom(1 / 1.25)}>−</button><button aria-label="Reset map zoom" onClick={() => gestures.reset()}>{Math.round(scale * 100)}%</button><button aria-label="Zoom tree in" onClick={() => gestures.zoom(1.25)}>+</button></div>
+        {branchParent && !overview && <section ref={branchPanel} tabIndex={-1} className="lp-stage-branches" aria-label="Branches at selected stage" onKeyDown={event => { if (event.key === 'Escape') { setBranchParent(null); centerOn.current = branchParent; setEndpoints(previous => [...previous]) } }}><div className="lp-actions"><strong>Connected to {family.nodes.find(n => n.id === branchParent)?.label}</strong><button aria-label="Close branch choices" onClick={() => { setBranchParent(null); centerOn.current = branchParent; setEndpoints(previous => [...previous]) }}>Close</button></div>{family.nodes.filter(n => n.parent === branchParent && !layout.nodes.some(visible => visible.id === n.id)).map(node => <button key={node.id} onClick={() => { setBranchParent(null); exploreForm(node.id) }}><strong>{node.label}</strong><span>{node.lang} · {node.relation || 'source path'}</span></button>)}</section>}
         {overview && <div className="lp-overview-caption"><span>{family.nodes.length} forms · all loaded branches</span><select aria-label="Explore a form" value="" onChange={event => { if (event.target.value) exploreForm(event.target.value) }}><option value="">Explore a form…</option>{family.nodes.map(node => <option key={node.id} value={node.id}>{node.label} · {node.lang}</option>)}</select></div>}
         {!overview && <div className="lp-graph-toolbar">
           <div role="group" aria-label="Exploration navigation">
@@ -252,11 +284,6 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
           <div role="group" aria-label="Family detail">
             <button aria-pressed={!pathOnly} onClick={() => setPathOnly(false)}>Family</button>
             <button aria-pressed={pathOnly} disabled={sourced && selected.parent === null} onClick={() => setPathOnly(true)}>Selected path</button>
-          </div>
-          <div role="group" aria-label="Tree scale">
-            <button aria-label="Zoom out" disabled={zoom <= .75} onClick={() => setZoom(z => Math.max(.75, z - .25))}>−</button>
-            <button aria-label="Reset tree scale" onClick={() => setZoom(1)}>{Math.round(zoom * 100)}%</button>
-            <button aria-label="Zoom in" disabled={zoom >= 1.5} onClick={() => setZoom(z => Math.min(1.5, z + .25))}>+</button>
           </div>
         </div>}
         {!overview && <button className="lp-mobile-inspect" onClick={() => { inspector.current?.scrollIntoView({ block: 'start', behavior: 'instant' }); inspector.current?.focus({ preventScroll: true }) }}>Selected: {selected.label} · details ↓</button>}
@@ -301,6 +328,7 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
         <button className="lp-mobile-inspect" onClick={() => { scroll.current?.scrollIntoView({ block: 'start', behavior: 'instant' }); scroll.current?.focus({ preventScroll: true }) }}>↑ Back to tree</button>
         <div className="lp-section-label">Selected form</div>
         <div aria-live="polite" aria-atomic="true"><p className={`lp-word ${selected.reconstructed ? 'is-reconstructed' : ''}`}>{selected.label}</p><p className="lp-label">{selected.lang}{selected.reconstructed ? ' · reconstructed' : ''}</p></div>
+        {onKeepLater && <button className="lp-keep-later" aria-pressed={laterIds.includes(selected.id)} onClick={() => onKeepLater(selected.id)}>{laterIds.includes(selected.id) ? 'Saved for later ✓' : 'Explore later'}</button>}
         {sourced && <section className="lp-history-controls" aria-label="Explore word history">
           {continuation.length > 0 ? <button onClick={() => { setOverview(false); setPathOnly(false); setEndpoints(previous => continuationVisible ? foldHistory(family, previous, selected.id) : [...new Set([...previous.filter(id => id !== selected.id), ...continuation.map(n => n.id)])]) }}>{continuationVisible ? 'Fold continuation' : 'Unfold continuation'}</button> :
             selected.lookup && !selected.historyState && !(isPIE(selected) && selected.label.endsWith('-')) ? <button className="lp-main" disabled={pending || tracing || !!traceChoice || !!limit} onClick={() => void exploreHistory()}>Explore deeper ↘</button> : null}

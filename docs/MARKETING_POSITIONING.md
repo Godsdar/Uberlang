@@ -79,3 +79,10 @@ Only English has an installed grammar model; this control does not add language
 coverage. A conservative Latin-letter gate is not language detection. New text
 examples have no prepared answers. Structure readings are rule-derived; dictionary
 senses remain alternatives and live translation is unavailable in the notebook.
+
+## Automatic sentence language (2026-10-24, ADR-034)
+
+Supersedes the manual input-language note above. Sentence/Text identifies the
+selected sentence locally and has no language selector. Ambiguous short input
+may need a longer phrase. Grammar remains English-only; automatic identification
+does not expand model coverage. The word-history target picker is unchanged.

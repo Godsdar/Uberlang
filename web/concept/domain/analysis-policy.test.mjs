@@ -14,7 +14,7 @@ test('shared corpus rejects unsupported input before any English request', () =>
     if (item.expected==='accepted') assert.equal(sentenceRequest('doc',item.text,0,0,item.language).language,item.language)
     else assert.throws(()=>sentenceRequest('doc',item.text,0,0,item.language), /not been sent/,item.id)
   }
-  assert.throws(()=>sentenceRequest('doc','Birds sing.',0,0,''),/Choose the text language/)
+  assert.throws(()=>sentenceRequest('doc','Birds sing.',0,0,''),/Could not identify the language/)
 })
 test('UTF-16, word boundaries and combining marks preserve exact source without truncation',()=>{
   assert.equal(wordCount("café l'été 42"),3)

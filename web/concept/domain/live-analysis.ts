@@ -25,7 +25,7 @@ const boundary = (text: string, index: number) =>
   !(/[\uD800-\uDBFF]/.test(text[index - 1] ?? '') && /[\uDC00-\uDFFF]/.test(text[index] ?? ''))
 
 /** Send one complete sentence, never silently truncate a long document or selection. */
-export function sentenceRequest(documentId: string, document: string, start: number, end: number, language: string): AnalysisRequest {
+export function sentenceRequest(documentId: string, document: string, start: number, end: number, language: string | ((text: string) => string)): AnalysisRequest {
   if (!document.trim() || !Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < start || end > document.length || !boundary(document, start) || !boundary(document, end)) {
     throw new Error('Select a word or place the cursor in an English sentence.')
   }
@@ -38,9 +38,10 @@ export function sentenceRequest(documentId: string, document: string, start: num
     const contextStart = segment.index + segment.segment.indexOf(text)
     const contextEnd = contextStart + text.length
     if (start !== end && (start < contextStart || end > contextEnd)) throw new Error('Select words within one sentence. Analyze other sentences separately.')
-    const issue = textIssue(text) ?? languageIssue(language, text)
+    const detectedLanguage = typeof language === 'function' ? language(text) : language
+    const issue = textIssue(text) ?? languageIssue(detectedLanguage, text)
     if (issue) throw new Error(`${issue.message} Your text has not been sent.`)
-    return { documentId, language, text, contextStart,
+    return { documentId, language: detectedLanguage, text, contextStart,
       selection: start === end ? { start: 0, end: text.length } : { start: start - contextStart, end: end - contextStart } }
   }
   throw new Error('Place the cursor inside a sentence to analyze it.')

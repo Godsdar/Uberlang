@@ -80,3 +80,10 @@ Result: engine/model/version, source sentence range, token IDs + original ranges
 For each candidate record exact package/model versions, hardware, warm/cold latency, peak memory, download size, failures, token/range fidelity, morphology and dependency errors, licensing, and cost per 1,000 sentences if applicable. Evaluate explanations separately from syntactic accuracy. Use a linguistically reviewed reference and document disagreements; fixture resemblance is not evidence of general accuracy.
 
 Minimum adapter gate: 100% valid source slices/head references; no stale results after edits; visible unsupported/error states. Quality and latency thresholds require measured baseline and user review before production claims. If no candidate is usable within $0, retain the labeled concept and local research path instead of disguising a paid dependency.
+
+## Input identification, 2026-10-24
+
+ADR-034 adds tinyld 1.3.4 light in the web client to remove manual sentence language
+selection. Regression fixtures cover five languages and mixed-passage offsets;
+this is not a broad accuracy evaluation. Low-signal short phrases return unknown.
+No grammar engine changes or multilingual grammar coverage are implied.

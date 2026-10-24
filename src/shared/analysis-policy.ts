@@ -1,17 +1,8 @@
 /** Bounded English pilot. A script check is not automatic language identification. */
 export const analysisLimits = { documentUtf16Units: 6000, utf16Units: 500, words: 50, sentences: 1 } as const
 export const analysisModel = { language: 'en', engine: 'spaCy', version: '3.8.7', model: 'en_core_web_sm', modelVersion: '3.8.0' } as const
-export const languageChoices = [
-  { code: '', label: 'Choose the text language' },
-  { code: 'en', label: 'English · grammar available' },
-  { code: 'ru', label: 'Russian · no grammar model' },
-  { code: 'es', label: 'Spanish · no grammar model' },
-  { code: 'fr', label: 'French · no grammar model' },
-  { code: 'mul', label: 'Mixed languages · unsupported' },
-  { code: 'und', label: 'Other / unknown · unsupported' }
-] as const
 export const analysisWarnings = [
-  'English was declared by the user; language is not automatically detected. Latin-script text in another language may produce incorrect English predictions.',
+  'The grammar model supports English. Incorrect language identification can affect predictions.',
   'The script check rejects non-Latin letters, including names or quotations inside English text.'
 ]
 export type InputIssue = { code: string; message: string }
@@ -28,7 +19,7 @@ export function textIssue(text: string): InputIssue | null {
 }
 
 export function languageIssue(language: string, text: string): InputIssue | null {
-  if (!language) return { code: 'LANGUAGE_REQUIRED', message: 'Choose the text language before analysis. Language is not automatically detected.' }
+  if (!language) return { code: 'LANGUAGE_REQUIRED', message: 'Could not identify the language confidently. Try a longer phrase.' }
   if (language !== 'en') return { code: 'UNSUPPORTED_LANGUAGE', message: 'Grammar is unavailable for this language. Only the English model is installed; your text remains available for reading.' }
   const letters = [...text].filter(character => /\p{L}/u.test(character))
   if (!letters.length) return { code: 'NO_LANGUAGE_CONTENT', message: 'Choose a sentence containing words. Numbers, punctuation or emoji alone have no supported grammar analysis.' }
