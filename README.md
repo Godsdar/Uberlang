@@ -354,3 +354,5 @@ PIE overview above the tree distinguishes roots, forms and affixes. Separate
 histories stay separate, but no numbered choice blocks the initial tree. See
 [ADR-029](docs/decisions/ADR-029-branches-at-each-stage.md) and
 [ADR-031](docs/decisions/ADR-031-immediate-history-preview.md).
+
+Word trees open in **Whole tree** view with all loaded branches fitted to the screen. Select a form (or use the form picker) to open the detailed view; Whole tree returns to the overview. This changes the view, not the stored family or its source evidence. See [ADR-032](docs/decisions/ADR-032-whole-tree-first.md).

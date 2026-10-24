@@ -105,3 +105,22 @@ test('a short source branch stays next to its parent as another branch grows dee
   assert.ok(point('suffix').y<point('old').y)
   assert.ok(graph.links.every(({from,to})=>from.y<to.y))
 })
+
+test('whole-tree overview preserves every loaded node and fits both viewport axes', async () => {
+  const { fitFamilyScale } = await import('./graphs.ts')
+  for (const family of Object.values(families)) {
+    const before = structuredClone(family)
+    const layout = familyLayout(family.nodes, family.nodes.map(n => n.id), family.direction)
+    assert.equal(layout.nodes.length, family.nodes.length)
+    assert.equal(layout.links.length, family.nodes.length - 1)
+    for (const viewport of [{ width: 320, height: 340 }, { width: 1000, height: 500 }, { width: 800, height: 200 }]) {
+      const scale = fitFamilyScale(layout, viewport)
+      assert.ok(scale > 0 && scale <= 1)
+      assert.ok(layout.width * scale <= viewport.width + 1e-8)
+      assert.ok(layout.height * scale <= viewport.height + 1e-8)
+    }
+    assert.deepEqual(family, before)
+  }
+  assert.equal(fitFamilyScale({ width: 10000, height: 2000 }, { width: 320, height: 400 }), .032)
+  assert.equal(fitFamilyScale({ width: 100, height: 100 }, { width: 800, height: 600 }), 1)
+})

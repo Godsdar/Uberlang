@@ -448,6 +448,14 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp-ancestry{padding:0;margin:12px 0}
 #lingua-concept .lp-ancestry .lp-section-label{margin:0}
 #lingua-concept .lp-pie-overview:empty{display:none}
+#lingua-concept .lp-tree-view{display:flex;gap:6px;margin:0 0 4px}
+#lingua-concept .lp .lp-family-explorer.is-overview-view .lp-explorer-grid{grid-template-columns:minmax(0,1fr)}
+#lingua-concept .lp-tree-view button{font-size:13px;padding:6px 10px;color:var(--lp-muted);min-height:36px}
+#lingua-concept .lp-tree-view button[aria-pressed=true]{background:var(--lp-soft);color:var(--lp-accent)}
+#lingua-concept .lp .lp-family-canvas.is-overview{height:clamp(260px,56svh,500px);max-height:none;overflow:hidden;display:flex;align-items:center}
+#lingua-concept .lp-family-canvas.is-overview .lp-graph-size{flex-shrink:0;overflow:hidden}
+#lingua-concept .lp-overview-caption{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--lp-muted);margin:8px 0}
+#lingua-concept .lp .lp-overview-caption select{font-size:13px;padding:8px;max-width:100%;border:1px solid var(--lp-line);border-radius:6px;background:var(--lp-bg);color:var(--lp-fg)}
 @media(max-width:760px){
  #lingua-concept .lp-research .lp-family-canvas{max-height:min(400px,65svh)}
  #lingua-concept .lp-family-explorer .lp-graph-toolbar{padding:4px 0;gap:4px}

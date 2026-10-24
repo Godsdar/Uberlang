@@ -90,6 +90,12 @@ export function familyLayout(nodes: FamilyNode[], endpoints: string[], direction
   return { width, height, nodes: points, links }
 }
 
+/** Fit every loaded branch without clipping either axis or enlarging small trees. */
+export function fitFamilyScale(layout: { width: number; height: number }, viewport: { width: number; height: number }) {
+  if (![layout.width, layout.height, viewport.width, viewport.height].every(n => Number.isFinite(n) && n > 0)) return 1
+  return Math.min(1, viewport.width / layout.width, viewport.height / layout.height)
+}
+
 /** Dependency trees are a different relation system from historical families. */
 export function syntaxLayout(tokens: Token[]) {
   if (!tokens.length || tokens.some((t, i) => !Number.isInteger(t.head) || t.head < 0 ||
