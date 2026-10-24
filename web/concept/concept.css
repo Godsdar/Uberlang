@@ -433,3 +433,7 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 
 #lingua-concept .lp-tabs button[aria-pressed="true"],#lingua-concept .lp .lp-theme button[aria-pressed="true"]{background:var(--lp-soft);border-radius:6px;padding-inline:10px}
 .lp-layout-picker button[aria-pressed="true"]{background:var(--lp-soft);border-radius:6px;font-weight:600}
+
+#lingua-concept .lp-other-histories{margin:26px 0;font-size:14px}
+#lingua-concept .lp-other-histories>summary{cursor:pointer;color:var(--lp-muted)}
+#lingua-concept .lp .lp-discovery-meaning{max-width:70ch;color:var(--lp-muted);margin:0 0 20px}

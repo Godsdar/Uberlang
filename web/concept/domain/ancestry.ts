@@ -73,7 +73,7 @@ export function stageEndpoints(family: Family): string[] {
 }
 
 export const originLabel = (label: string) => label.replace(/^Etymology(?: (\d+))?$/, (_, number) => number ? `Origin ${number}` : 'Word origin')
-export const ORIGIN_HELP = 'Separate dictionary histories for the same spelling, often with different meanings. These numbers are not steps in time or confidence rankings. Choose the meaning you want to explore.'
+export const ORIGIN_HELP = 'Separate dictionary histories for the same spelling, often with different meanings. These histories stay separate; opening one does not resolve the meaning in context.'
 export const pieKind = (node: FamilyNode) => /^\*?-/.test(node.label) ? 'PIE affix' : node.label.endsWith('-') ? 'PIE root' : 'PIE form'
 export const pieOverview = (family: Family) => ancestryNodes(family).filter(isPIE).filter((node, index, nodes) =>
   nodes.findIndex(other => other.label === node.label) === index).sort((a, b) => Number(pieKind(b) === 'PIE root') - Number(pieKind(a) === 'PIE root'))

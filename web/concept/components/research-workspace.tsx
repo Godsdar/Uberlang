@@ -1,10 +1,10 @@
-import { originLabel, ORIGIN_HELP } from '../domain/ancestry'
+import { originLabel } from '../domain/ancestry'
 import { LanguagePicker } from './language-picker'
 import { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { FamilyExplorer } from './explorers'
 import { historyLanguages, historyTarget, type HistoryTarget } from '../../../src/shared/etymology'
-import { parseHistory, type HistoryResult } from '../domain/history'
+import { openHistory, parseHistory, type HistoryResult } from '../domain/history'
 import { DISCOVERY_KEY, MAX_BACKUP, emptyLibrary, parseLibrary, saveDiscovery, sharedForms, validateDiscovery, writeLibrary, type Discovery, type DiscoveryLibrary, type ExplorerView } from '../domain/explorations'
 import type { Family } from '../domain/graphs'
 
@@ -69,9 +69,9 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
     try { commit(saveDiscovery(libraryRef.current, current)); setStatus('Saved on this browser. Changes to this discovery will save automatically.') }
     catch (error) { setStorageError(message(error)) }
   }
-  function activate(next: Discovery, trace = false) {
+  function activate(next: Discovery, trace = false, alternatives: HistoryResult | null = null) {
     setAutoTrace(trace)
-    cancel(); setChoices(null)
+    cancel(); setChoices(alternatives)
     const previous = activeRef.current
     // Keep a recoverable draft when a new search replaces an unsaved tree.
     if (previous && previous.id !== next.id && !libraryRef.current.discoveries.some(d => d.id === previous.id)) setUnsaved(items => [previous, ...items.filter(d => d.id !== previous.id)])
@@ -124,12 +124,13 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
       if (!response.ok) throw new Error(response.status === 429 ? 'The dictionary is busy. Wait a moment and retry.' : 'Word history is unavailable right now. Your current tree is still here; try a prepared family below.')
       const result = parseHistory(await response.json(), target)
       if (request.current !== controller || controller.signal.aborted) return
-      if (result.choices.length === 1) {
-        activate(newDiscovery({ word: target.term, language: target.language, family: result.choices[0], ...seed }), !target.term.includes(' '))
+      const family = openHistory(result)
+      if (family) {
+        activate(newDiscovery({ word: target.term, language: target.language, family, ...seed }), !target.term.includes(' '), result.choices.length > 1 ? result : null)
         setStatus(target.term.includes(' ') ? 'Dictionary expression opened. Its documented history is separate from the origins of its words.' : 'Following cited roots toward Proto-Indo-European where the evidence allows.')
       } else {
         setChoices(result)
-        setStatus(result.choices.length ? 'This word has separate histories. Choose one; they will stay separate.' : target.term.includes(' ') ? 'No supported dictionary history was found for this expression. Ordinary sentences often have no shared origin; the words can be researched separately.' : result.reason || 'No sourced history was found. This does not prove the word has no history.')
+        setStatus(target.term.includes(' ') ? 'No supported dictionary history was found for this expression. Ordinary sentences often have no shared origin; the words can be researched separately.' : result.reason || 'No sourced history was found. This does not prove the word has no history.')
       }
     } catch (error) {
       if (request.current === controller) setStatus(controller.signal.aborted ? 'Lookup timed out. Your tree is still here; try again when ready.' : message(error))
@@ -160,7 +161,7 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
     <p className="lp-research-status" role="status" aria-live="polite">{status}</p>
     {storageError && <div role="alert" className="lp-storage-error"><p>{storageError}</p><button onClick={backupCurrent} disabled={!active}>Download current discovery</button><button onClick={() => { try { download(localStorage.getItem(DISCOVERY_KEY) ?? '', 'uberlang-stored-data.json') } catch { setStatus('The browser is blocking access to stored data.') } }}>Download stored data</button><button onClick={() => { const next = load(); raw.current = next.raw; loaded.error = next.error; libraryRef.current = next.library; setLibrary(next.library); setStorageError(next.error); if (!next.error) { const current = next.library.discoveries.find(d => d.id === next.library.activeId); if (current) { setAutoTrace(false); update(current); setGeneration(g => g + 1) } } }}>Reload saved library</button></div>}
     {unsaved.filter(d => d.id !== active?.id && !library.discoveries.some(s => s.id === d.id)).length > 0 && <details className="lp-draft-recovery"><summary>Unsaved trees from this session</summary>{unsaved.filter(d => d.id !== active?.id && !library.discoveries.some(s => s.id === d.id)).map(d => <div key={d.id}><button onClick={() => activate(d)}>{d.word} — reopen</button><button onClick={() => download(JSON.stringify(saveDiscovery(emptyLibrary(), d)), 'uberlang-unsaved-discovery.json')}>Download {d.word}</button></div>)}<p>Save or download these trees before closing this page.</p></details>}
-    {choices && <div className="lp-history-choices" aria-label="Choose word history"><p>{ORIGIN_HELP}</p>{choices.choices.map(choice => <button key={choice.id} onClick={() => { activate(newDiscovery({ word: choices.target.term, language: choices.target.language, family: choice, ...(context && { context }), ...(importedCard && { importedCard }) }), !choices.target.term.includes(' ')); setStatus('Your chosen etymology is open. Other histories have not been merged.') }}><strong>{originLabel(choice.label)}</strong><span>{choice.summary || choice.reason}</span></button>)}{choices.source && <a href={choices.source} target="_blank" rel="noreferrer">Read the dictionary entry ↗</a>}</div>}
+    {choices && !choices.choices.length && choices.source && <a href={choices.source} target="_blank" rel="noreferrer">Read the dictionary entry ↗</a>}
     <details className="lp-discoveries"><summary>Your discoveries · {library.discoveries.length}</summary>
       <p className="lp-label">Stored in this browser only. Download a backup to keep a copy or move to another device.</p>
       <label>Find a discovery<input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Word or your note" /></label>
@@ -185,6 +186,7 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
     </details>
     {active ? <article className="lp-discovery" aria-label="Current discovery">
       <header className="lp-discovery-heading"><div><p className="lp-eyebrow">{active.family.direction === 'sources' ? 'Sourced history · partial' : 'Prepared family · sourced examples'}</p><h2 ref={resultHeading} tabIndex={-1}>{active.word}<span>{historyLanguages[active.language]}</span></h2></div><div className="lp-actions"><button className="lp-main" onClick={remember}>{saved && !storageError ? 'Saved · save now' : 'Save discovery'}</button><button onClick={backupCurrent}>Download</button></div></header>
+      {active.family.nodes.find(node => node.parent === null)?.gloss && <p className="lp-discovery-meaning">{active.family.nodes.find(node => node.parent === null)?.gloss}</p>}
       {active.context && <details><summary>Original context</summary><p className="lp-discovery-context">{active.context}</p></details>}
       {active.word.includes(' ') && <section className="lp-expression-history" aria-label="Expression history"><h3>History of the expression</h3><p className="lp-label">This is the dictionary entry for the whole expression. The origins of its individual words are separate research.</p><p>{active.family.historyText || 'No readable history of this expression is available in the supported source format. A dictionary entry or a word connection alone does not establish how a phrase originated.'}</p><a href={active.family.nodes.find(n => n.parent === null)?.source} target="_blank" rel="noreferrer">Read the cited entry ↗</a><p className="lp-label">{active.family.attribution}</p></section>}
       {(!active.word.includes(' ') || active.family.nodes.length > 1) && <FamilyExplorer key={`${active.id}:${generation}`} family={active.family} word={active.word} autoTrace={autoTrace} initialView={active.view} onSnapshot={snapshot} preferredLanguages={library.languages} onStartFrom={node => {
@@ -193,6 +195,11 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
         if (!target) { setStatus('This form cannot be looked up directly. Its source entry is linked in the inspector.'); return }
         setTerm(target.term); setLanguage(target.language); setContext(''); setImportedCard(undefined); void explore(target, {})
       }} />}
+      {choices && choices.choices.length > 1 && <details key={active.id} className="lp-other-histories"><summary>Other histories of {active.word} · {choices.choices.length - 1}</summary><p className="lp-label">Different meanings can have separate histories. The first dictionary history opens automatically; the alternatives stay separate.</p><div className="lp-history-choices" aria-label="Other word histories">{choices.choices.map(choice => <button key={choice.id} disabled={choice.id === active.family.id} aria-pressed={choice.id === active.family.id} onClick={() => {
+        const family = openHistory(choices, choice.id)!
+        activate(newDiscovery({ word: choices.target.term, language: choices.target.language, family, ...(context && { context }), ...(importedCard && { importedCard }) }), !choices.target.term.includes(' '), choices)
+        setStatus('History opened. Your previous tree is kept separately.')
+      }}><strong>{choice.summary || originLabel(choice.label)}</strong><span>{choice.id === active.family.id ? 'Showing this history' : 'Open this history →'}</span></button>)}</div></details>}
       <div className="lp-discovery-notes"><div><h3>Your discovery</h3>{selected && <div className="lp-actions" role="group" aria-label={`Your interest in ${selected.label}`}><span>{selected.label}</span>{(['known', 'curious'] as const).map(mark => <button key={mark} aria-pressed={active.marks[selected.id] === mark} onClick={() => { const marks = { ...active.marks }; if (marks[selected.id] === mark) delete marks[selected.id]; else marks[selected.id] = mark; patch({ marks }) }}>{mark === 'known' ? 'I know this' : 'Explore later'}</button>)}</div>}<label>What caught your attention?<textarea value={active.note} maxLength={4000} rows={3} placeholder="A connection, a question, something to remember…" onChange={e => patch({ note: e.target.value })} /></label><p className="lp-label">{saved && !storageError ? 'Notes and tree changes save on this browser.' : 'Save this discovery to keep your tree and notes after closing the page.'}</p></div><button onClick={() => options.onAnki(active)}>Make an Anki card…</button></div>
       <details className="lp-compare"><summary>Compare with another discovery</summary><label>Saved discovery<select value={compareId} onChange={e => setCompareId(e.target.value)}><option value="">Choose a word</option>{library.discoveries.filter(d => d.id !== active.id).map(d => <option key={d.id} value={d.id}>{d.word} · {historyLanguages[d.language]} · {originLabel(d.family.label || 'Prepared family')}</option>)}</select></label>
         {comparison && <div><h3>{active.word} & {comparison.word}</h3><p>{shared.length ? 'Forms found in both loaded histories:' : 'No shared form appears in the loaded histories. The trees may be incomplete; this is not proof that the words are unrelated.'}</p><ul>{shared.map(({ left, right }) => <li key={`${left.id}:${right.id}`}><strong>{left.label}</strong> · {left.lang}<br /><a href={left.edgeSource || left.source} target="_blank" rel="noreferrer">{active.word}: {left.relation || 'family evidence'} ↗</a>{' · '}<a href={right.edgeSource || right.source} target="_blank" rel="noreferrer">{comparison.word}: {right.relation || 'family evidence'} ↗</a></li>)}</ul><p className="lp-label">A shared form is a lead to investigate, not proof of a shared ancestor. Homonyms, components, inflections and separate etymologies need their own evidence. No connecting edge has been invented.</p></div>}

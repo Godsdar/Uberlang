@@ -175,7 +175,7 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
         {tracing ? <button onClick={() => { traceRequest.current?.abort() }}>Stop tracing</button> :
           !traceChoice && <button disabled={pending} onClick={() => void runTrace()}>Continue roots & relatives</button>}
       </div>
-      <p role="status" aria-live="polite">{traceMessage || ancestrySummary(family)}</p>
+      <p role="status" aria-live="polite">{traceChoice ? 'The loaded tree is ready. An intermediate form has more than one history; you can explore those below.' : traceMessage || ancestrySummary(family)}</p>
       <div className="lp-pie-overview" aria-label="Proto-Indo-European overview">
         {pieOverview(family).map(node => <div className="lp-pie-summary" key={node.id}>
           <span className="lp-section-label">{pieKind(node)}</span><strong>{node.label}</strong>
@@ -190,10 +190,7 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
             }}>Locate {node.label} in tree ↓</button></div>
         </div>)}
       </div>
-      {traceChoice && <div className="lp-history-choices" role="group" aria-label="Choose ancestry to trace"><p>{ORIGIN_HELP}</p>{traceChoice.result.choices.map(option => <button key={option.id} onClick={() => {
-        try { const next = traceChoice.relatives ? extendRelatives(family, traceChoice.nodeId, traceChoice.result, option.id, 2) : extendHistory(family, traceChoice.nodeId, traceChoice.result, option.id); showTrace(next); void runTrace(next) }
-        catch (error) { setTraceMessage(error instanceof Error ? error.message : 'Cannot add this history.') }
-      }}><strong>{originLabel(option.label)}</strong><span>{option.summary || option.reason}</span></button>)}</div>}
+
     </section>}
 
     <details className="lp-family-branch-menu"><summary>Choose branches · {leaves.length} available</summary><div className="lp-branch-picker" role="group" aria-label="Visible family branches">
@@ -268,7 +265,7 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
           <p className="lp-history-status" role="status" aria-live="polite">{historyMessage}</p>
           {choice?.nodeId === selected.id && <div className="lp-history-choices" role="group" aria-label="Choose a separate etymology"><p>{ORIGIN_HELP}</p>
             {choice.result.choices.map(option => <button key={option.id} onClick={() => { try { applyHistory(choice.result, option.id, choice.relatives) } catch (error) { setHistoryMessage(error instanceof Error ? error.message : 'Cannot add this history.') } }}>
-              <strong>{originLabel(option.label)}</strong><span>{option.summary}</span><small>{option.nodes.length > 1 ? `${option.nodes.length - 1} cited forms` : 'No supported continuation'}</small>
+              <strong>{option.summary || originLabel(option.label)}</strong><span>Explore this history →</span><small>{option.nodes.length > 1 ? `${option.nodes.length - 1} cited forms` : 'No supported continuation'}</small>
             </button>)}
           </div>}
         </section>}
@@ -285,6 +282,10 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
         <p className="lp-label lp-attribution">Wiktionary · <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</a><br />{sourced ? 'Live source lookup · partial history' : 'Curated family · selected relatives'}</p>
       </aside>
     </div>
+      {traceChoice && <details className="lp-other-histories"><summary>More histories for {family.nodes.find(node => node.id === traceChoice.nodeId)?.label}</summary><div className="lp-history-choices" role="group" aria-label="Optional ancestry histories"><p>{ORIGIN_HELP}</p>{traceChoice.result.choices.map(option => <button key={option.id} onClick={() => {
+        try { const next = traceChoice.relatives ? extendRelatives(family, traceChoice.nodeId, traceChoice.result, option.id, 2) : extendHistory(family, traceChoice.nodeId, traceChoice.result, option.id); showTrace(next); void runTrace(next) }
+        catch (error) { setTraceMessage(error instanceof Error ? error.message : 'Cannot add this history.') }
+      }}><strong>{option.summary || originLabel(option.label)}</strong><span>Explore this history →</span></button>)}</div></details>}
   </div>
 }
 

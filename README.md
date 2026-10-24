@@ -30,8 +30,8 @@ Built with TypeScript, React, D3, and Motion.
 ## Start with a word
 
 Search or browse the grouped **Language** menu, then choose **Explore**. The word and its cited forms are looked up
-sequentially toward **Proto-Indo-European (PIE)**. Separate etymologies pause for
-your choice. Other origins, unsupported forms or missing evidence can end a
+sequentially toward **Proto-Indo-European (PIE)**. The first dictionary history opens immediately; other histories are optional
+below the tree. Ambiguous intermediate entries retain the loaded tree. Other origins, unsupported forms or missing evidence can end a
 branch earlier; the app never invents a PIE connection. **Stop tracing** keeps
 progress, **Continue tracing roots** resumes, and **View PIE form** reveals a
 reached reconstruction. Select any form to inspect its evidence or explore it as a new word.
@@ -337,7 +337,8 @@ Research preserves explicitly cited intermediate stages and word components,
 including Russian **брать** and **исследовать**. The tree distinguishes sources
 from cognates, descendants, borrowed descendants and derivatives. Use **Choose
 branches** to reveal loaded forms and **Load this form’s relatives** on an older
-form to expand into other languages. Separate etymologies still require a choice.
+form to expand into other languages. Initial lookup opens the first dictionary
+history immediately; other meanings are optional below its tree.
 Missing stages remain marked, and no universal PIE ancestry is assumed.
 
 **My decks** imports a local file; it cannot discover an installed Anki collection.
@@ -349,6 +350,7 @@ start with an empty answer. Storage belongs to this browser and site address.
 
 Word-family exploration checks skipped intermediate entries for relatives within
 the same bounded run, showing a small branch preview at each sourced stage. The
-PIE overview above the tree distinguishes roots, forms and affixes; Origin 1/2
-denotes separate dictionary histories. See
-[ADR-029](docs/decisions/ADR-029-branches-at-each-stage.md).
+PIE overview above the tree distinguishes roots, forms and affixes. Separate
+histories stay separate, but no numbered choice blocks the initial tree. See
+[ADR-029](docs/decisions/ADR-029-branches-at-each-stage.md) and
+[ADR-031](docs/decisions/ADR-031-immediate-history-preview.md).

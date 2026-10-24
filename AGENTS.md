@@ -26,8 +26,9 @@ reading, English grammar and Anki support that journey. Saved discovery storage
 is `uberlang.explorations.v1`; never clear or overwrite corrupt/unknown data.
 Keep the separate session-note, imported-deck and old roots contracts intact.
 Vercel/Pages build without duplicate CI checks (ADR-026); CI remains independent.
-Explicit research Explore traces cited roots and shows typed relatives (ADR-027/028), pausing for
-alternative etymologies and preserving partial evidence. Saved trees stay local
+Explicit research Explore immediately opens the first dictionary history (ADR-031),
+then traces cited roots and shows typed relatives (ADR-027/028). Other entry histories
+are optional below the tree. Intermediate ambiguity preserves partial evidence. Saved trees stay local
 until Continue tracing roots; never fabricate a PIE connection.
 
 ## Current web entry (ADR-017)

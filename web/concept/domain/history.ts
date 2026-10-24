@@ -20,6 +20,22 @@ export function parseHistory(value: unknown, target: HistoryTarget): HistoryResu
   return { target, choices, reason: value.reason, source: value.source }
 }
 
+/** Open immediately in dictionary order; this is a display default, not sense disambiguation. */
+export function openHistory(result: HistoryResult, choiceId?: string): HistoryChoice | null {
+  const choice = choiceId === undefined ? result.choices[0] : result.choices.find(item => item.id === choiceId)
+  if (choiceId !== undefined && !choice) throw new Error('Unknown history.')
+  if (!choice) return null
+  const family = structuredClone(choice)
+  const root = family.nodes.find(node => node.parent === null)!
+  root.gloss = choice.summary
+  root.historyChoice = { id: choice.id, source: root.source, readerSelected: choiceId !== undefined }
+  if (result.choices.length > 1) {
+    const selection = choiceId === undefined ? 'First listed dictionary history shown automatically.' : 'Reader opened this dictionary history.'
+    root.historyNote = `${selection} Other histories remain separate; this does not resolve the word’s meaning in context.${root.historyNote ? ' ' + root.historyNote : ''}`
+  }
+  return family
+}
+
 export const HISTORY_NODE_LIMIT = 64
 export const HISTORY_DEPTH_LIMIT = 8
 export function historyLimit(family: Family, nodeId: string): string | null {
