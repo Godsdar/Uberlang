@@ -10,6 +10,11 @@ For bounded coding tasks, including Sol at medium reasoning. Read this after AGE
 
 ## Product rules
 
+Current UI priorities are `DESIGN.md` and ADR-036 (2026-10-25): compact word-origin
+research; no promotional headings, decorative empty states or repeated service
+copy in either entry mode. Word placeholder is exactly `Enter a word`. Older
+marketing/retention roadmaps are historical where they conflict.
+
 - Working product name: **Uberlang** (only U uppercase, lowercase l; latest owner instruction 2026-10-18). Read the [brand brief](OWNER_BRIEF_2026-10-16.md#бренд-для-дальнейшей-работы). The repository is Godsdar/Uberlang (owner-authorized rename). The demo is https://uberlang.vercel.app/ on Vercel project lingua (owner-authorized domain). Other technical identifiers remain Lingua; do not rename code, accounts or stored data for branding. English UI. Minimal Zen Notes / Monkeytype direction; themes through CSS tokens.
 - Positioning: explore words, their origins, and connections across languages. [Coverage by mode](MARKETING_POSITIONING.md#coverage-by-mode) governs claims: initial lookup/grammar are English; sourced history continuation can cross supported languages; prepared branches stay labeled.
 - $0 operation. No paid infrastructure/API, accounts, analytics, desktop signing, or mobile release as a shortcut. The local Node backend is authorized by ADR-012; ADR-013 authorizes the free stateless Vercel analysis rollout.

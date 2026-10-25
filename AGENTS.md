@@ -20,6 +20,12 @@ for branding. See the owner brief and [current marketing/language coverage](docs
 
 ## Current research entry (ADR-025)
 
+The owner direction from 2026-10-25 is in `docs/DESIGN.md` and ADR-036: compact
+word-origin research, no promotional headings or repeated instructions, exact
+word placeholder `Enter a word`. Context, grammar and Anki support this journey;
+detailed help and secondary tools open on request. This supersedes conflicting
+marketing priorities in earlier planning documents.
+
 Etymology research is the primary `/` experience. `web/concept/components/research-workspace.tsx`
 uses the existing etymology endpoint for explicit word/language lookup. Context
 reading, English grammar and Anki support that journey. Saved discovery storage

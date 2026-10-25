@@ -326,10 +326,6 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 
 /* Etymology is the entry point; reading tools support an ongoing discovery. */
 #lingua-concept .lp-shell{max-width:1100px}
-#lingua-concept .lp-research-intro{max-width:700px;margin:24px 0 30px}
-#lingua-concept .lp .lp-eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1.7px;color:var(--lp-gold);margin:0 0 12px}
-#lingua-concept .lp-research h1{font:clamp(32px,5vw,52px)/1.12 Georgia,serif;letter-spacing:-1.2px;margin:0 0 18px}
-#lingua-concept .lp-research-intro>p:last-child{color:var(--lp-muted);font-size:17px}
 #lingua-concept .lp-research-search{display:flex;align-items:end;gap:14px;flex-wrap:wrap;margin-bottom:12px}
 #lingua-concept .lp-research label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--lp-muted)}
 #lingua-concept .lp-research :is(input:not([type=checkbox]),textarea,select){min-width:0;max-width:100%;border:1px solid var(--lp-line);background:var(--lp-surface);color:var(--lp-fg);padding:12px;font:16px/1.5 system-ui,sans-serif;border-radius:6px;box-sizing:border-box}
@@ -353,7 +349,7 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp .lp-discovery-heading h2{font:40px/1.2 Georgia,serif;overflow-wrap:anywhere}
 #lingua-concept .lp-discovery-heading h2 span{display:block;font:12px/2 system-ui,sans-serif;color:var(--lp-muted);margin-top:6px}
 #lingua-concept .lp-discovery-heading button{border:1px solid var(--lp-line)}
-#lingua-concept .lp-discovery-notes{display:flex;align-items:start;gap:24px;padding-top:24px;margin-top:26px}
+#lingua-concept .lp-discovery-notes{padding-top:8px;margin-top:16px}
 #lingua-concept .lp-discovery-notes>div{flex:1;min-width:0}
 #lingua-concept .lp-discovery-notes textarea{width:100%;resize:vertical}
 #lingua-concept .lp-discovery-notes [aria-pressed=true]{background:var(--lp-soft);color:var(--lp-accent);box-shadow:none;}
@@ -364,8 +360,6 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp-context>summary{font-size:18px;color:var(--lp-fg);cursor:pointer}
 #lingua-concept .lp-context>summary span{display:block;font-size:12px;color:var(--lp-muted);margin-top:4px}
 #lingua-concept .lp-context[open]>.lp-main-area{margin-top:28px}
-#lingua-concept .lp-research-empty{padding:40px 0 22px;text-align:center;color:var(--lp-muted);font-size:14px;line-height:1.8}
-#lingua-concept .lp .lp-empty-form{font:clamp(20px,4vw,32px)/1.5 Georgia,serif;color:var(--lp-fg);margin-bottom:20px}
 #lingua-concept .lp-storage-error{border:1px solid var(--lp-gold);padding:16px;font-size:14px}
 #lingua-concept .lp-draft-recovery{font-size:12px;color:var(--lp-muted)}
 #lingua-concept .lp .lp-discovery-context{white-space:pre-wrap;overflow-wrap:anywhere;padding:16px 0}
@@ -376,11 +370,9 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
  #lingua-concept .lp-research-search{gap:12px}
  #lingua-concept .lp-search-word{flex-basis:100%}
  #lingua-concept .lp-research-search>label:not(.lp-search-word){flex:1;min-width:0}
- #lingua-concept .lp-discovery-notes{flex-direction:column}
  #lingua-concept .lp-discovery-notes>div{width:100%}
  #lingua-concept .lp-research button{min-height:40px}
  #lingua-concept .lp-discovery-list li{align-items:start}
- #lingua-concept .lp-research-intro{margin-top:14px}
 }
 #lingua-concept .lp-research .lp-graph-scroll{max-height:560px}
 #lingua-concept .lp-mobile-inspect{display:none}
@@ -389,9 +381,6 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
  #lingua-concept .lp-mobile-inspect{display:block;color:var(--lp-accent);margin-bottom:12px}
  #lingua-concept .lp-research .lp-graph-scroll{max-height:400px}
 }
-#lingua-concept .lp-research.has-discovery .lp-research-intro{margin-bottom:20px}
-#lingua-concept .lp-research.has-discovery h1{font-size:32px}
-#lingua-concept .lp-research.has-discovery .lp-research-intro>p:last-child{display:none}
 
 /* Trace progress belongs with the tree, including pauses for ambiguous sources. */
 #lingua-concept .lp-ancestry{padding:12px 0;margin:16px 0 22px}
@@ -416,7 +405,6 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp-entry-modes button{font-size:16px;padding:10px 14px;color:var(--lp-muted)}
 #lingua-concept .lp-entry-modes button[aria-pressed=true]{color:var(--lp-accent);background:var(--lp-soft)}
 #lingua-concept .lp-context{margin-top:0;padding-top:0}
-#lingua-concept .lp-context-title{font:clamp(30px,4vw,46px)/1.2 Georgia,serif;margin:0 0 16px}
 #lingua-concept .lp-context>.lp-main-area{margin-top:20px}
 #lingua-concept .lp-sentence-picker{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
 #lingua-concept .lp-sentence-picker:empty{display:none}
@@ -441,7 +429,6 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp .lp-discovery-heading h2{font-size:28px;line-height:1.25;margin:0;scroll-margin-top:12px}
 #lingua-concept .lp-discovery-heading h2 span{display:inline;font-size:12px;line-height:1.5;margin:0 0 0 12px;vertical-align:middle}
 #lingua-concept .lp .lp-research-status:empty{display:none}
-#lingua-concept .lp-research.has-discovery .lp-research-intro{display:none}
 #lingua-concept .lp-discovery-tools{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:12px 0}
 #lingua-concept .lp-discovery-tools .lp-actions{margin:0}
 #lingua-concept .lp .lp-family-branch-menu{margin:8px 0}
@@ -487,8 +474,6 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 
 /* Sentence/Text: a composer, then one focused reading surface. */
 #lingua-concept .lp-context{max-width:760px;margin:0 auto;}
-#lingua-concept .lp-context-title{font:400 clamp(26px,4vw,36px)/1.25 Georgia,serif;margin:12px 0 24px;letter-spacing:-.5px;}
-#lingua-concept .lp-context.has-result .lp-context-title{display:none;}
 #lingua-concept .lp .lp-context>.lp-main-area{display:block;margin-top:0;}
 #lingua-concept .lp-context .lp-composer{margin:0;}
 #lingua-concept .lp-context .lp-composer[open]>summary{display:none;}
@@ -547,7 +532,6 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp-context .lp-sentence-picker{flex-wrap:nowrap;overflow-x:auto;max-width:100%;padding-bottom:6px;}
 #lingua-concept .lp-context .lp-sentence-picker button{flex-shrink:0;min-height:44px;}
 @media(max-width:760px){
- #lingua-concept .lp-context-title{margin:4px 0 20px;font-size:28px;}
  #lingua-concept .lp-context .lp-composer-body{padding:14px 14px 10px;}
  #lingua-concept .lp .lp-context .lp-editor{font-size:18px;}
  #lingua-concept .lp-context .lp-source{font-size:23px;}
@@ -558,3 +542,25 @@ body:has([data-variant]:not([hidden]) .lp[data-theme="light"]) .lp-layout-picker
 #lingua-concept .lp .lp-context textarea.lp-editor:focus-visible{outline:none;}
 #lingua-concept .lp .lp-sentence-result:focus{outline:none;}
 #lingua-concept .lp-context .lp-analyze-current{margin:0 0 16px;min-height:44px;}
+
+/* Compact research entry; explanations open only when requested. */
+#lingua-concept .lp-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0;}
+#lingua-concept .lp-research-options{display:flex;flex-wrap:wrap;gap:8px 24px;color:var(--lp-muted);font-size:12px;margin:4px 0;}
+#lingua-concept .lp-research-options>details[open]{flex-basis:100%;}
+#lingua-concept .lp-research-options summary,#lingua-concept .lp-tree-help summary,#lingua-concept .lp-discovery-notes>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;gap:6px;}
+#lingua-concept .lp-research-options p,#lingua-concept .lp-tree-help p{max-width:70ch;font-size:12px;color:var(--lp-muted);}
+#lingua-concept .lp .lp-tree-help{font-size:12px;margin:0;}
+#lingua-concept .lp-discovery-notes>div{padding:8px 0;}
+#lingua-concept .lp-discoveries{margin:4px 0 16px;padding:0;}
+#lingua-concept .lp-discoveries>summary{min-height:44px;display:flex;align-items:center;}
+#lingua-concept .lp-entry-modes{margin:0 0 20px;gap:6px;}
+#lingua-concept .lp-entry-modes button{font-size:14px;min-height:44px;}
+#lingua-concept .lp-research-search{gap:12px;}
+#lingua-concept .lp-search-word input{font:20px/1.5 system-ui,sans-serif!important;}
+#lingua-concept .lp .lp-research button{min-height:44px;}
+
+#lingua-concept .lp .lp-research-options>.lp-curiosity-queue,#lingua-concept .lp .lp-research-options>.lp-discoveries{margin:0;padding:0;max-width:100%;font-size:12px;}
+#lingua-concept .lp .lp-research-options>.lp-discoveries>summary{font:12px/1.5 system-ui,sans-serif;}
+#lingua-concept .lp .lp-research-options>.lp-curiosity-queue>summary{font-size:12px;}
+#lingua-concept .lp .lp-research-options>details[open]{flex-basis:100%;width:100%;}
+#lingua-concept .lp .lp-research-options{margin-bottom:18px;}

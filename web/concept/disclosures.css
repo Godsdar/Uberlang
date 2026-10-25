@@ -33,8 +33,8 @@
   #lingua-concept .lp details > summary:hover { color:var(--lp-fg);background:color-mix(in srgb,var(--lp-surface) 65%,transparent); }
 }
 #lingua-concept .lp .lp-discoveries { padding:6px 0; }
-#lingua-concept .lp .lp-discoveries > summary { font:20px/1.5 Georgia,'Times New Roman',serif;padding-block:14px; }
-#lingua-concept .lp .lp-discoveries > summary::before { top:25px; }
+#lingua-concept .lp .lp-discoveries > summary { font:14px/1.5 system-ui,sans-serif;padding-block:11px; }
+#lingua-concept .lp .lp-discoveries > summary::before { top:19px; }
 #lingua-concept .lp .lp-context > summary { font:22px/1.5 Georgia,'Times New Roman',serif; }
 #lingua-concept .lp .lp-context > summary::before { top:24px; }
 #lingua-concept .lp .lp-context > summary span { font:12px/1.6 system-ui,sans-serif;margin-top:3px; }
@@ -42,7 +42,7 @@
 #lingua-concept .lp .lp-tool-guide > summary { width:max-content;max-width:100%;margin-inline:auto; }
 @media(max-width:480px) {
   #lingua-concept .lp-header { flex-wrap:wrap; }
-  #lingua-concept .lp-header .lp-brand { flex-basis:100%; }
+  #lingua-concept .lp-header .lp-brand { flex-basis:auto; }
   #lingua-concept .lp-header .lp-appearance { margin-left:auto; }
 }
 
