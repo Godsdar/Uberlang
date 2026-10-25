@@ -1,4 +1,5 @@
 import { originLabel } from '../domain/ancestry'
+import { RequestElapsed } from './request-elapsed'
 import { LanguagePicker } from './language-picker'
 import { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -41,6 +42,8 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
   const [context, setContext] = useState('')
   const [importedCard, setImportedCard] = useState<Discovery['importedCard']>()
   const [pending, setPending] = useState(false)
+  const [libraryOpen, setLibraryOpen] = useState(false)
+  const [lookupFailed, setLookupFailed] = useState(false)
   const [status, setStatus] = useState('')
   const [choices, setChoices] = useState<HistoryResult | null>(null)
   const [unsaved, setUnsaved] = useState<Discovery[]>([])
@@ -79,7 +82,7 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
     catch (error) { setStorageError(message(error)) }
   }
   function activate(next: Discovery, trace = false, alternatives: HistoryResult | null = null) {
-    setAutoTrace(trace)
+    setLibraryOpen(false); setAutoTrace(trace)
     cancel(); setChoices(alternatives)
     const previous = activeRef.current
     // Keep a recoverable draft when a new search replaces an unsaved tree.
@@ -124,13 +127,13 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
     return () => { window.removeEventListener('beforeunload', leaving); window.removeEventListener('pagehide', flush); document.removeEventListener('visibilitychange', visibility); window.removeEventListener('storage', changed) }
   }, [])
   async function explore(target: HistoryTarget, seed: Pick<ResearchEntry, 'context' | 'importedCard'> = { context, importedCard }) {
-    cancel(); setChoices(null)
+    cancel(); setChoices(null); setLookupFailed(false); setLibraryOpen(false)
     const controller = new AbortController(); request.current = controller
-    setPending(true); setStatus(`Looking up ${target.term} in ${historyLanguages[target.language]}…`)
+    setPending(true); setStatus(`Waiting for the dictionary`)
     const timer = setTimeout(() => controller.abort(), 15000)
     try {
       const response = await fetch('/api/etymology', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', signal: controller.signal, body: JSON.stringify(target) })
-      if (!response.ok) throw new Error(response.status === 429 ? 'The dictionary is busy. Wait a moment and retry.' : 'Word history is unavailable right now. Your current tree is still here; try a prepared family below.')
+      if (!response.ok) throw new Error(response.status === 429 ? 'The dictionary is busy. Wait a moment and retry.' : 'Word history is unavailable right now. Your current tree is still here. Retry or open an example.')
       const result = parseHistory(await response.json(), target)
       if (request.current !== controller || controller.signal.aborted) return
       const family = openHistory(result)
@@ -142,7 +145,7 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
         setStatus(target.term.includes(' ') ? 'No supported dictionary history was found for this expression. Ordinary sentences often have no shared origin; the words can be researched separately.' : result.reason || 'No sourced history was found. This does not prove the word has no history.')
       }
     } catch (error) {
-      if (request.current === controller) setStatus(controller.signal.aborted ? 'Lookup timed out. Your tree is still here; try again when ready.' : message(error))
+      if (request.current === controller) { setLookupFailed(true); setStatus(controller.signal.aborted ? 'The dictionary did not respond in time. Try again.' : message(error)) }
     } finally { clearTimeout(timer); if (request.current === controller) { request.current = null; setPending(false) } }
   }
   function snapshot(family: Family, view: ExplorerView) { patch({ family, view }) }
@@ -156,20 +159,22 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
 
   return <section className={`lp-research${active ? ' has-discovery' : ''}`} aria-label="Etymology research">
     <h1 className="lp-sr-only">Word origins</h1>
-    <form className="lp-research-search" onSubmit={event => {
+    <div className="lp-research-entry"><form className="lp-research-search" onSubmit={event => {
       event.preventDefault(); const target = historyTarget(language, term.trim())
       if (!target) { setStatus('Enter a supported word or dictionary expression, up to 80 characters. Reconstructed forms need an asterisk (*).'); return }
       void explore(target)
     }}>
-      <label className="lp-search-word">Word<input ref={search} value={term} maxLength={80} placeholder="Enter a word" autoComplete="off" onChange={e => { cancel(); setChoices(null); setTerm(e.target.value); setContext(''); setImportedCard(undefined); setStatus('') }} /></label>
-      <LanguagePicker value={language} onChange={code => { cancel(); setChoices(null); setLanguage(code); setContext(''); setImportedCard(undefined); setStatus('') }} />
-      <button className="lp-main" type="submit" disabled={pending}>Explore →</button>
-      {pending && <button type="button" onClick={() => { cancel(); setStatus('Lookup cancelled. Your tree is unchanged.') }}>Cancel</button>}
-    </form>
+      <label className="lp-search-word">Word<input ref={search} value={term} maxLength={80} placeholder="Enter a word" autoComplete="off" onChange={e => { cancel(); setChoices(null); setTerm(e.target.value); setContext(''); setImportedCard(undefined); setLookupFailed(false); setStatus('') }} /></label>
+      <LanguagePicker value={language} onChange={code => { cancel(); setChoices(null); setLanguage(code); setContext(''); setImportedCard(undefined); setLookupFailed(false); setStatus('') }} />
+      <button className="lp-main" type="submit" disabled={pending}>{lookupFailed ? 'Retry →' : 'Explore →'}</button>
+    </form><button className="lp-library-toggle" aria-expanded={libraryOpen} onClick={() => setLibraryOpen(!libraryOpen)}>{libraryOpen ? 'Back to tree' : `Library · ${library.discoveries.length}`}</button></div>
     {context && <details className="lp-entry-context"><summary>Context for this lookup</summary><p>{context}</p><button onClick={options.onContext}>Back to sentence analysis</button></details>}
     <div className="lp-research-options"><details><summary>Examples</summary><div className="lp-research-starts"><span>Prepared families</span>{['water', 'mother'].filter(word => options.prepared[word]).map(word => <button key={word} onClick={() => { activate(newDiscovery({ word, language: 'en', family: options.prepared[word] })); setStatus(''); setContext(''); setImportedCard(undefined) }}>{word} ↗</button>)}</div></details><details><summary>About word lookup</summary><p>Explore sends the word and selected language to Wiktionary. Dictionary expressions are also supported. Histories may be incomplete; separate etymologies stay separate.</p><p>Examples are prepared and open offline. Saved discoveries stay in this browser; download a backup to keep a copy.</p><p><a href="https://en.wiktionary.org/" target="_blank" rel="noreferrer">Wiktionary ↗</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noreferrer">CC BY-SA 4.0</a></p></details>
+
+    </div>
+    <section className="lp-library-workspace" hidden={!libraryOpen} aria-label="Discovery library"><h2>Your library</h2>
     {curiosities.length > 0 && <details className="lp-curiosity-queue"><summary>Continue exploring · {curiosities.length}</summary><p className="lp-label">Your saved questions · on this browser</p>{curiosities.slice(0, 5).map(({ discovery, node }) => <button key={`${discovery.id}:${node.id}`} onClick={() => { activate(resumeDiscovery(discovery, node.id)); setStatus('') }}><strong>{node.label}</strong><span>{node.lang} · from {discovery.word}</span><span aria-hidden="true">→</span></button>)}{curiosities.length > 5 && <details><summary>{curiosities.length - 5} more saved forms</summary>{curiosities.slice(5).map(({ discovery, node }) => <button key={`${discovery.id}:${node.id}`} onClick={() => activate(resumeDiscovery(discovery, node.id))}>{node.label} · {node.lang} · from {discovery.word}</button>)}</details>}</details>}
-    <details className="lp-discoveries"><summary>Your discoveries · {library.discoveries.length}</summary>
+    <details className="lp-discoveries" open><summary>Your discoveries · {library.discoveries.length}</summary>
       <p className="lp-label">Stored in this browser only. Download a backup to keep a copy or move to another device.</p>
       <label>Find a discovery<input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Word or your note" /></label>
       <ul className="lp-discovery-list">{visible.map(d => <li key={d.id}><button onClick={() => { activate(d); setStatus('') }}>{d.word}<small>{historyLanguages[d.language]} · {d.family.nodes.length} forms{Object.values(d.marks).includes('curious') ? ' · to explore' : ''}</small></button><details><summary>Manage</summary><button onClick={() => {
@@ -191,20 +196,24 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
       }}>{loaded.error ? 'Replace unreadable library' : 'Restore copies'}</button><button onClick={() => setRestore(null)}>Cancel restore</button></div>}
       <details className="lp-language-interests"><summary>Languages I’m curious about</summary><p className="lp-label">Star matching branches in your trees. These preferences do not create new connections.</p><div>{Object.entries(historyLanguages).map(([code, name]) => <label key={code}><input type="checkbox" checked={library.languages.includes(code)} onChange={e => { try { commit({ ...libraryRef.current, languages: e.target.checked ? [...libraryRef.current.languages, code] : libraryRef.current.languages.filter(l => l !== code) }) } catch (error) { setStorageError(message(error)) } }} />{name}</label>)}</div></details>
     </details>
-    </div>
-    <p className="lp-research-status" role="status" aria-live="polite">{status}</p>
-    {storageError && <div role="alert" className="lp-storage-error"><p>{storageError}</p><button onClick={backupCurrent} disabled={!active}>Download current discovery</button><button onClick={() => { try { download(localStorage.getItem(DISCOVERY_KEY) ?? '', 'uberlang-stored-data.json') } catch { setStatus('The browser is blocking access to stored data.') } }}>Download stored data</button><button onClick={() => { const next = load(); raw.current = next.raw; loaded.error = next.error; libraryRef.current = next.library; setLibrary(next.library); setStorageError(next.error); if (!next.error) { const current = next.library.discoveries.find(d => d.id === next.library.activeId); if (current) { setAutoTrace(false); update(current); setGeneration(g => g + 1) } } }}>Reload saved library</button></div>}
     {unsaved.filter(d => d.id !== active?.id && !library.discoveries.some(s => s.id === d.id)).length > 0 && <details className="lp-draft-recovery"><summary>Unsaved trees from this session</summary>{unsaved.filter(d => d.id !== active?.id && !library.discoveries.some(s => s.id === d.id)).map(d => <div key={d.id}><button onClick={() => activate(d)}>{d.word} — reopen</button><button onClick={() => download(JSON.stringify(saveDiscovery(emptyLibrary(), d)), 'uberlang-unsaved-discovery.json')}>Download {d.word}</button></div>)}<p>Save or download these trees before closing this page.</p></details>}
+    </section>
+    {(pending || status) && <div className={`lp-request-feedback${pending ? ' is-pending' : ''}`}>
+      <div>{pending && <strong>{term} <small>{historyLanguages[language]}</small></strong>}<p role="status" aria-live="polite">{status}</p></div>
+      {pending && <><RequestElapsed /><button onClick={() => { cancel(); setStatus('Lookup cancelled.'); search.current?.focus() }}>Cancel</button></>}
+    </div>}
+    {storageError && <div role="alert" className="lp-storage-error"><p>{storageError}</p><button onClick={backupCurrent} disabled={!active}>Download current discovery</button><button onClick={() => { try { download(localStorage.getItem(DISCOVERY_KEY) ?? '', 'uberlang-stored-data.json') } catch { setStatus('The browser is blocking access to stored data.') } }}>Download stored data</button><button onClick={() => { const next = load(); raw.current = next.raw; loaded.error = next.error; libraryRef.current = next.library; setLibrary(next.library); setStorageError(next.error); if (!next.error) { const current = next.library.discoveries.find(d => d.id === next.library.activeId); if (current) { setAutoTrace(false); update(current); setGeneration(g => g + 1) } } }}>Reload saved library</button></div>}
+
     {choices && !choices.choices.length && choices.source && <a href={choices.source} target="_blank" rel="noreferrer">Read the dictionary entry ↗</a>}
-    {active ? <article className="lp-discovery" aria-label="Current discovery">
-      <header className="lp-discovery-heading"><h2 ref={resultHeading} tabIndex={-1}>{active.word}{' '}<span>{historyLanguages[active.language]} · {active.family.direction === 'sources' ? 'Live · partial history' : 'Prepared family'}</span></h2></header>
+    {active ? <article className="lp-discovery" aria-label="Current discovery" hidden={libraryOpen}>
+      <header className="lp-discovery-heading"><h2 ref={resultHeading} tabIndex={-1}>{active.word}{' '}<span>{historyLanguages[active.language]} · {active.family.direction === 'sources' ? 'Live · partial history' : 'Prepared family'}</span></h2><div className="lp-actions"><button className="lp-save-discovery" onClick={remember}>{saved && !storageError ? 'Saved ✓' : 'Save discovery'}</button><details className="lp-discovery-export"><summary>Export</summary><button onClick={backupCurrent}>Download discovery</button></details></div></header>
       {(!active.word.includes(' ') || active.family.nodes.length > 1) && <FamilyExplorer key={`${active.id}:${generation}`} family={active.family} word={active.word} autoTrace={autoTrace} initialView={active.view} onSnapshot={snapshot} preferredLanguages={library.languages} onKeepLater={keepForLater} laterIds={Object.keys(active.marks).filter(id => active.marks[id] === 'curious')} onStartFrom={node => {
         const code = node.lookup?.language ?? Object.entries(historyLanguages).find(([, name]) => name === node.lang)?.[0]
         const target = code ? historyTarget(code, node.lookup?.term ?? node.label) : undefined
         if (!target) { setStatus('This form cannot be looked up directly. Its source entry is linked in the inspector.'); return }
         setTerm(target.term); setLanguage(target.language); setContext(''); setImportedCard(undefined); void explore(target, {})
       }} />}
-      <div className="lp-discovery-tools"><div className="lp-actions"><button className="lp-main" onClick={remember}>{saved && !storageError ? 'Saved · save now' : 'Save discovery'}</button><button onClick={backupCurrent}>Download</button></div></div>
+
       {active.context && <details><summary>Original context</summary><p className="lp-discovery-context">{active.context}</p></details>}
       {active.word.includes(' ') && <section className="lp-expression-history" aria-label="Expression history"><h3>History of the expression</h3><p className="lp-label">This is the dictionary entry for the whole expression. The origins of its individual words are separate research.</p><p>{active.family.historyText || 'No readable history of this expression is available in the supported source format. A dictionary entry or a word connection alone does not establish how a phrase originated.'}</p><a href={active.family.nodes.find(n => n.parent === null)?.source} target="_blank" rel="noreferrer">Read the cited entry ↗</a><p className="lp-label">{active.family.attribution}</p></section>}
       {choices && choices.choices.length > 1 && <details key={active.id} className="lp-other-histories"><summary>Other histories of {active.word} · {choices.choices.length - 1}</summary><p className="lp-label">Different meanings can have separate histories. The first dictionary history opens automatically; the alternatives stay separate.</p><div className="lp-history-choices" aria-label="Other word histories">{choices.choices.map(choice => <button key={choice.id} disabled={choice.id === active.family.id} aria-pressed={choice.id === active.family.id} onClick={() => {

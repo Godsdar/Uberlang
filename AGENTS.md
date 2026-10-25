@@ -20,7 +20,7 @@ for branding. See the owner brief and [current marketing/language coverage](docs
 
 ## Current research entry (ADR-025)
 
-The owner direction from 2026-10-25 is in `docs/DESIGN.md` and ADR-036: compact
+The owner direction from 2026-10-25 is in `docs/DESIGN.md` and ADR-037: compact
 word-origin research, no promotional headings or repeated instructions, exact
 word placeholder `Enter a word`. Context, grammar and Anki support this journey;
 detailed help and secondary tools open on request. This supersedes conflicting

@@ -51,8 +51,8 @@ import { mountFamily, mountSyntax, unmountExplorers } from './components/explore
     const ui = name => q(`[data-ui="${name}"]`);
     const s={hasResult:false,language:'',text:'',analyzed:'',theme:['tokyo','light','graphite'].includes(saved.theme)?saved.theme:'tokyo',view:['understand','grammar','origins'].includes(saved.view)?saved.view:'origins',start:0,end:0,context:null,token:null,phrase:null,notes:[],documents:{},format:'markdown',animation:true,live:null,liveDocument:'',pending:false,liveMessage:'',gate:new AnalysisRequestGate(),selectionSource:'reading',lexical:null,lexicalDocument:'',lexicalGate:new AnalysisRequestGate(),lexicalPending:false,lexicalMessage:'',familyId:null};
     app.dataset.theme=s.theme;syncTheme(app,s);ui('input').value=s.text;
-    function stopRequest(){s.gate.invalidate();s.pending=false;s.liveMessage='';s.lexicalGate.invalidate();s.lexicalPending=false;s.lexicalMessage='';}
-    function changeSelection(start,end){s.explicitExpression=false;const focusId=document.activeElement?.dataset.focusId;s.selectionSource='reading';stopRequest();ui('export').hidden=true;s.start=start;s.end=end;s.language=languageAtSelection(s.text,start);resolve(s);render(app,s);persist(s);if(focusId)requestAnimationFrame(()=>q(`[data-focus-id="${focusId}"]`)?.focus({preventScroll:true}));}
+    function stopRequest(){clearInterval(s.liveClock);s.liveClock=null;clearInterval(s.lexicalClock);s.lexicalClock=null;s.analysisRetry=false;s.gate.invalidate();s.pending=false;s.liveMessage='';s.lexicalGate.invalidate();s.lexicalPending=false;s.lexicalMessage='';}
+    function changeSelection(start,end){s.explicitExpression=false;const focusId=document.activeElement?.dataset.focusId;const interrupted=s.pending;s.selectionSource='reading';stopRequest();if(interrupted)s.liveMessage='Previous analysis cancelled. Selection changed.';ui('export').hidden=true;s.start=start;s.end=end;s.language=languageAtSelection(s.text,start);resolve(s);render(app,s);persist(s);if(focusId)requestAnimationFrame(()=>q(`[data-focus-id="${focusId}"]`)?.focus({preventScroll:true}));}
     s.selectToken=changeSelection;
     function analyze(){s.hasResult=true;s.view='understand';stopRequest();s.live=null;ui('export').hidden=true;s.text=ui('input').value;s.language=detectTextLanguage(s.text);s.analyzed=s.text;s.start=0;s.end=s.text.length;s.phrase=null;s.token=null;resolve(s);const first=readingSentence(s.text,0);if(first){s.start=first.start;s.end=first.end;s.language=languageAtSelection(s.text,s.start);resolve(s);}render(app,s);q('.lp-composer').open=false;q('.lp-example-set').open=false;persist(s);}
     async function analyzeLive(){
@@ -62,12 +62,13 @@ import { mountFamily, mountSyntax, unmountExplorers } from './components/explore
       if(s.selectionSource!=='editor' && s.text===editor.value && s.analyzed===s.text && s.end>s.start){start=s.start;end=s.end;}
       let request;
       try{request=sentenceRequest(hash(editor.value),editor.value,start,end,detectTextLanguage);s.language=request.language;}catch(error){s.liveMessage=error.message;renderLiveStatus(app,s);return;}
-      stopRequest();s.live=null;s.liveDocument='';s.text=editor.value;s.analyzed=s.text;
+      stopRequest();if(s.liveDocument!==editor.value){s.live=null;s.liveDocument='';}s.text=editor.value;s.analyzed=s.text;
       s.start=request.contextStart+request.selection.start;s.end=request.contextStart+request.selection.end;
-      s.pending=true;s.liveMessage='Analyzing…';
-      ui('export').hidden=true;resolve(s);render(app,s);
+      s.pending=true;s.analysisRetry=false;s.requestStarted=performance.now();s.liveMessage='English sentence · waiting for grammar';s.hasResult=true;s.view='understand';
+      ui('export').hidden=true;resolve(s);if(s.analysisStatus==='live')s.liveMessage='Refreshing grammar · current reading stays available';render(app,s);q('.lp-composer').open=false;q('.lp-example-set').open=false;ui('result').focus({preventScroll:true});
+      s.liveClock=setInterval(()=>{if(s.pending)ui('live-elapsed').textContent=`${Math.floor((performance.now()-s.requestStarted)/1000)}s elapsed`;},1000);
       const ticket=s.gate.begin();
-      const timeout=setTimeout(()=>{if(ticket.current()){s.gate.invalidate();s.pending=false;s.liveMessage='Analysis took too long. Please try again.';renderLiveStatus(app,s);}},20000);
+      const timeout=setTimeout(()=>{if(ticket.current()){s.gate.invalidate();s.pending=false;s.analysisRetry=true;s.liveMessage='The grammar service did not respond in time.';renderLiveStatus(app,s);}},20000);
       try{
         const response=await fetch('/api/analysis',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(request),signal:ticket.signal,credentials:'same-origin'});
         if(!ticket.current())return;
@@ -80,13 +81,13 @@ import { mountFamily, mountSyntax, unmountExplorers } from './components/explore
         s.live=parseAnalysis(data,request);s.liveDocument=s.text;s.pending=false;s.view='understand';s.hasResult=true;
         s.liveMessage='';q('.lp-composer').open=false;
         resolve(s);render(app,s);persist(s);ui('result').focus({preventScroll:true});ui('result').scrollIntoView({block:'start',behavior:'instant'});
-      }catch(error){if(!ticket.current())return;s.pending=false;s.liveMessage=error instanceof SyntaxError?'The service returned an unreadable result. Please retry.':error.message;renderLiveStatus(app,s);}
+      }catch(error){if(!ticket.current())return;s.pending=false;s.analysisRetry=true;s.liveMessage=error instanceof SyntaxError?'The service returned an unreadable result. Please retry.':error.message;renderLiveStatus(app,s);}
       finally{clearTimeout(timeout);}
     }
     async function lookupLexicon(){
       const request=lexicalRequest(s);
       if(!request||s.text!==s.analyzed){s.lexicalMessage='Select one word in your reading before looking it up.';renderLexicalStatus(app,s);return;}
-      stopRequest();s.lexical=null;s.lexicalPending=true;s.lexicalMessage=`Looking up “${request.word}”…`;
+      stopRequest();s.lexicalPending=true;s.lexicalStarted=performance.now();s.lexicalMessage=`Dictionary request · ${request.word}`;
       ui('export').hidden=true;resolve(s);render(app,s);
       const ticket=s.lexicalGate.begin();
       const timeout=setTimeout(()=>{if(ticket.current()){s.lexicalGate.invalidate();s.lexicalPending=false;s.lexicalMessage='The dictionary took too long. Choose Look up word to retry.';renderLexicalStatus(app,s);}},20000);
@@ -122,8 +123,8 @@ import { mountFamily, mountSyntax, unmountExplorers } from './components/explore
       if(action==='lexicon'){await lookupLexicon();return;}
       if(action==='cancel-lexicon'){s.lexicalGate.invalidate();s.lexicalPending=false;s.lexicalMessage='Word lookup cancelled.';renderLexicalStatus(app,s);return;}
       if(action==='edit'){q('.lp-composer').open=true;ui('input').focus();return;}
-      if(action==='live'||action==='live-current'){await analyzeLive();return;}
-      if(action==='cancel'){stopRequest();s.liveMessage='Analysis cancelled.';renderLiveStatus(app,s);return;}
+      if(action==='live'||action==='live-current'||action==='retry-analysis'){await analyzeLive();return;}
+      if(action==='cancel'){stopRequest();s.analysisRetry=true;s.liveMessage='Analysis cancelled. Your text is ready to read.';renderLiveStatus(app,s);return;}
       if(action==='analyze'){analyze();return;}
       if(action==='selection'){
         const editor=ui('input');let start=editor.selectionStart,end=editor.selectionEnd;
@@ -212,7 +213,10 @@ import { mountFamily, mountSyntax, unmountExplorers } from './components/explore
     button.textContent='Dictionary';button.disabled=!request||s.text!==s.analyzed||s.pending||s.lexicalPending;
     app.querySelector('[data-action="cancel-lexicon"]').hidden=!s.lexicalPending;
     app.querySelector('.lp-lexical-actions').hidden=!selection||!(selection.kind==='word'||s.phrase||s.explicitExpression);
-    const status=app.querySelector('[data-ui="lexical-status"]');status.textContent=s.lexicalMessage;status.setAttribute('aria-busy',String(s.lexicalPending));
+    const status=app.querySelector('[data-ui="lexical-status"]');status.textContent=s.lexicalMessage;
+    const elapsed=app.querySelector('[data-ui="lexical-elapsed"]');elapsed.hidden=!s.lexicalPending;
+    if(s.lexicalPending){elapsed.textContent=`${Math.floor((performance.now()-s.lexicalStarted)/1000)}s elapsed`;if(!s.lexicalClock)s.lexicalClock=setInterval(()=>{elapsed.textContent=`${Math.floor((performance.now()-s.lexicalStarted)/1000)}s elapsed`;},1000);}
+    else {clearInterval(s.lexicalClock);s.lexicalClock=null;}
   }
   function dictionaryPanel(s){
     const lexical=currentLexical(s);if(!lexical)return '';
@@ -243,10 +247,14 @@ import { mountFamily, mountSyntax, unmountExplorers } from './components/explore
     const status=app.querySelector('[data-ui="live-status"]');status.textContent=readingMessage(s.liveMessage||'');
     const notes=app.querySelector('[data-ui="model-notes"]');notes.hidden=s.analysisStatus!=='live'||!s.live||s.liveDocument!==s.text;
     app.querySelector('[data-ui="model-evidence"]').innerHTML=notes.hidden?'':`<p>${esc(grammarLabel(s))}</p><ul>${s.live.warnings.map(w=>`<li>${esc(w)}</li>`).join('')}</ul>`;
-    status.setAttribute('aria-busy',String(s.pending));
+    const feedback=app.querySelector('[data-ui="analysis-feedback"]');feedback.hidden=!s.liveMessage&&!s.pending;
+    const elapsed=app.querySelector('[data-ui="live-elapsed"]');elapsed.hidden=!s.pending;
+    if(s.pending)elapsed.textContent=`${Math.floor((performance.now()-s.requestStarted)/1000)}s elapsed`;
+    else {clearInterval(s.liveClock);s.liveClock=null;}
+    app.querySelector('[data-action="retry-analysis"]').hidden=!s.analysisRetry||s.pending;
     app.querySelector('[data-action="live"]').disabled=s.pending||!s.text.trim();
     app.querySelector('[data-action="cancel"]').hidden=!s.pending;
-    const current=app.querySelector('[data-action="live-current"]');current.hidden=!!s.context;current.disabled=s.pending;
+    const current=app.querySelector('[data-action="live-current"]');current.hidden=!!s.context||s.pending||s.analysisRetry;current.disabled=s.pending;
   }
   function render(app,s){
     app.classList.toggle('lp-animation',s.animation);renderLiveStatus(app,s);

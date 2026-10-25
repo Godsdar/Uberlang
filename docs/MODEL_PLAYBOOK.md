@@ -10,7 +10,7 @@ For bounded coding tasks, including Sol at medium reasoning. Read this after AGE
 
 ## Product rules
 
-Current UI priorities are `DESIGN.md` and ADR-036 (2026-10-25): compact word-origin
+Current UI priorities are `DESIGN.md` and ADR-037 (2026-10-25): compact word-origin
 research; no promotional headings, decorative empty states or repeated service
 copy in either entry mode. Word placeholder is exactly `Enter a word`. Older
 marketing/retention roadmaps are historical where they conflict.
