@@ -164,7 +164,7 @@ function ResearchWorkspace({ options, bridge }: { options: Options; bridge: Brid
       if (!target) { setStatus('Enter a supported word or dictionary expression, up to 80 characters. Reconstructed forms need an asterisk (*).'); return }
       void explore(target)
     }}>
-      <label className="lp-search-word">Word<input ref={search} value={term} maxLength={80} placeholder="Enter a word" autoComplete="off" onChange={e => { cancel(); setChoices(null); setTerm(e.target.value); setContext(''); setImportedCard(undefined); setLookupFailed(false); setStatus('') }} /></label>
+      <label className="lp-search-word"><span className="lp-sr-only">Word</span><input ref={search} value={term} maxLength={80} placeholder="Enter a word" autoComplete="off" onChange={e => { cancel(); setChoices(null); setTerm(e.target.value); setContext(''); setImportedCard(undefined); setLookupFailed(false); setStatus('') }} /></label>
       <LanguagePicker value={language} onChange={code => { cancel(); setChoices(null); setLanguage(code); setContext(''); setImportedCard(undefined); setLookupFailed(false); setStatus('') }} />
       <button className="lp-main" type="submit" disabled={pending}>{lookupFailed ? 'Retry →' : 'Explore →'}</button>
     </form><button className="lp-library-toggle" aria-expanded={libraryOpen} onClick={() => setLibraryOpen(!libraryOpen)}>{libraryOpen ? 'Back to tree' : `Library · ${library.discoveries.length}`}</button></div>

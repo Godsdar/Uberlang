@@ -239,9 +239,11 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
     </section>}
     <div className="lp-explorer-grid">
       <div className="lp-graph-panel">
-        <div className="lp-tree-view" role="group" aria-label="Tree view">
+        <div className="lp-map-bar"><div className="lp-tree-view" role="group" aria-label="Tree view">
           <button aria-pressed={!overview} onClick={() => { setOverview(false); setEndpoints(defaults); setPathOnly(false); setBranchParent(null); selectNode(initial.id); centerOn.current = initial.id; gestures.reset() }}>Main history</button>
           <button aria-pressed={overview} onClick={() => { setOverview(true); setBranchParent(null); gestures.reset() }}>Whole tree</button>
+        </div>
+        <div className="lp-camera-controls" role="group" aria-label="Map controls"><button aria-label="Zoom tree out" onClick={() => gestures.zoom(1 / 1.25)}>−</button><button aria-label="Reset map zoom" onClick={() => gestures.reset()}>{Math.round(scale * 100)}%</button><button aria-label="Zoom tree in" onClick={() => gestures.zoom(1.25)}>+</button></div>
         </div>
         <div className="lp-tree-viewport">
         <div className={`lp-graph-scroll lp-family-canvas is-gestural ${overview ? 'is-overview' : ''} ${sourced ? 'is-sourced' : ''}`} ref={scroll} {...gestures.bind} onPointerDown={event => { readerMoved.current = true; gestures.bind.onPointerDown(event) }} onWheel={() => { readerMoved.current = true }} onKeyDown={() => { readerMoved.current = true }} onScroll={event => { const next = { scrollLeft: event.currentTarget.scrollLeft, scrollTop: event.currentTarget.scrollTop }; setScreenPosition(next); if (!overview) setPositions(next) }} tabIndex={0} role="region" aria-label={`${word} ${sourced ? 'sources' : 'family'}. Pinch to zoom; drag to move.`}>
@@ -281,7 +283,7 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
           </svg><span>Whole tree</span>
         </button>
         </div>
-        <div className="lp-camera-controls" role="group" aria-label="Map controls"><button aria-label="Zoom tree out" onClick={() => gestures.zoom(1 / 1.25)}>−</button><button aria-label="Reset map zoom" onClick={() => gestures.reset()}>{Math.round(scale * 100)}%</button><button aria-label="Zoom tree in" onClick={() => gestures.zoom(1.25)}>+</button></div>
+
         {branchParent && !overview && <section ref={branchPanel} tabIndex={-1} className="lp-stage-branches" aria-label="Branches at selected stage" onKeyDown={event => { if (event.key === 'Escape') { setBranchParent(null); centerOn.current = branchParent; setEndpoints(previous => [...previous]) } }}><div className="lp-actions"><strong>Connected to {family.nodes.find(n => n.id === branchParent)?.label}</strong><button aria-label="Close branch choices" onClick={() => { setBranchParent(null); centerOn.current = branchParent; setEndpoints(previous => [...previous]) }}>Close</button></div>{family.nodes.filter(n => n.parent === branchParent && !layout.nodes.some(visible => visible.id === n.id)).map(node => <button key={node.id} onClick={() => { setBranchParent(null); exploreForm(node.id) }}><strong>{node.label}</strong><span>{node.lang} · {node.relation || 'source path'}</span></button>)}</section>}
         {overview && <div className="lp-overview-caption"><span>{family.nodes.length} forms · all loaded branches</span><select aria-label="Explore a form" value="" onChange={event => { if (event.target.value) exploreForm(event.target.value) }}><option value="">Explore a form…</option>{family.nodes.map(node => <option key={node.id} value={node.id}>{node.label} · {node.lang}</option>)}</select></div>}
         {!overview && <div className="lp-graph-toolbar">

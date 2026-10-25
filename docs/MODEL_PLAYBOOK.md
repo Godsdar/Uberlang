@@ -13,7 +13,9 @@ For bounded coding tasks, including Sol at medium reasoning. Read this after AGE
 Current UI priorities are `DESIGN.md` and ADR-037 (2026-10-25): compact word-origin
 research; no promotional headings, decorative empty states or repeated service
 copy in either entry mode. Word placeholder is exactly `Enter a word`. Older
-marketing/retention roadmaps are historical where they conflict.
+marketing/retention roadmaps are historical where they conflict. The owner’s new
+2026-10-25 gamification/retention direction is recorded in DESIGN.md section 12;
+research and stage its mechanics separately from the compact-workspace release.
 
 - Working product name: **Uberlang** (only U uppercase, lowercase l; latest owner instruction 2026-10-18). Read the [brand brief](OWNER_BRIEF_2026-10-16.md#бренд-для-дальнейшей-работы). The repository is Godsdar/Uberlang (owner-authorized rename). The demo is https://uberlang.vercel.app/ on Vercel project lingua (owner-authorized domain). Other technical identifiers remain Lingua; do not rename code, accounts or stored data for branding. English UI. Minimal Zen Notes / Monkeytype direction; themes through CSS tokens.
 - Positioning: explore words, their origins, and connections across languages. [Coverage by mode](MARKETING_POSITIONING.md#coverage-by-mode) governs claims: initial lookup/grammar are English; sourced history continuation can cross supported languages; prepared branches stay labeled.
@@ -22,6 +24,10 @@ marketing/retention roadmaps are historical where they conflict.
 - Repeated words are separate occurrences. Keep exact text and UTF-16 `[start,end)` offsets. Editing invalidates old results.
 - Syntax, morphology, meaning, translation and etymology are distinct layers. Never infer ancestry from similar spelling, meaning, translation, or nearby nodes.
 - Preserve sources, reconstruction `*`, omitted stages and CC BY-SA attribution in UI and reports.
+
+## Design references
+
+For substantial UX changes, consult the owner-supplied [reference catalog and research workflow](research/design-reference-sources.md), starting with the two existing research documents linked there. Inspect real flows, space allocation and loading/error/narrow-screen states; record sources and the reason each borrowed pattern fits Uberlang. Read delegated research before implementing its recommendations. Gallery inclusion alone is not evidence of market success. Preserve the accepted tree + selected-form card direction in DESIGN.md and ADR-037.
 
 ## Find the correct place
 
