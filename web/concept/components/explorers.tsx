@@ -343,7 +343,7 @@ export function FamilyExplorer({ family: initialFamily, word, onFamilyChange, in
           </div>}
         </section>}
         {onStartFrom && <button className="lp-new-origin" onClick={() => onStartFrom(selected)}>Explore as a new word ↗</button>}
-        <p className="lp-word-gloss">{selected.gloss || family.note}</p>
+        {selected.gloss && <p className="lp-word-gloss">{selected.gloss}</p>}
         <nav className="lp-lineage-trail" aria-label="Selected evidence path">
           {trail.map(n => <button key={n.id} aria-current={n.id === selected.id ? 'true' : undefined} onClick={() => selectNode(n.data.id)}>{n.data.label}</button>)}
         </nav>
